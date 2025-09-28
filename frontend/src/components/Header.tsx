@@ -26,7 +26,7 @@ const Header = () => {
                 <DropdownMenu>
                     <DropdownMenuTrigger className='flex items-center gap-1'>
                         <UserCog />
-                        <span className='text-md font-semibold'>Profile</span>
+                        <span className='text-md font-semibold'>Hồ Sơ</span>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
