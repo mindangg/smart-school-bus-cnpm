@@ -12,7 +12,7 @@ import {
 import { UserCog } from "lucide-react";
 const Header = () => {
     return (
-        <header className='fixed top-0 left-0 flex items-center justify-between p-3 w-full bg-[#E3F1FBFF]'>
+        <header className='fixed top-0 left-0 flex items-center justify-between w-full h-16 bg-[#E3F1FBFF] shadow-md'>
             <div className='flex items-center'>
                 <Image 
                     src='/logo.svg'
