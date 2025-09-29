@@ -1,21 +1,16 @@
 import SideBar from '@/components/SideBar'
-import React from 'react'
-import { Bus, BusFront, CarTaxiFront, Eye, MapPin, MessageCircleMore, Users } from 'lucide-react'
+import { adminNav } from "@/lib/navItems"
 
-const navItems = [
-    { label: 'Bảng Điều Khiển', href: '/admin/controls', icon: <BusFront className='w-5 h-5'/> },
-    { label: 'Lịch Trình Xe Buýt', href: '/admin/schedules', icon: <Bus className='w-5 h-5'/> },
-    { label: 'Tuyến Đường', href: '/admin/paths', icon: <MapPin className='w-5 h-5'/> },
-    { label: 'Tài Xế', href: '/admin/drivers', icon: <CarTaxiFront className='w-5 h-5'/> },
-    { label: 'Học Sinh', href: '/admin/students', icon: <Users className='w-5 h-5'/> },
-    { label: 'Tin Nhắn', href: '/admin/chats', icon: <MessageCircleMore className='w-5 h-5'/> },
-    { label: 'Theo Dõi Trực Tiếp', href: '/admin/tracking', icon: <Eye className='w-5 h-5'/> }
-]
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <div className='flex'>
+      <SideBar navItems={adminNav} />
 
-const layout = () => {
-    return (
-        <SideBar navItems={navItems}/>
-    )
+      <main className="ml-[16%] w-full h-[100vh] mt-16 flex flex-col gap-6 bg-gray-50 p-6">{children}</main>
+    </div>
+  )
 }
-
-export default layout

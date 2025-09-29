@@ -29,13 +29,13 @@ const Chats = () => {
 
 
     return (
-        <main className='relative top-20 flex flex-col gap-6 bg-gray-50 p-5'>
-            <h1 className='text-xl font-bold'>Trung Tâm Tin Nhắn</h1>
-            <section className='flex items-center w-full bg-white'>
+        <section>
+            <h1 className='text-xl font-bold mb-5'>Trung Tâm Tin Nhắn</h1>
+            <div className='flex items-center w-full bg-white'>
                 <ChatList chats={chats} selectedChat={selectedChat} onSelect={setSelectedChat} />
                 <ChatWindow messages={messages}/>
-            </section>
-        </main>
+            </div>
+        </section>
     )
 }
 

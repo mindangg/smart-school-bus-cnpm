@@ -12,7 +12,7 @@ import Image from "next/image"
 
 const Paths = () => {
     return (
-        <main className='relative top-20 flex flex-col gap-6 bg-gray-50 p-7'>    
+        <section>    
             <section className='bg-white flex flex-col gap-3'>
                 <h1 className='text-xl font-bold'>Bảng Phân Công Tuyến Đường</h1>
                 <h2 className='text-md font-bold'>Phân Công Tài Xế và Xe Buýt cho Tuyến Đường</h2>
@@ -74,7 +74,7 @@ const Paths = () => {
                     />
                 </div>
             </section>
-        </main>
+        </section>
     )
 }
 
