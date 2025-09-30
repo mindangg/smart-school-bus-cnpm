@@ -5,7 +5,7 @@ type NavItem = {
 }
 
 export const adminNav: NavItem[] = [
-    { label: 'Bảng Điều Khiển', href: '/admin/controls', icon: 'BusFront' },
+    { label: 'Bảng Điều Khiển', href: '/admin', icon: 'BusFront' },
     { label: 'Lịch Trình Xe Buýt', href: '/admin/schedules', icon: 'Bus' },
     { label: 'Tuyến Đường', href: '/admin/paths', icon: 'MapPin' },
     { label: 'Tài Xế', href: '/admin/drivers', icon: 'CarTaxiFront' },

@@ -1,4 +1,4 @@
-import StudentCard from '@/components/StudentCard'
+import StudentCard from '@/components/admin/StudentCard'
 import Image from 'next/image'
 
 const page = () => {

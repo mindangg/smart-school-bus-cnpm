@@ -1,4 +1,4 @@
-import PathCard from "@/components/PathCard"
+import PathCard from "@/components/admin/PathCard"
 
 const Paths = () => {
     return (

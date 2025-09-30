@@ -1,7 +1,7 @@
 'use client'
 
-import ChatList from '@/components/chats/ChatList'
-import ChatWindow from '@/components/chats/ChatWindow'
+import ChatList from '@/components/admin/chats/ChatList'
+import ChatWindow from '@/components/admin/chats/ChatWindow'
 import { Input } from '@/components/ui/input'
 
 import React, { useState } from 'react'

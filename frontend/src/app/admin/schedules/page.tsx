@@ -1,4 +1,4 @@
-import ScheduleCard from "@/components/ScheduleCard"
+import ScheduleCard from "@/components/admin/ScheduleCard"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 const page = () => {
