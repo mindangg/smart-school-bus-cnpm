@@ -1,39 +1,35 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
-     "rootDir": "./src",
-     "outDir": "./dist",
+    /* File Layout */
+    "rootDir": "./src",
+    "outDir": "./dist",
 
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "ESNext",
+    /* Environment Settings */
+    "module": "CommonJS",
     "target": "ES2020",
-    "types": [],
-    "strict": true,
-    "moduleResolution": "NodeNext",
-    "verbatimModuleSyntax": true,
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
 
-    // Other Outputs
+    /* Output */
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
 
-    // Stricter Typechecking Options
+    /* Type Checking */
+    "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
 
-    // Style Options
-     "noImplicitReturns": true,
-     "noUnusedLocals": true,
-     "noUnusedParameters": true,
+    /* Style Options */
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
 
-    // Recommended Options
+    /* Recommended */
     "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
     "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]
