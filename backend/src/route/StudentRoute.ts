@@ -3,20 +3,20 @@ import express from 'express'
 // import requireAuth from '../middlewares/requireAuth'
 
 import {
-    getAllStudents
-    getStudent,
+    getStudents,
+    getStudentById,
     createStudent,
     deleteStudent,
     updateStudent
-} from '../controller/StudentController.js'
+} from '../controller/StudentController'
 
 const router = express.Router()
 
 // router.use(requireAuth)
 
-router.get('/', getAllStudents)
+router.get('/', getStudents)
 
-router.get('/:id', getStudent)
+router.get('/:id', getStudentById)
 
 router.post('/', createStudent)
 

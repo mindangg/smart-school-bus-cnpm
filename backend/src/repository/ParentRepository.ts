@@ -5,11 +5,11 @@ export const getParentByEmail = async (email: string) => {
     return await prisma.parent.findUnique({ where: { email } })
 }
 
-// export const loginParent = async (data: { 
-//     email: string ; password: string
-// }) => {
-//     return await prisma.parent.create({ data })
-// }
+export const loginParent = async (data: { 
+    email: string ; password: string
+}) => {
+    return await prisma.parent.create({ data })
+}
 
 export const signupParent = async (data: { 
     name: string; email: string ; password: string

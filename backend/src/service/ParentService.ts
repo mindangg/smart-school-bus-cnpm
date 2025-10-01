@@ -11,13 +11,14 @@ export const signupParent = async (dto: SignupParentDTO) => {
     return toDTO(parent)
 }
 
-// export const loginParent = async (name: string, email: string) => {
-//   const existingUser = await parentRepo.getUserByEmail(email)
-//   if (existingUser) 
-//     throw new Error('Email already exists')
+export const loginParent = async (dto: SignupParentDTO) => {
+  const existingUser = await parentRepo.getUserByEmail(dto.email)
+  if (existingUser) 
+    throw new Error('Email already exists')
 
-//   return await loginParent({ name, email })
-// }
+  const parent = await loginParent(dto)
+  return toDTO(parent)
+}
 
 export const getParents = async () => {
     const parents = await parentRepository.getParents()

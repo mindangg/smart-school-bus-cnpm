@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,31 +7,120 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Admin {
-  id          Int    @id @default(autoincrement())
-  name        String
-  email       String @unique
-  password    String
+model bus_stops {
+  stop_id   Int        @id @default(autoincrement())
+  latitude  Decimal?   @db.Decimal(10, 8)
+  longitude Decimal?   @db.Decimal(10, 8)
+  address   String?    @db.VarChar(255)
+  is_active Boolean?   @default(true)
+  students  students[]
 }
 
-model Driver {
-  id          Int    @id @default(autoincrement())
-  name        String
-  email       String @unique
-  password    String
+model buses {
+  bus_id                Int                 @id @default(autoincrement())
+  bus_number            String              @unique(map: "bus_number") @db.VarChar(50)
+  license_plate         String              @unique(map: "license_plate") @db.VarChar(50)
+  capacity              Int?
+  model                 String?             @db.VarChar(100)
+  year                  Int?
+  status                String?             @db.VarChar(20)
+  last_maintenance_date DateTime?           @db.Date
+  route_assignments     route_assignments[]
+  routes                routes[]
 }
 
-model Parent {
-  id          Int       @id @default(autoincrement())
-  name        String
-  email       String    @unique
-  password    String
-  students    Student[]
+model notifications {
+  notification_id   Int             @id @default(autoincrement())
+  user_id           Int
+  notification_type String?         @db.VarChar(20)
+  title             String          @db.VarChar(255)
+  message           String?         @db.Text
+  event_id          Int?
+  is_read           Boolean?        @default(false)
+  created_at        DateTime?       @default(now()) @db.Timestamp(0)
+  users             users           @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "notifications_ibfk_1")
+  student_events    student_events? @relation(fields: [event_id], references: [event_id], onUpdate: NoAction, map: "notifications_ibfk_2")
+
+  @@index([event_id], map: "idx_notifications_event_id")
+  @@index([user_id], map: "idx_notifications_user_id")
 }
 
-model Student {
-  id       Int    @id @default(autoincrement())
-  name     String
-  parentId Int
-  parent   Parent @relation(fields: [parentId], references: [id])
+model route_assignments {
+  assignment_id   Int              @id @default(autoincrement())
+  route_id        Int
+  driver_id       Int
+  bus_id          Int
+  assignment_date DateTime         @db.Date
+  is_active       Boolean?         @default(true)
+  created_at      DateTime?        @default(now()) @db.Timestamp(0)
+  routes          routes           @relation(fields: [route_id], references: [route_id], onDelete: Cascade, onUpdate: NoAction, map: "route_assignments_ibfk_1")
+  users           users            @relation(fields: [driver_id], references: [user_id], onUpdate: NoAction, map: "route_assignments_ibfk_2")
+  buses           buses            @relation(fields: [bus_id], references: [bus_id], onUpdate: NoAction, map: "route_assignments_ibfk_3")
+  student_events  student_events[]
+
+  @@unique([route_id, driver_id, assignment_date], map: "uniq_route_driver_date")
+  @@index([bus_id], map: "idx_route_assignments_bus_id")
+  @@index([driver_id], map: "idx_route_assignments_driver_id")
+  @@index([route_id], map: "idx_route_assignments_route_id")
+}
+
+model routes {
+  route_id          Int                 @id @default(autoincrement())
+  route_type        String?             @db.VarChar(20)
+  bus_id            Int?
+  start_time        DateTime?           @db.Time(0)
+  is_active         Boolean?            @default(true)
+  created_at        DateTime?           @default(now()) @db.Timestamp(0)
+  updated_at        DateTime?           @default(now()) @db.Timestamp(0)
+  route_assignments route_assignments[]
+  buses             buses?              @relation(fields: [bus_id], references: [bus_id], onUpdate: NoAction, map: "routes_ibfk_1")
+
+  @@index([bus_id], map: "idx_routes_bus_id")
+}
+
+model student_events {
+  event_id            Int                @id @default(autoincrement())
+  student_id          Int
+  route_assignment_id Int?
+  event_type          String             @db.VarChar(20)
+  event_time          DateTime           @db.Timestamp(0)
+  notes               String?            @db.Text
+  notifications       notifications[]
+  students            students           @relation(fields: [student_id], references: [student_id], onDelete: Cascade, onUpdate: NoAction, map: "student_events_ibfk_1")
+  route_assignments   route_assignments? @relation(fields: [route_assignment_id], references: [assignment_id], onUpdate: NoAction, map: "student_events_ibfk_2")
+
+  @@index([route_assignment_id], map: "idx_student_events_assignment_id")
+  @@index([student_id], map: "idx_student_events_student_id")
+}
+
+model students {
+  student_id        Int              @id @default(autoincrement())
+  parent_id         Int?
+  full_name         String           @db.VarChar(255)
+  profile_photo_url String?          @db.VarChar(255)
+  is_active         Boolean?         @default(true)
+  created_at        DateTime?        @default(now()) @db.Timestamp(0)
+  stop_id           Int?
+  student_events    student_events[]
+  users             users?           @relation(fields: [parent_id], references: [user_id], onUpdate: NoAction, map: "students_ibfk_1")
+  bus_stops         bus_stops?       @relation(fields: [stop_id], references: [stop_id], onUpdate: NoAction, map: "students_ibfk_2")
+
+  @@index([parent_id], map: "idx_students_parent_id")
+  @@index([stop_id], map: "idx_students_stop_id")
+}
+
+model users {
+  user_id           Int                 @id @default(autoincrement())
+  email             String              @unique(map: "email") @db.VarChar(255)
+  password          String              @db.VarChar(255)
+  full_name         String?             @db.VarChar(255)
+  phone_number      String?             @db.VarChar(20)
+  address           String?             @db.VarChar(255)
+  role              String              @db.VarChar(20)
+  is_active         Boolean?            @default(true)
+  created_at        DateTime?           @default(now()) @db.Timestamp(0)
+  updated_at        DateTime?           @default(now()) @db.Timestamp(0)
+  notifications     notifications[]
+  route_assignments route_assignments[]
+  students          students[]
 }

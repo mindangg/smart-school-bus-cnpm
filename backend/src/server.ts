@@ -2,11 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import type { Request, Response } from 'express'
 
-
-// import AdminRoute from './route/AdminRoute'
-// import DriverRoute from'./route/DriverRoute'
-import ParentRoute from'./route/ParentRoute'
-// import StudentRoute from'./route/StudentRoute'
+// import ParentRoute from'./route/ParentRoute'
+import StudentRoute from'./route/StudentRoute'
 
 const app = express()
 
@@ -20,10 +17,8 @@ app.use((req: Request, _res: Response, next) => {
 app.use(cors({origin: 'http://localhost:3000'}))
 
 // routes
-// app.use('/api/admin', AdminRoute)
-// app.use('/api/driver', DriverRoute)
-app.use('/api/parent', ParentRoute)
-// app.use('/api/student', StudentRoute)
+
+app.use('/api/students', StudentRoute)
 
 app.get('/', (_req: Request, res: Response) => {
     res.send('Welcome to my app')
