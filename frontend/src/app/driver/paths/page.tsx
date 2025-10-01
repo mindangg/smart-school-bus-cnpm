@@ -38,6 +38,7 @@ const page = () => {
                 />
             </section>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             <section className='bg-white p-4 border border-gray-100 shadow-xs rounded-xl'>
                 <h2 className='text-md font-bold'>Đón & Trả Học Sinh</h2>
                 <p className='text-gray-600'>Quản lý trạng thái học sinh cho tuyến đường hiện tại của bạn.</p>
@@ -52,6 +53,9 @@ const page = () => {
                 <StudentCard />
                 <StudentCard />
             </section>
+=======
+            
+>>>>>>> Stashed changes
 =======
             
 >>>>>>> Stashed changes
