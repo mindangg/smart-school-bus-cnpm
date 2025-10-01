@@ -9,7 +9,7 @@ import {
     // getParentById,
     // deleteParent,
     // updateParent
-} from '../controller/ParentController'
+} from '../controller/UserController'
 
 const router = express.Router()
 

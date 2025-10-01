@@ -1,40 +1,39 @@
 import type { Request, Response } from 'express'
-import * as parentService from '../service/ParentService'
-import type { SignupParentDTO } from '../dto/ParentDTO'
+import * as userService from '../service/UserService'
 
-export const signupParent = async (req: Request, res: Response) => {
+export const signupUser = async (req: Request, res: Response) => {
     try {
-        const dto: SignupParentDTO = req.body
-        const parent = await parentService.signupParent(dto)
-        res.status(201).json(parent)
+        const data = req.body
+        const user = await userService.signupUser(data)
+        res.status(201).json(user)
     } 
     catch (error: any) {
         res.status(400).json({ message: error.message })
     }
 }
 
-// export const loginParent = async (req: Request, res: Response) => {
+// export const loginUser = async (req: Request, res: Response) => {
 //     try {
 //         const { email, password } = req.body
-//         const parent = await parentService.loginParent(email, password)
-//         res.status(201).json(parent)
+//         const user = await userService.loginUser(email, password)
+//         res.status(201).json(user)
 //     } 
 //     catch (error: any) {
 //         res.status(400).json({ message: error.message })
 //     }
 // }
 
-export const getParents = async (_req: Request, res: Response) => {
+export const getUsers = async (_req: Request, res: Response) => {
     try {
-        const parent = await parentService.getParents()
-        res.status(200).json(parent)
+        const user = await userService.getUsers()
+        res.status(200).json(user)
     } 
     catch (error: any) {
         res.status(400).json({ message: error.message })
     }
 }
 
-export const getParentById = async (req: Request, res: Response) => {
+export const getUserById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
 
@@ -43,15 +42,15 @@ export const getParentById = async (req: Request, res: Response) => {
             return
         }
 
-        const parent = await parentService.getParentById(parseInt(id, 10))
-        res.status(200).json(parent)
+        const user = await userService.getUserById(parseInt(id, 10))
+        res.status(200).json(user)
     } 
     catch (error: any) {
         res.status(400).json({ message: error.message })
     }
 }
 
-export const updateParent = async (req: Request, res: Response) => {
+export const updateUser = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
 
@@ -60,15 +59,15 @@ export const updateParent = async (req: Request, res: Response) => {
             return
         }
 
-        const parent = await parentService.updateParent(parseInt(id, 10))
-        res.status(200).json(parent)
+        const user = await userService.updateUser(parseInt(id, 10))
+        res.status(200).json(user)
     } 
     catch (error: any) {
         res.status(400).json({ message: error.message })
     }
 }
 
-export const deleteParent = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
 
@@ -77,7 +76,7 @@ export const deleteParent = async (req: Request, res: Response) => {
             return
         }
 
-        await parentService.deleteParent(parseInt(id, 10))
+        await userService.deleteUser(parseInt(id, 10))
         res.status(200)
     } 
     catch (error: any) {

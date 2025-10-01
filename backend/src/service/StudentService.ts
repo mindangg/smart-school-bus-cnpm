@@ -1,8 +1,8 @@
 import * as studentRepository from '../repository/StudentRepository'
-import type { Student } from '../utils/type'
+import type { Student } from '../utils/interface'
 
-export const createStudent = async (dto: Student) => {
-    const student = await studentRepository.createStudent(dto)
+export const createStudent = async (data: Student) => {
+    const student = await studentRepository.createStudent(data)
 
     if (!student)
         throw new Error('Can not create')
@@ -12,12 +12,7 @@ export const createStudent = async (dto: Student) => {
 
 
 export const getStudents = async () => {
-    const students = await studentRepository.getStudents()
-
-    if (!students)
-        throw new Error('No student')
-
-    return students
+    return await studentRepository.getStudents()
 }
 
 export const getStudentById = async (id: number) => {
@@ -28,8 +23,8 @@ export const getStudentById = async (id: number) => {
     return student
 }
 
-export const updateStudent = async (id: number, dto: Student) => {
-    const student = await studentRepository.updateStudent(id, dto)
+export const updateStudent = async (id: number, data: Student) => {
+    const student = await studentRepository.updateStudent(id, data)
     if (!student)
         throw new Error('No student')
 

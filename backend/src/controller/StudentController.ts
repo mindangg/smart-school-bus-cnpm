@@ -1,10 +1,11 @@
 import type { Request, Response } from 'express'
 import * as studentService from '../service/StudentService'
+import type { Student } from '../utils/interface'
 
 export const createStudent = async (req: Request, res: Response) => {
     try {
-        const dto = req.body
-        const student = await studentService.createStudent(dto)
+        const data: Student = req.body
+        const student = await studentService.createStudent(data)
         res.status(201).json(student)
     } 
     catch (error: any) {
@@ -42,14 +43,14 @@ export const getStudentById = async (req: Request, res: Response) => {
 export const updateStudent = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
-        const dto = req.body
+        const data: Student = req.body
 
         if (!id) {
             res.status(400).json({ message: 'ID is required' })
             return
         }
 
-        const student = await studentService.updateStudent(Number(id), dto)
+        const student = await studentService.updateStudent(Number(id), data)
         res.status(200).json(student)
     } 
     catch (error: any) {
