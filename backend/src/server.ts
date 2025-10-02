@@ -1,8 +1,9 @@
 import express from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import type { Request, Response } from 'express'
 
-// import ParentRoute from'./route/ParentRoute'
+import UserRoute from'./route/UserRoute'
 import StudentRoute from'./route/StudentRoute'
 
 const app = express()
@@ -15,9 +16,11 @@ app.use((req: Request, _res: Response, next) => {
 })
 
 app.use(cors({origin: 'http://localhost:3000'}))
+app.use(cookieParser())
 
 // routes
 
+app.use('/api/users', UserRoute)
 app.use('/api/students', StudentRoute)
 
 app.get('/', (_req: Request, res: Response) => {

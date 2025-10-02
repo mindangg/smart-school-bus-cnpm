@@ -1,19 +1,16 @@
 import { PrismaClient, users } from '@prisma/client'
+import { userSignupDTO } from '../dto/User'
 const prisma = new PrismaClient()
-
-import type { User } from '../utils/interface'
 
 export const getUserByEmail = async (email: string) => {
     return await prisma.users.findUnique({ where: { email } })
 }
 
-export const createUser = async (data: users) => {
+export const signupUser = async (data: userSignupDTO) => {
     return await prisma.users.create({ data })
 }
 
-export const loginUser = async (data: { 
-    email: string ; password: string
-}) => {
+export const createUser = async (data: userSignupDTO) => {
     return await prisma.users.create({ data })
 }
 
@@ -25,10 +22,10 @@ export const getUserById = async (user_id: number) => {
     return await prisma.users.findUnique({ where: { user_id } })
 }
 
-export const updateUserById = async (user_id: number, data: User) => {
+export const updateUserById = async (user_id: number, data: users) => {
     return await prisma.users.update({
         where: { user_id },
-        data,
+        data
     })
 }
 

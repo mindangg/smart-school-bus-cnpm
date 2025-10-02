@@ -1,10 +1,10 @@
 import type { Request, Response } from 'express'
 import * as studentService from '../service/StudentService'
-import type { Student } from '../utils/interface'
+import { students } from '@prisma/client'
 
 export const createStudent = async (req: Request, res: Response) => {
     try {
-        const data: Student = req.body
+        const data: students = req.body
         const student = await studentService.createStudent(data)
         res.status(201).json(student)
     } 
@@ -43,7 +43,7 @@ export const getStudentById = async (req: Request, res: Response) => {
 export const updateStudent = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
-        const data: Student = req.body
+        const data: students = req.body
 
         if (!id) {
             res.status(400).json({ message: 'ID is required' })

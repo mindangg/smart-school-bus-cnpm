@@ -1,7 +1,7 @@
+import { students } from '@prisma/client'
 import * as studentRepository from '../repository/StudentRepository'
-import type { Student } from '../utils/interface'
 
-export const createStudent = async (data: Student) => {
+export const createStudent = async (data: students) => {
     const student = await studentRepository.createStudent(data)
 
     if (!student)
@@ -9,7 +9,6 @@ export const createStudent = async (data: Student) => {
 
     return student
 }
-
 
 export const getStudents = async () => {
     return await studentRepository.getStudents()
@@ -23,7 +22,7 @@ export const getStudentById = async (id: number) => {
     return student
 }
 
-export const updateStudent = async (id: number, data: Student) => {
+export const updateStudent = async (id: number, data: students) => {
     const student = await studentRepository.updateStudent(id, data)
     if (!student)
         throw new Error('No student')

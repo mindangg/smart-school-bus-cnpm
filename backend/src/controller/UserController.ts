@@ -4,24 +4,40 @@ import * as userService from '../service/UserService'
 export const signupUser = async (req: Request, res: Response) => {
     try {
         const data = req.body
-        const user = await userService.signupUser(data)
-        res.status(201).json(user)
+        const { user, token } = await userService.signupUser(data)
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 60 * 1000 * 3,
+        })
+
+        res.status(201).json({ message: "Đăng ký thành công", user })
     } 
     catch (error: any) {
         res.status(400).json({ message: error.message })
     }
 }
 
-// export const loginUser = async (req: Request, res: Response) => {
-//     try {
-//         const { email, password } = req.body
-//         const user = await userService.loginUser(email, password)
-//         res.status(201).json(user)
-//     } 
-//     catch (error: any) {
-//         res.status(400).json({ message: error.message })
-//     }
-// }
+export const loginUser = async (req: Request, res: Response) => {
+    try {
+        const data = req.body
+        const { existingUser, token } = await userService.loginUser(data)
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 60 * 1000 * 3,
+        })
+
+        res.status(201).json({ message: 'Đăng nhập thành công', existingUser })
+    } 
+    catch (error: any) {
+        res.status(400).json({ message: error.message })
+    }
+}
 
 export const getUsers = async (_req: Request, res: Response) => {
     try {
@@ -53,13 +69,14 @@ export const getUserById = async (req: Request, res: Response) => {
 export const updateUser = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
+        const data = req.body
 
         if (!id) {
             res.status(400).json({ message: 'ID is required' })
             return
         }
 
-        const user = await userService.updateUser(parseInt(id, 10))
+        const user = await userService.updateUser(parseInt(id, 10), data)
         res.status(200).json(user)
     } 
     catch (error: any) {
@@ -77,7 +94,7 @@ export const deleteUser = async (req: Request, res: Response) => {
         }
 
         await userService.deleteUser(parseInt(id, 10))
-        res.status(200)
+        res.status(200).json({ message: 'Delete successfully'})
     } 
     catch (error: any) {
         res.status(400).json({ message: error.message })

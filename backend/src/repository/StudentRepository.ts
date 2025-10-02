@@ -5,7 +5,20 @@ const mapStudent = (student: students) => ({
     student_id: student.student_id,
     full_name: student.full_name,
     profile_photo_url: student.profile_photo_url ?? undefined,
-    is_active: student.is_active
+    is_active: student.is_active,
+
+    // ...(student.stop_id !== null && student.stop_id !== undefined
+    // ? { stop_id: student.stop_id }
+    // : {}),
+    // ...(student.users !== null && student.stop_id !== undefined
+    // ? { stop_id: student.stop_id }
+    // : {}),
+    // ...(student.stop_id !== null && student.stop_id !== undefined
+    // ? { stop_id: student.stop_id }
+    // : {}),
+    // ...(student.stop_id !== null && student.stop_id !== undefined
+    // ? { stop_id: student.stop_id }
+    // : {})
 })
 
 export const createStudent = async (data: students) => {

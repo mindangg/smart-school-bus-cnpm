@@ -3,28 +3,28 @@ import express from 'express'
 // import requireAuth from '../middlewares/requireAuth'
 
 import {
-    // loginParent,
-    signupParent,
-    getParents,
-    // getParentById,
-    // deleteParent,
-    // updateParent
+    loginUser,
+    signupUser,
+    getUsers,
+    getUserById,
+    deleteUser,
+    updateUser
 } from '../controller/UserController'
 
 const router = express.Router()
 
-// router.post('/login', loginParent)
+router.post('/login', loginUser)
 
-router.post('/signup', signupParent)
+router.post('/signup', signupUser)
 
 // router.use(requireAuth)
 
-router.get('/', getParents)
+router.get('/', getUsers)
 
-// router.get('/:id', getParentById)
+router.get('/:id', getUserById)
 
-// router.delete('/:id', deleteParent)
+router.delete('/:id', deleteUser)
 
-// router.put('/:id', updateParent)
+router.put('/:id', updateUser)
 
 export default router
