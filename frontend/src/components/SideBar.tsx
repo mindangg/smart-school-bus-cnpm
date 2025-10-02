@@ -21,8 +21,8 @@ const SideBar = ({ navItems, isOpen, onClose }: SideBarProps) => {
 
     return (
         <nav
-        className={cn(
-            "fixed top-16 left-0 flex flex-col gap-3 w-[16%] h-full p-2 pt-4 pr-1 border-r border-gray-200 shadow-md z-40 bg-white transition-transform",
+            className={cn(
+            "fixed top-16 left-0 flex flex-col gap-3 w-[16%] h-[calc(100vh-4rem)] p-2 pt-4 pr-1 border-r border-gray-200 shadow-md z-40 bg-white transition-transform overflow-y-auto",
             "md:translate-x-0", 
             isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}

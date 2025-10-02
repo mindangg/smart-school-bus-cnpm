@@ -24,7 +24,7 @@ export default function DriverLayout({
 
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-4 left-4 z-50 bg-gray-800 text-white p-3 rounded-full shadow-lg md:hidden"
+        className="fixed bottom-4 left-4 z-60 bg-gray-800 text-white p-3 rounded-full shadow-lg md:hidden"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -38,7 +38,7 @@ export default function DriverLayout({
         </svg>
       </button>
 
-      <main className="ml-0 md:ml-[16%] w-full h-[100vh] min-h-[100vh] mt-16 flex flex-col gap-6 bg-gray-50 p-4">
+      <main className="ml-0 md:ml-[16%] w-full min-h-screen mt-16 flex flex-col gap-6 bg-gray-50 p-4">
         {children}
       </main>
     </div>
