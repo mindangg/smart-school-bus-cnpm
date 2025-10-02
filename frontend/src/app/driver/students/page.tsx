@@ -20,7 +20,8 @@ const Page = () => {
         <p className="text-gray-600">
           Quản lý trạng thái học sinh cho tuyến đường hiện tại của bạn.
         </p>
-
+        <div className='overflow-x-auto'>
+            <div className="min-w-[900px]">
         {/* Header */}
         <div className="grid grid-cols-[4fr_5fr_4fr_3fr_2fr] py-6 text-center text-black border-b border-gray-300 font-bold">
           <span>Tên Học Sinh</span>
@@ -34,6 +35,8 @@ const Page = () => {
         {students.map((student) => (
           <StudentCard key={student.id} data={student} />
         ))}
+        </div>
+        </div>
       </section>
     </div>
   )
