@@ -1,10 +1,10 @@
 'use client'
-import SideBar from '@/components/SideBar'
-import { adminNav } from "@/lib/navItems"
-import { useState } from 'react'
 
+import { useState } from "react"
+import SideBar from "@/components/SideBar"
+import { driverNav } from "@/lib/navItems"
 
-export default function AdminLayout({
+export default function DriverLayout({
   children,
 }: {
   children: React.ReactNode
@@ -13,7 +13,7 @@ export default function AdminLayout({
 
   return (
     <div className="flex">
-      <SideBar navItems={adminNav} isOpen={open} onClose={() => setOpen(false)} />
+      <SideBar navItems={driverNav} isOpen={open} onClose={() => setOpen(false)} />
 
       {open && (
         <div

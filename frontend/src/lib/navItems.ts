@@ -15,9 +15,9 @@ export const adminNav: NavItem[] = [
 ]
 
 export const driverNav: NavItem[] = [
-    { label: 'Thông tin tuyến đường', href: '/drivers/paths', icon: 'Map' },
-    { label: 'Danh sách học sinh', href: '/drivers/students', icon: 'Users' },
-    { label: 'Chat với người quản lý', href: '/drivers/chats', icon: 'MessageSquare' }
+    { label: 'Thông tin tuyến đường', href: '/driver/paths', icon: 'Map' },
+    { label: 'Danh sách học sinh', href: '/driver/students', icon: 'Users' },
+    { label: 'Chat với người quản lý', href: '/driver/chats', icon: 'MessageSquare' }
 ]
 
 export const userNav: NavItem[] = [

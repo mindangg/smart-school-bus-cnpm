@@ -4,6 +4,8 @@ const Paths = () => {
     return (
         <section>
             <h1 className='text-xl font-bold'>Danh Sách Điểm Dừng</h1>
+            <div className='overflow-x-auto'>
+            <div className="min-w-[900px]">
             <div className='grid grid-cols-[2fr_4fr_5fr_3fr_2fr] py-6 text-center text-black border-b border-gray-300 font-bold'>
                 <span>ID Điểm Dừng</span>
                 <span>Tên Điểm Dừng</span>
@@ -14,6 +16,9 @@ const Paths = () => {
             <PathCard />
             <PathCard />
             <PathCard />
+            <PathCard />
+            </div>
+            </div>
         </section>
     )
 }

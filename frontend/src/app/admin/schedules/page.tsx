@@ -4,7 +4,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 const page = () => {
     return (
         <section className='flex flex-col gap-6'>
-            <h1 className='text-xl font-bold'>Quản Lý Lịch Trình Xe Buýt</h1>
+            <h1 className='text-2xl sm:text-4xl font-bold'>Quản Lý Lịch Trình Xe Buýt</h1>
             <section>
                 <ToggleGroup 
                     type="single"
@@ -17,7 +17,9 @@ const page = () => {
             </section>
             <section>
                 <h2 className='texttext-lg font-bold'>Lịch Trình Hàng Tuần Sắp Tới</h2>
-                <div className='grid grid-cols-[3fr_4fr_4fr_3fr_2fr_2fr] py-6 text-center text-black border-b border-gray-300 font-bold'>
+                <div className="overflow-x-auto">
+                <div className="min-w-[900px]">
+                <div className="grid grid-cols-[3fr_4fr_4fr_3fr_2fr_2fr] py-6 text-center text-black border-b border-gray-300 font-bold">
                     <span>ID Xe Buýt</span>
                     <span>Tuyến</span>
                     <span>Tài Xế</span>
@@ -28,6 +30,8 @@ const page = () => {
                 <ScheduleCard />
                 <ScheduleCard />
                 <ScheduleCard />
+                </div>
+                </div>
             </section>
         </section>
     )

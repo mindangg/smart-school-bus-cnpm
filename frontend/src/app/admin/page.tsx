@@ -11,13 +11,10 @@ const controlItems = [
 const page = () => {
     return (
         <section>
-            <h1 className='text-xl font-bold mb-5'>Tổng Quan Các Chỉ Số Chính</h1>
-            <div className='flex items-center justify-between gap-5'>
-                {controlItems.map(c => (
-                    <ControlCards
-                        key={c.title}
-                        { ... c }
-                    />
+            <h1 className='text-2xl sm:text-4xl font-bold mb-5'>Tổng Quan Các Chỉ Số Chính</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 cursor-pointer">
+                {controlItems.map((c) => (
+                <ControlCards key={c.title} {...c} />
                 ))}
             </div>
         </section>
