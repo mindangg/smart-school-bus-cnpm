@@ -1,5 +1,5 @@
 import { PrismaClient, users } from '@prisma/client'
-import { userSignupDTO } from '../dto/User'
+import { userCreateDTO, userSignupDTO } from '../dto/User'
 const prisma = new PrismaClient()
 
 export const getUserByEmail = async (email: string) => {
@@ -10,7 +10,7 @@ export const signupUser = async (data: userSignupDTO) => {
     return await prisma.users.create({ data })
 }
 
-export const createUser = async (data: userSignupDTO) => {
+export const createUser = async (data: userCreateDTO) => {
     return await prisma.users.create({ data })
 }
 
