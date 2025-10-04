@@ -42,17 +42,25 @@ export const signupUser = async (data: userSignupDTO) => {
 }
 
 export const loginUser = async (data: userLoginDTO) => {
-    const existingUser = await userRepository.getUserByEmail(data.email)
-    if (!existingUser) 
+    const user = await userRepository.getUserByEmail(data.email)
+    if (!user ) 
         throw new Error('Email không đúng.')
 
-    const isMatch = await bcrypt.compare(data.password, existingUser.password)
+    const isMatch = await bcrypt.compare(data.password, user .password)
     if (!isMatch)
         throw new Error("Mật khẩu không đúng.")
 
-    const token = createToken(existingUser.user_id)
+    const token = createToken(user .user_id)
 
-    return { existingUser, token }
+    return { user, token }
+}
+
+export const getCurrentUser = async (id: number) => {
+    const user = await userRepository.getUserById(id)
+    if (!user ) 
+        throw new Error('Không có người dùng auth này')
+
+    return { user }
 }
 
 export const getUsers = async () => {

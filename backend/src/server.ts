@@ -8,15 +8,18 @@ import StudentRoute from'./route/StudentRoute'
 
 const app = express()
 
-app.use(express.json())
-
 app.use((req: Request, _res: Response, next) => {
     console.log(req.path, req.method)
     next()
 })
 
-app.use(cors({origin: 'http://localhost:3000'}))
 app.use(cookieParser())
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true            
+}))
+
+app.use(express.json())
 
 // routes
 

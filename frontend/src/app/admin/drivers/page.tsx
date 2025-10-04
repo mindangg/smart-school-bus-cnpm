@@ -3,7 +3,7 @@ import React from 'react'
 
 const page = () => {
     return (
-                <section className='flex flex-col gap-5'>
+        <section className='flex flex-col gap-5'>
             <h1 className='text-2xl font-bold'>Danh sách tài xế</h1>
             <section>
                 <div className="overflow-x-auto">

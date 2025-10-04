@@ -14,8 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useState } from "react"
-import api from "@/lib/axios"
+import { useAuthAction } from "@/hooks/useAuthAction"
  
 const formSchema = z.object({
     email: z
@@ -28,37 +27,19 @@ const formSchema = z.object({
     .min(1, { message: "Vui lòng nhập mật khẩu." })
 })
 
-const LoginForm = () => {
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState("")
-    
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-        email: "",
-        password: ""
-        },
-    })
+const LoginForm = () => {    
+  const { login, error, loading, user } = useAuthAction()
+
+  const form = useForm<z.infer<typeof formSchema>>({
+      resolver: zodResolver(formSchema),
+      defaultValues: {
+      email: "",
+      password: ""
+      },
+  })
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        setLoading(true)
-        setError('')
-
-        try {
-            const res = await api.post("/api/users/login", {
-                email: values.email,
-                password: values.password,
-                role: "Parent"
-            })
-            console.log("Đăng ký thành công:", res.data)
-        } 
-        catch (err: any) {
-            console.error(err)
-            setError(err.response?.data?.message || "Có lỗi xảy ra")
-        } 
-        finally {
-            setLoading(false)
-        }
+        await login(values.email, values.password)
     }
     
     return (

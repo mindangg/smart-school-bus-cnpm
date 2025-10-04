@@ -1,5 +1,6 @@
+import api from '@/lib/axios';
 import { createContext, useReducer, useEffect, useContext } from 'react'
-import type { Dispatch, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 type AuthState = {
     user: null | { id: string; email: string };
@@ -38,6 +39,20 @@ type AuthProviderProps = { children: ReactNode }
 
 export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     const [state, dispatch] = useReducer(authReducer, initialState)
+
+    useEffect(() => {
+        const checkUser = async () => {
+            try {
+                const res = await api.get(`/api/users/current`)
+                dispatch({ type: 'LOGIN', payload: res.data.user })
+            } 
+            catch {
+                dispatch({ type: 'LOGOUT' })
+            }
+        }
+
+        checkUser()
+    }, [])
 
     return (
         <AuthContext.Provider value={{ state, dispatch }}>
