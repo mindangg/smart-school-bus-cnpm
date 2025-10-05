@@ -22,7 +22,7 @@ const signupSchema = z.object({
 })
 
 const createToken = (id: number) => {
-    return jwt.sign({id}, process.env.SECRET!, { expiresIn: '3d' })
+    return jwt.sign({ id }, process.env.SECRET!, { expiresIn: '3d' })
 }
 
 export const signupUser = async (data: userSignupDTO) => {
@@ -42,16 +42,16 @@ export const signupUser = async (data: userSignupDTO) => {
 }
 
 export const loginUser = async (data: userLoginDTO) => {
-    const user = await userRepository.getUserByEmail(data.email)
-    if (!user ) 
+    const checkUser = await userRepository.loginUser(data.email)
+    if (!checkUser)
         throw new Error('Email không đúng.')
 
-    const isMatch = await bcrypt.compare(data.password, user .password)
+    const isMatch = await bcrypt.compare(data.password, checkUser.password)
     if (!isMatch)
         throw new Error("Mật khẩu không đúng.")
 
-    const token = createToken(user .user_id)
-
+    const token = createToken(checkUser.user_id)
+    const { password: _, ...user } = checkUser
     return { user, token }
 }
 

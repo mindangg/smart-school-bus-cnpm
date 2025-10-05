@@ -1,5 +1,6 @@
 import LoginForm from '@/components/LoginForm'
 import Image from 'next/image'
+import Link from 'next/link'
 
 const Login = () => {
     return (
@@ -15,6 +16,9 @@ const Login = () => {
                     <h1 className='text-3xl font-bold italic text-[#0079CEFF]'>BusSGU</h1>
                 </div>
                 <LoginForm />
+                <div className='flex gap-5 mt-5'>
+                    <Link href='/signup' className='text-sm font-bold'>Chưa có tài khoản?</Link>
+                </div>
             </div>
         </main>
     )

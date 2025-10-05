@@ -14,7 +14,7 @@ export const useAuthAction = () => {
             setLoading(true)
             setError('')
 
-            const res = await api.post('/api/users/current', {
+            const res = await api.post('/api/users/login', {
                 email: email,
                 password: password,
             })

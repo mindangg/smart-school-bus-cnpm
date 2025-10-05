@@ -14,7 +14,7 @@ type AuthAction =
 
 export const AuthContext = createContext<any>(null)
 
-const initialState: AuthState = { user: null, loading: false }
+const initialState: AuthState = { user: null, loading: true }
 
 export const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch(action.type){
@@ -46,19 +46,33 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
                 const res = await api.get(`/api/users/current`)
                 dispatch({ type: 'LOGIN', payload: res.data.user })
             } 
-            catch {
-                dispatch({ type: 'LOGOUT' })
+            catch (err: any) {
+                if (err.response?.status === 401) {
+                    dispatch({ type: 'LOGOUT' })
+                }
+                else {
+                    console.error('Server error:', err)
+                }
             }
         }
 
         checkUser()
     }, [])
 
+    // ✅ Provide simple helpers instead of exposing dispatch directly
+    // const login = (user: User) => dispatch({ type: "LOGIN", payload: user });
+    // const logout = () => dispatch({ type: "LOGOUT" });
+
     return (
-        <AuthContext.Provider value={{ state, dispatch }}>
+        <AuthContext.Provider value={{ user: state.user, loading: state.loading, dispatch }}>
             {children}
         </AuthContext.Provider>
     )
 }
 
-export const useAuth = () => useContext(AuthContext)
+export const useAuth = () => {
+    const context = useContext(AuthContext)
+    if (!context) 
+        throw new Error('useAuth must be used within AuthContextProvider')
+    return context
+}

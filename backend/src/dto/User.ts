@@ -17,3 +17,12 @@ export interface userCreateDTO {
     address: string
     role: string
 }
+
+export const userGetSelect = {
+    user_id: true,
+    email: true,
+    full_name: true,
+    phone_number: true,
+    address: true,
+    role: true,
+} as const

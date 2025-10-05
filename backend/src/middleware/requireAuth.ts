@@ -10,7 +10,8 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction): vo
 
     try {
         const decoded = jwt.verify(token, process.env.SECRET as string) as JwtPayload
-        // req.user_id = decoded.user_id
+        (req as any).user_id = decoded.id
+        console.log('Decoded payload:', decoded)
         next()
     } 
     catch (error) {
