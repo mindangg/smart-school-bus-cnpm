@@ -1,4 +1,4 @@
-"use client"
+'use client'
  
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { toast } from 'sonner'
 import api from '@/lib/axios'
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 
 const baseSchema = z.object({
     email: z
@@ -60,18 +60,19 @@ const updateSchema = baseSchema.extend({
 })
 
 type DriverFormProps = {
-driver?: {
-    email: string
-    full_name: string
-    phone_number: string
-    address: string
-    password?: string
-    user_id?: number
-}
+    driver?: {
+        email: string
+        full_name: string
+        phone_number: string
+        address: string
+        password?: string
+        user_id?: number
+    }
     mode?: 'create' | 'update'
+    fetchDrivers: () => void
 }
 
-const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
+const DriverForm = ({ driver, mode = 'create', fetchDrivers }: DriverFormProps) => {
     const schema = mode === 'create' ? createSchema : updateSchema
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
@@ -105,18 +106,18 @@ const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
                 if (!payload.password) 
                     delete payload.password
 
-                const res = await api.put(`/api/users/${driver?.user_id}`, {
+                await api.put(`/api/users/${driver?.user_id}`, {
                 ... values, 
                 role: 'Driver'
             })
-
+            fetchDrivers()
             toast.success('Cập nhật thành công.')
             }
             else {
-                const res = await api.post('/api/users', { 
+                await api.post('/api/users', { 
                     ...values, role: 'Driver' 
                 })
-                console.log(res.data)
+                fetchDrivers()
                 toast.success('Tạo thành công.')
             }
 
@@ -147,13 +148,13 @@ const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
                         </FormItem>
                     )}
                 />
-
+                {mode === 'create' ? (
                 <FormField
                     control={form.control}
                     name="password"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>{mode === 'update' ? 'Mật khẩu mới (tùy chọn)' : 'Mật Khẩu'}</FormLabel>
+                        <FormLabel>Mật Khẩu</FormLabel>
                         <FormControl>
                             <Input placeholder="Smartschoolbus1@" {...field} />
                         </FormControl>
@@ -161,6 +162,7 @@ const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
                         </FormItem>
                     )}
                 />
+                ) : null}
 
                 <FormField
                     control={form.control}

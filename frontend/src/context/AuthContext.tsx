@@ -59,10 +59,6 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
         checkUser()
     }, [])
 
-    // ✅ Provide simple helpers instead of exposing dispatch directly
-    // const login = (user: User) => dispatch({ type: "LOGIN", payload: user });
-    // const logout = () => dispatch({ type: "LOGOUT" });
-
     return (
         <AuthContext.Provider value={{ user: state.user, loading: state.loading, dispatch }}>
             {children}
