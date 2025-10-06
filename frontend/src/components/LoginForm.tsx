@@ -28,7 +28,7 @@ const formSchema = z.object({
 })
 
 const LoginForm = () => {    
-  const { login, error, loading, user } = useAuthAction()
+  const { login, loading } = useAuthAction()
 
   const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
@@ -73,7 +73,7 @@ const LoginForm = () => {
           )}
         />
         <Button type="submit" disabled={loading}>
-            {loading ? "Đang đăng ký..." : "Đăng nhập"}
+            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
         </Button>
       </form>
     </Form>

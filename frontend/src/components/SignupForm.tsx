@@ -14,8 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useState } from "react"
-import api from "@/lib/axios"
+import { useAuthAction } from "@/hooks/useAuthAction";
  
 const formSchema = z.object({
     email: z
@@ -24,10 +23,10 @@ const formSchema = z.object({
         .email({ message: "Email không hợp lệ"}), 
 
     password: z
-    .string()    
-    .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." })
-    .regex(/[A-Z]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự viết hoa." })
-    .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." }),
+      .string()    
+      .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." })
+      .regex(/[A-Z]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự viết hoa." })
+      .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." }),
 
     confPassword: z.string().min(1, { message: "Vui lòng nhập lại mật khẩu." }),
     }).refine((data) => data.password === data.confPassword, {
@@ -36,8 +35,7 @@ const formSchema = z.object({
 })
 
 const SignupForm = () => {
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState("")
+    const { signup, loading } = useAuthAction()
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -49,24 +47,7 @@ const SignupForm = () => {
     })
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        setLoading(true)
-        setError('')
-
-        try {
-            const res = await api.post("/api/users/signup", {
-                email: values.email,
-                password: values.password,
-                role: "Parent"
-            })
-            console.log("Đăng ký thành công:", res.data)
-        } 
-        catch (err: any) {
-            console.error(err)
-            setError(err.response?.data?.message || "Có lỗi xảy ra")
-        } 
-        finally {
-            setLoading(false)
-        }
+        await signup(values.email, values.password)
     }
 
     return (

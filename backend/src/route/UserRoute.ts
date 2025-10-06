@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { requireAuth } from '../middleware/requireAuth'
+// import { requireAuth } from '../middleware/requireAuth'
 
 import {
     loginUser,
@@ -9,6 +9,7 @@ import {
     getCurrentUser,
     getUsers,
     getUserById,
+    createUser,
     deleteUser,
     updateUser
 } from '../controller/UserController'
@@ -21,13 +22,15 @@ router.post('/signup', signupUser)
 
 router.post('/logout', logoutUser)
 
-router.use(requireAuth)
+// router.use(requireAuth)
 
 router.get('/', getUsers)
 
 router.get('/current', getCurrentUser)
 
 router.get('/:id', getUserById)
+
+router.post('/', createUser)
 
 router.delete('/:id', deleteUser)
 

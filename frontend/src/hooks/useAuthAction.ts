@@ -1,47 +1,62 @@
 'use client'
 
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { AuthContext } from '@/context/AuthContext'
 import api from '@/lib/axios'
+import { toast } from "sonner"
 
 export const useAuthAction = () => {
-    const { state, dispatch } = useContext(AuthContext)
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState('')
+    const { user, loading, dispatch } = useContext(AuthContext)
+
+    const signup = async (email: string, password: string) => {
+        try {
+            dispatch({ type: 'LOADING' })
+
+            const res = await api.post('/api/users/signup', {
+                email: email,
+                password: password,
+                role: 'Parent'
+            })
+
+            toast.success('Đăng ký thành công.')
+            dispatch({ type: 'LOGIN', payload: res.data.user })
+
+        }
+        catch (err: any) {
+            console.error(err)
+            dispatch({ type: 'LOGOUT' })
+        }
+    }
 
     const login = async (email: string, password: string) => {
         try {
-            setLoading(true)
-            setError('')
+            dispatch({ type: 'LOADING' })
 
             const res = await api.post('/api/users/login', {
                 email: email,
                 password: password,
             })
-            
-            dispatch({ type: 'LOGIN', payload: res.data.user }) 
-            console.log('Đăng ký thành công:', res.data)
 
-        } 
+            toast.success('Đăng nhập thành công.')
+            dispatch({ type: 'LOGIN', payload: res.data.user })
+
+        }
         catch (err: any) {
             console.error(err)
-            setError(err.response?.data?.message || 'Có lỗi xảy ra')
             dispatch({ type: 'LOGOUT' })
-        } 
-        finally {
-            setLoading(false)
         }
     }
 
     const logout = async () => {
         try {
             await api.post('/api/users/logout')
+            toast.success('Hẹn gặp lại.')
             dispatch({ type: 'LOGOUT' })
-        } 
+        }
         catch (err: any) {
             console.error(err.response?.data || err.message)
         }
     }
 
-     return { ...state, login, logout, error, loading }
+     return { user, loading, signup, login, logout }
 }

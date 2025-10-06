@@ -23,8 +23,11 @@ export const createUser = async (data: userCreateDTO) => {
     return await prisma.users.create({ data, select: userGetSelect })
 }
 
-export const getUsers = async () => {
-    return await prisma.users.findMany({ select: userGetSelect })
+export const getUsers = async (filter: any) => {
+    return await prisma.users.findMany({ 
+        where: filter,
+        select: userGetSelect 
+    })
 }
 
 export const getUserById = async (user_id: number) => {

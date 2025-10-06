@@ -58,9 +58,16 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     }
 }
 
-export const getUsers = async (_req: Request, res: Response) => {
+export const getUsers = async (req: Request, res: Response) => {
     try {
-        const user = await userService.getUsers()
+        const { role } = req.query
+
+        let filter: any = {}
+
+        if (role)
+            filter.role = role
+        
+        const user = await userService.getUsers(filter)
         res.status(200).json(user)
     } 
     catch (error: any) {
@@ -79,6 +86,18 @@ export const getUserById = async (req: Request, res: Response) => {
 
         const user = await userService.getUserById(parseInt(id, 10))
         res.status(200).json(user)
+    } 
+    catch (error: any) {
+        res.status(400).json({ message: error.message })
+    }
+}
+
+export const createUser = async (req: Request, res: Response) => {
+    try {
+        const data = req.body
+        const user = await userService.createUser(data)
+
+        res.status(201).json({ message: "Tạo thành công", user })
     } 
     catch (error: any) {
         res.status(400).json({ message: error.message })
