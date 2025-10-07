@@ -18,6 +18,17 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface Driver {
     user_id: number,
@@ -35,6 +46,7 @@ interface DriverCardProps {
 
 const DriverCard = ({ driver, handleDelete, fetchDrivers } : DriverCardProps) => {
     const [open, setOpen] = useState(false)
+    const [openAlert, setOpenAlert] = useState(false)
     
     return (
         <div className='grid grid-cols-[2fr_3fr_3fr_3fr_5fr_2fr] py-6 text-center text-black border-b border-gray-300'>
@@ -50,9 +62,24 @@ const DriverCard = ({ driver, handleDelete, fetchDrivers } : DriverCardProps) =>
                         <DropdownMenuLabel>Hành Động</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => setOpen(true)}>Chỉnh Sửa</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(driver.user_id)}>Xóa</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setOpenAlert(true)}>Xóa</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
+
+                <AlertDialog open={openAlert} onOpenChange={setOpenAlert}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Bạn có chắc muốn xóa?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Hành động này không thể hoàn tác. Tài khoản này sẽ bị xóa vĩnh viễn.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Hủy</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDelete(driver.user_id)}>Đồng ý</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+                </AlertDialog>
 
                 <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>

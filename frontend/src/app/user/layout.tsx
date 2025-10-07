@@ -1,9 +1,9 @@
 'use client'
 import SideBar from '@/components/SideBar'
-import { adminNav } from "@/lib/navItems"
+import { userNav } from "@/lib/navItems"
 import { useState } from 'react'
 
-export default function AdminLayout({
+export default function UserLayout({
   children,
 }: {
   children: React.ReactNode
@@ -12,7 +12,7 @@ export default function AdminLayout({
 
   return (
     <div className="flex">
-      <SideBar navItems={adminNav} isOpen={open} onClose={() => setOpen(false)} />
+      <SideBar navItems={userNav} isOpen={open} onClose={() => setOpen(false)} />
 
       {open && (
         <div

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { useState, useEffect } from 'react'
 import { Loader2, RefreshCcw } from 'lucide-react'
+import { toast } from 'sonner'
 
 const page = () => {
     const [drivers, setDrivers] = useState<any[]>([])
@@ -41,13 +42,13 @@ const page = () => {
     }, [])
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Bạn có chắc muốn xóa tài xế này không?")) return
         try {
             await api.delete(`/api/users/${id}`)
+            toast('Xóa thành công')
             fetchDrivers()
         } catch (err) {
-        console.error(err)
-        alert("Xóa thất bại, vui lòng thử lại.")
+            console.error(err)
+            toast("Xóa thất bại, vui lòng thử lại.")
         }
     }
 
