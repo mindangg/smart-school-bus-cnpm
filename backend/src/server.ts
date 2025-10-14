@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import type { Request, Response } from 'express'
+import 'dotenv/config'
 
 import UserRoute from'./route/UserRoute'
 import StudentRoute from'./route/StudentRoute'
@@ -31,5 +32,6 @@ app.get('/', (_req: Request, res: Response) => {
 })
 
 app.listen(process.env.PORT, () => {
+    console.log(`Server running on port ${process.env.PORT}`)
     console.log(`Server running at http://localhost:${process.env.PORT}`)
 })
