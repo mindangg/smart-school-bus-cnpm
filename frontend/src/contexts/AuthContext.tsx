@@ -10,11 +10,11 @@ type AuthState = {
 type AuthAction = 
   | { type: 'LOGIN'; payload: { id: string; email: string } }
   | { type: 'LOGOUT' }
-  | { type: 'LOADING' }
+  | { type: 'LOADING'; payload: boolean}
 
 export const AuthContext = createContext<any>(null)
 
-const initialState: AuthState = { user: null, loading: true }
+const initialState: AuthState = { user: null, loading: false }
 
 export const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch(action.type){
@@ -28,7 +28,7 @@ export const authReducer = (state: AuthState, action: AuthAction): AuthState => 
             ...state, user: null, loading: false
         }
     case 'LOADING':
-        return { ...state, loading: true }
+        return { ...state, loading: action.payload }
       
     default:
       return state

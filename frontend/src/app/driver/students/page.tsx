@@ -2,7 +2,7 @@ import React from "react"
 import StudentCard from "@/components/admin/StudentCard"
 
 const Page = () => {
-  // Mock data
+  // Mock data=
   const students = [
     { id: 1, name: "Trần Thị An", stop: "Điểm Dừng Chính & Đại Lộ Sồi", time: "07:30 AM", status: "Đã Đón" },
     { id: 2, name: "Nguyễn Văn B", stop: "Trạm xe Nguyễn Trãi", time: "07:40 AM", status: "Chưa Đón" },
@@ -16,7 +16,7 @@ const Page = () => {
   return (
     <div>
       <section className="bg-white p-4 border border-gray-100 shadow-xs rounded-xl">
-        <h2 className="text-md font-bold">Đón & Trả Học Sinh</h2>
+        <h2 className="text-md font-bold">Đón & Trả Học Sinh</h2> 
         <p className="text-gray-600">
           Quản lý trạng thái học sinh cho tuyến đường hiện tại của bạn.
         </p>

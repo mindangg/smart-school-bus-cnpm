@@ -11,17 +11,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { UserCog } from "lucide-react";
 import { useAuthAction } from '@/hooks/useAuthAction'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link';
-import { useEffect } from 'react';
 
 const Header = () => {
     const { logout } = useAuthAction()
     const { user } = useAuth()
-
-    useEffect(() => {
-        console.log(user)
-    })
 
     return (
         <header className='fixed top-0 left-0 flex items-center justify-between w-full h-16 px-3 bg-[#E3F1FBFF] shadow-md z-20'>
@@ -55,7 +50,7 @@ const Header = () => {
                     </Button>
                 </div>
             ) : (
-                    <Button className='hover:cursor-pointer'>
+                    <Button className='bg-blue-500 hover:bg-blue-600 hover:cursor-pointer'>
                         <Link href='/login'>
                             Đăng nhập
                         </Link>

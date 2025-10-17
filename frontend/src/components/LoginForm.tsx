@@ -72,7 +72,7 @@ const LoginForm = () => {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading} className='w-full bg-blue-500 hover:bg-blue-600 hover:cursor-pointer'>
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
         </Button>
       </form>

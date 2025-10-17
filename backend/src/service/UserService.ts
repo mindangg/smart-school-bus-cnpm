@@ -13,10 +13,10 @@ const signupSchema = z.object({
 
     password: z
         .string()    
-        .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." })
-        .regex(/[A-Z]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự viết hoa." })
-        .regex(/[0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự số." })
-        .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." }),
+        .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." }),
+        // .regex(/[A-Z]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự viết hoa." })
+        // .regex(/[0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự số." })
+        // .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." }),
     
     role: z.string()
 })
@@ -29,9 +29,9 @@ const createSchema = z.object({
 
     password: z
         .string()    
-        .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." })
+        .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." }),
         // .regex(/[A-Z]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự viết hoa." })
-        .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." }),
+        // .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." }),
 
     full_name: z.string().min(1, {
         message: "Vui lòng nhập họ tên.",
@@ -75,7 +75,7 @@ export const signupUser = async (data: userSignupDTO) => {
 export const loginUser = async (data: userLoginDTO) => {
     const checkUser = await userRepository.loginUser(data.email)
     if (!checkUser)
-        throw new Error('Email không đúng.')
+        throw new Error('Email không tồn tại.')
 
     const isMatch = await bcrypt.compare(data.password, checkUser.password)
     if (!isMatch)
