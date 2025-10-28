@@ -1,5 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
-const userGetSelect = require('../dto/User')
+const { userGetSelect } = require('../dto/User')
 const prisma = new PrismaClient()
 
 const getUserByEmail = (email) => {

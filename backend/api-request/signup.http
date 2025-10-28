@@ -1,0 +1,11 @@
+### GET request to example server
+POST localhost:4000/api/users/signup
+Content-Type: application/json
+
+{
+  "email": "mindang1@gmail.com",
+  "password": "mindang1",
+  "role": "PARENT"
+}
+
+###
