@@ -1,7 +1,6 @@
-import type { Request, Response } from 'express'
-import * as userService from '../service/UserService'
+const userService = require('../service/UserService')
 
-export const signupUser = async (req: Request, res: Response) => {
+const signupUser = async (req, res) => {
     try {
         const data = req.body
         const { user, token } = await userService.signupUser(data)
@@ -14,13 +13,13 @@ export const signupUser = async (req: Request, res: Response) => {
         })
 
         res.status(201).json({ message: "Đăng ký thành công", user })
-    } 
-    catch (error: any) {
+    }
+    catch (error) {
         res.status(400).json({ message: error.message })
     }
 }
 
-export const loginUser = async (req: Request, res: Response) => {
+const loginUser = async (req, res) => {
     try {
         const data = req.body
         const { user, token } = await userService.loginUser(data)
@@ -33,13 +32,13 @@ export const loginUser = async (req: Request, res: Response) => {
         })
 
         res.status(201).json({ message: 'Đăng nhập thành công', user })
-    } 
-    catch (error: any) {
+    }
+    catch (error) {
         res.status(400).json({ message: error.message })
     }
 }
 
-export const logoutUser = async (_req: Request, res: Response) => {
+const logoutUser = async (_req, res) => {
     res.clearCookie('token', {
         httpOnly: true,
         sameSite: 'strict',
@@ -48,34 +47,34 @@ export const logoutUser = async (_req: Request, res: Response) => {
     res.status(200).json({ message: 'Logged out successfully' })
 }
 
-export const getCurrentUser = async (req: Request, res: Response) => {
+const getCurrentUser = async (req, res) => {
     try {
-        const user = await userService.getCurrentUser((req as any).user_id)
+        const user = await userService.getCurrentUser(req.user_id)
         res.json({ user })
-    } 
+    }
     catch (error) {
         res.status(401).json({ message: 'Unauthorized' })
     }
 }
 
-export const getUsers = async (req: Request, res: Response) => {
+const getUsers = async (req, res) => {
     try {
         const { role } = req.query
 
-        let filter: any = {}
+        let filter = {}
 
         if (role)
             filter.role = role
-        
+
         const user = await userService.getUsers(filter)
         res.status(200).json(user)
-    } 
-    catch (error: any) {
+    }
+    catch (error) {
         res.status(400).json({ message: error.message })
     }
 }
 
-export const getUserById = async (req: Request, res: Response) => {
+const getUserById = async (req, res) => {
     try {
         const { id } = req.params
 
@@ -86,25 +85,25 @@ export const getUserById = async (req: Request, res: Response) => {
 
         const user = await userService.getUserById(parseInt(id, 10))
         res.status(200).json(user)
-    } 
-    catch (error: any) {
+    }
+    catch (error) {
         res.status(400).json({ message: error.message })
     }
 }
 
-export const createUser = async (req: Request, res: Response) => {
+const createUser = async (req, res) => {
     try {
         const data = req.body
         const user = await userService.createUser(data)
 
         res.status(201).json({ message: "Tạo thành công", user })
-    } 
-    catch (error: any) {
+    }
+    catch (error) {
         res.status(400).json({ message: error.message })
     }
 }
 
-export const updateUser = async (req: Request, res: Response) => {
+const updateUser = async (req, res) => {
     try {
         const { id } = req.params
         const data = req.body
@@ -116,13 +115,13 @@ export const updateUser = async (req: Request, res: Response) => {
 
         const user = await userService.updateUser(parseInt(id, 10), data)
         res.status(200).json(user)
-    } 
-    catch (error: any) {
+    }
+    catch (error) {
         res.status(400).json({ message: error.message })
     }
 }
 
-export const deleteUser = async (req: Request, res: Response) => {
+const deleteUser = async (req, res) => {
     try {
         const { id } = req.params
 
@@ -133,8 +132,20 @@ export const deleteUser = async (req: Request, res: Response) => {
 
         await userService.deleteUser(parseInt(id, 10))
         res.status(200).json({ message: 'Delete successfully'})
-    } 
-    catch (error: any) {
+    }
+    catch (error) {
         res.status(400).json({ message: error.message })
     }
+}
+
+module.exports = {
+    signupUser,
+    loginUser,
+    logoutUser,
+    getCurrentUser,
+    getUsers,
+    getUserById,
+    createUser,
+    updateUser,
+    deleteUser
 }

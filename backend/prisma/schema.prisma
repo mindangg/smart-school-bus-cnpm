@@ -124,5 +124,3 @@ model users {
   route_assignments route_assignments[]
   students          students[]
 }
-
-

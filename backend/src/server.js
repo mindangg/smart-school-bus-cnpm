@@ -1,14 +1,14 @@
-import express from 'express'
-import cors from 'cors'
-import cookieParser from 'cookie-parser'
-import type { Request, Response } from 'express'
+require('dotenv').config()
+const express = require('express')
+const cors = require('cors')
+const cookieParser = require('cookie-parser')
 
-import UserRoute from'./route/UserRoute'
-import StudentRoute from'./route/StudentRoute'
+const UserRoute = require('./route/UserRoute')
+const StudentRoute = require('./route/StudentRoute')
 
 const app = express()
 
-app.use((req: Request, _res: Response, next) => {
+app.use((req, res, next) => {
     console.log(req.path, req.method)
     next()
 })
@@ -16,7 +16,7 @@ app.use((req: Request, _res: Response, next) => {
 app.use(cookieParser())
 app.use(cors({
     origin: 'http://localhost:3000',
-    credentials: true            
+    credentials: true
 }))
 
 app.use(express.json())
@@ -26,7 +26,7 @@ app.use(express.json())
 app.use('/api/users', UserRoute)
 app.use('/api/students', StudentRoute)
 
-app.get('/', (_req: Request, res: Response) => {
+app.get('/', (req, res) => {
     res.send('Welcome to my app')
 })
 

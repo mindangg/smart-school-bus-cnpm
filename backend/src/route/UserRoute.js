@@ -1,8 +1,8 @@
-import express from 'express'
+const express = require('express')
 
 // import { requireAuth } from '../middleware/requireAuth'
 
-import {
+const {
     loginUser,
     signupUser,
     logoutUser,
@@ -12,7 +12,7 @@ import {
     createUser,
     deleteUser,
     updateUser
-} from '../controller/UserController'
+} = require('../controller/UserController')
 
 const router = express.Router()
 
@@ -36,4 +36,4 @@ router.delete('/:id', deleteUser)
 
 router.put('/:id', updateUser)
 
-export default router
+module.exports = router

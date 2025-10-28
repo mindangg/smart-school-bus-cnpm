@@ -46,7 +46,8 @@ const page = () => {
             await api.delete(`/api/users/${id}`)
             toast('Xóa thành công')
             fetchDrivers()
-        } catch (err) {
+        } 
+        catch (err) {
             console.error(err)
             toast("Xóa thất bại, vui lòng thử lại.")
         }

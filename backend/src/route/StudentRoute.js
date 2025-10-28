@@ -1,16 +1,16 @@
-import express from 'express'
+const express = require('express')
 
 // import requireAuth from '../middlewares/requireAuth'
 
-import {
+const {
     getStudents,
     getStudentById,
     createStudent,
     deleteStudent,
     updateStudent
-} from '../controller/StudentController'
+} = require('../controller/StudentController')
 
-const router = express.Router()
+const router = express.Router();
 
 // router.use(requireAuth)
 
@@ -24,4 +24,4 @@ router.delete('/:id', deleteStudent)
 
 router.put('/:id', updateStudent)
 
-export default router
+module.exports = router

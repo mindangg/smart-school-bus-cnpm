@@ -1,7 +1,7 @@
-import { PrismaClient, students } from '@prisma/client'
+const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
-const mapStudent = (student: students) => ({
+const mapStudent = (student) => ({
     student_id: student.student_id,
     full_name: student.full_name,
     profile_photo_url: student.profile_photo_url ?? undefined,
@@ -21,29 +21,29 @@ const mapStudent = (student: students) => ({
     // : {})
 })
 
-export const createStudent = async (data: students) => {
+const createStudent = async (data) => {
     const student = await prisma.students.create({ data })
 
     return student ? mapStudent(student) : null
 }
 
-export const getStudents = async () => {
+const getStudents = async () => {
     const students = await prisma.students.findMany()
 
     return students ? students.map(mapStudent) : []
 }
 
-export const getStudentById = async (student_id: number) => {
-    const student = await prisma.students.findUnique({ 
-        where: { student_id } 
+const getStudentById = async (student_id) => {
+    const student = await prisma.students.findUnique({
+        where: { student_id }
     })
 
     return student ? mapStudent(student) : null
 }
 
-export const updateStudent = async (
-    student_id: number,
-    data: students
+const updateStudent = async (
+    student_id,
+    data
 ) => {
     const student = await prisma.students.update({
         where: { student_id },
@@ -53,8 +53,16 @@ export const updateStudent = async (
     return student ? mapStudent(student) : null
 }
 
-export const deleteStudent = async (student_id: number) => {
-    return await prisma.students.delete({ 
-        where: { student_id } 
-    })
+const deleteStudent = (student_id) => {
+    return prisma.students.delete({
+        where: {student_id}
+    });
+}
+
+module.exports = {
+    getStudents,
+    getStudentById,
+    createStudent,
+    deleteStudent,
+    updateStudent
 }
