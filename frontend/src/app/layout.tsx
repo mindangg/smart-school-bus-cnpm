@@ -6,6 +6,8 @@ import Footer from "@/components/Footer";
 import { Providers } from "@/provider/Providers";
 import { Toaster } from "@/components/ui/sonner";
 
+import 'mapbox-gl/dist/mapbox-gl.css';
+
 const geistSans = Geist({ 
   variable: "--font-geist-sans",
   subsets: ["latin"],
