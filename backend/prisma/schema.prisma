@@ -123,4 +123,32 @@ model users {
   notifications     notifications[]
   route_assignments route_assignments[]
   students          students[]
+  chats1            chat[]              @relation("chatUser1")
+  chats2            chat[]              @relation("chatUser2")
+  sentMessages      chatMessage[]       @relation("sentMessages")
+}
+
+model chat {
+  chat_id    Int           @id @default(autoincrement())
+  user1      users         @relation("chatUser1", fields: [user1_id], references: [user_id])
+  user1_id   Int
+  user2      users         @relation("chatUser2", fields: [user2_id], references: [user_id])
+  user2_id   Int
+  created_at DateTime      @default(now())
+  updated_at DateTime      @default(now()) @updatedAt
+  messages   chatMessage[]
+
+  @@unique([user1_id, user2_id])
+}
+
+model chatMessage {
+  message_id   Int      @id @default(autoincrement())
+  chat         chat     @relation(fields: [chat_id], references: [chat_id])
+  chat_id      Int
+  sender       users    @relation("sentMessages", fields: [sender_id], references: [user_id])
+  sender_id    Int
+  message      String
+  message_type String   @default("text") // text, image, file
+  is_read      Boolean  @default(false)
+  created_at   DateTime @default(now())
 }

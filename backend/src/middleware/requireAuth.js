@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 
-export const requireAuth = (req, res, next) => {
+const requireAuth = (req, res, next) => {
     const token = req.cookies.token
     if (!token) {
         res.status(401).json({ message: 'No token, unauthorized' })
@@ -17,3 +17,5 @@ export const requireAuth = (req, res, next) => {
         res.status(401).json({ message: 'Invalid token' })
     }
 }
+
+module.exports = { requireAuth }

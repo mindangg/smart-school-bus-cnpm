@@ -110,6 +110,36 @@ CREATE TABLE notifications
     FOREIGN KEY (event_id) REFERENCES student_events (event_id) ON DELETE SET NULL
 );
 
+CREATE TABLE chats
+(
+    chat_id      INT PRIMARY KEY AUTO_INCREMENT,
+    user1_id     INT NOT NULL,
+    user2_id     INT NOT NULL,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    user_min     INT AS (LEAST(user1_id, user2_id)) STORED,
+    user_max     INT AS (GREATEST(user1_id, user2_id)) STORED,
+
+    UNIQUE KEY uniq_users_pair (user_min, user_max),
+
+    FOREIGN KEY (user1_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (user2_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE chat_messages (
+    message_id   INT PRIMARY KEY AUTO_INCREMENT,
+    chat_id      INT NOT NULL,
+    sender_id    INT NOT NULL,
+    message      TEXT NOT NULL,
+    message_type VARCHAR(20) DEFAULT 'text', -- text, image, file
+    is_read      BOOLEAN DEFAULT FALSE,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (chat_id) REFERENCES chats(chat_id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
 CREATE INDEX idx_students_parent_id ON students (parent_id);
 CREATE INDEX idx_students_stop_id ON students (stop_id);
 CREATE INDEX idx_routes_bus_id ON routes (bus_id);
@@ -120,3 +150,5 @@ CREATE INDEX idx_student_events_student_id ON student_events (student_id);
 CREATE INDEX idx_student_events_assignment_id ON student_events (route_assignment_id);
 CREATE INDEX idx_notifications_user_id ON notifications (user_id);
 CREATE INDEX idx_notifications_event_id ON notifications (event_id);
+CREATE INDEX idx_chat_messages_chat_id ON chat_messages(chat_id);
+CREATE INDEX idx_chat_messages_sender_id ON chat_messages(sender_id);

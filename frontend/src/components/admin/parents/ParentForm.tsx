@@ -1,16 +1,16 @@
 'use client'
- 
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from 'sonner'
@@ -22,7 +22,7 @@ const baseSchema = z.object({
     email: z
         .string()
         .min(1, { message: "Vui lòng nhập email."})
-        .email({ message: "Email không hợp lệ"}), 
+        .email({ message: "Email không hợp lệ"}),
 
     full_name: z.string().min(1, {
         message: "Vui lòng nhập họ tên.",
@@ -44,24 +44,20 @@ const baseSchema = z.object({
 // Create
 const createSchema = baseSchema.extend({
     password: z
-        .string()    
+        .string()
         .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." })
-        // .regex(/[A-Z]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự viết hoa." })
-        .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." })
 })
 
 // Update
 const updateSchema = baseSchema.extend({
     password: z
-        .string()    
+        .string()
         .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." })
-        // .regex(/[A-Z]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự viết hoa." })
-        .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." })
         .optional()
 })
 
-type DriverFormProps = {
-    driver?: {
+type ParentFormProps = {
+    parent?: {
         email: string
         full_name: string
         phone_number: string
@@ -72,26 +68,26 @@ type DriverFormProps = {
     mode?: 'create' | 'update'
 }
 
-const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
+const ParentForm = ({ parent, mode = 'create' } : ParentFormProps ) => {
     const router = useRouter()
 
     const schema = mode === 'create' ? createSchema : updateSchema
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
-        defaultValues: driver ?? {
-        email: "",
-        password: "",
-        full_name: "",
-        phone_number: "",
-        address: ""
+        defaultValues: parent ?? {
+            email: "",
+            password: "",
+            full_name: "",
+            phone_number: "",
+            address: ""
         },
     })
 
     useEffect(() => {
-        if (driver) 
-            form.reset(driver)
+        if (parent)
+            form.reset(parent)
 
-        else 
+        else
             form.reset({
                 email: "",
                 password: "",
@@ -99,25 +95,25 @@ const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
                 phone_number: "",
                 address: ""
             })
-    }, [driver])
+    }, [parent])
 
     const onSubmit = async (values: z.infer<typeof schema>) => {
         try {
-            if (mode == 'update' && driver?.user_id) {
+            if (mode == 'update' && parent?.user_id) {
                 const payload = { ... values }
-                if (!payload.password) 
+                if (!payload.password)
                     delete payload.password
 
-                await api.put(`users/${driver?.user_id}`, {
-                ... values, 
-                role: 'DRIVER'
-            })
-            router.refresh()
-            toast.success('Cập nhật thành công.')
+                await api.put(`users/${parent?.user_id}`, {
+                    ... values,
+                    role: 'PARENT'
+                })
+                router.refresh()
+                toast.success('Cập nhật thành công.')
             }
             else {
                 await api.post('users/signup', {
-                    ...values, role: 'DRIVER'
+                    ...values, role: 'PARENT'
                 })
                 router.refresh()
                 toast.success('Tạo thành công.')
@@ -142,28 +138,28 @@ const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
                     name="email"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                            <Input placeholder="smartschoolbus@gmail.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                                <Input placeholder="smartschoolbus@gmail.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
                 {mode === 'create' ? (
-                <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Mật Khẩu</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Smartschoolbus1@" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Mật Khẩu</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Smartschoolbus1@" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                 ) : null}
 
                 <FormField
@@ -171,11 +167,11 @@ const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
                     name="full_name"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Họ Tên</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Trần Minh Đăng" {...field} />
-                        </FormControl>
-                        <FormMessage />
+                            <FormLabel>Họ Tên</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Trần Minh Đăng" {...field} />
+                            </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -185,11 +181,11 @@ const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
                     name="phone_number"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Số điện thoại</FormLabel>
-                        <FormControl>
-                            <Input placeholder="090-123-4567" {...field} />
-                        </FormControl>
-                        <FormMessage />
+                            <FormLabel>Số điện thoại</FormLabel>
+                            <FormControl>
+                                <Input placeholder="090-123-4567" {...field} />
+                            </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -198,11 +194,11 @@ const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
                     name="address"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Địa chỉ</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Hồ Chí Minh" {...field} />
-                        </FormControl>
-                        <FormMessage />
+                            <FormLabel>Địa chỉ</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Hồ Chí Minh" {...field} />
+                            </FormControl>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -211,7 +207,7 @@ const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
                 </Button>
             </form>
         </Form>
-    )
-}
+    );
+};
 
-export default DriverForm
+export default ParentForm;

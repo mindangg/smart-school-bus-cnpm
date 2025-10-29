@@ -1,6 +1,6 @@
 const express = require('express')
 
-// import { requireAuth } from '../middleware/requireAuth'
+const { requireAuth } = require ('../middleware/requireAuth')
 
 const {
     loginUser,
@@ -22,7 +22,7 @@ router.post('/signup', signupUser)
 
 router.post('/logout', logoutUser)
 
-// router.use(requireAuth)
+router.use(requireAuth)
 
 router.get('/', getUsers)
 

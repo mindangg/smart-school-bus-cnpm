@@ -3,9 +3,9 @@ POST localhost:4000/api/users/signup
 Content-Type: application/json
 
 {
-  "email": "mindang1@gmail.com",
-  "password": "mindang1",
-  "role": "PARENT"
+  "email": "mindang3@gmail.com",
+  "password": "mindang3",
+  "role": "ADMIN"
 }
 
 ###

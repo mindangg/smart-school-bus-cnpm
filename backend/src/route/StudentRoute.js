@@ -1,6 +1,6 @@
 const express = require('express')
 
-// import requireAuth from '../middlewares/requireAuth'
+const { requireAuth } = require ('../middleware/requireAuth')
 
 const {
     getStudents,
@@ -12,7 +12,7 @@ const {
 
 const router = express.Router();
 
-// router.use(requireAuth)
+router.use(requireAuth)
 
 router.get('/', getStudents)
 

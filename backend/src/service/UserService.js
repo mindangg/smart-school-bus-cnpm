@@ -92,8 +92,8 @@ const getCurrentUser = async (id) => {
     return user
 }
 
-const getUsers = async (filter) => {
-    return await UserRepository.getUsers(filter)
+const getUsers = (filter) => {
+    return UserRepository.getUsers(filter);
 }
 
 const getUserById = async (id) => {
@@ -101,7 +101,7 @@ const getUserById = async (id) => {
     if (!userExist)
         throw new Error('Người dùng không tồn tại')
 
-    return await UserRepository.getUserById(id)
+    return UserRepository.getUserById(id)
 }
 
 const createUser = async (data) => {
@@ -113,7 +113,7 @@ const createUser = async (data) => {
 
     const hashedPassword = await bcrypt.hash(parsedData.password, 10)
 
-    return await UserRepository.createUser({...parsedData, password: hashedPassword})
+    return UserRepository.createUser({...parsedData, password: hashedPassword});
 }
 
 const updateUser = async (id, data) => {
