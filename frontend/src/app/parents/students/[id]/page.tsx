@@ -1,3 +1,4 @@
+import LiveTrackingMap from '@/components/parents/LiveTrackingMap'
 import { MapPin, BellRing, Bus } from 'lucide-react'
 import Image from 'next/image'
 
@@ -13,12 +14,7 @@ const page = () => {
                     <p>Điều Khiển</p>
                 </div>
                 <div className="relative w-full h-full">
-                    <Image
-                        src="/images/bus.png"
-                        alt="Realtime Bus Location"
-                        fill
-                        className="object-contain"
-                    />
+                    <LiveTrackingMap/>
                 </div>
             </section>
             <section className='w-1/4 mr-10 flex flex-col gap-7'>
