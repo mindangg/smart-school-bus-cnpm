@@ -1,7 +1,8 @@
-const { PrismaClient } = require('@prisma/client')
-const bcrypt = require('bcrypt')
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 const prisma = new PrismaClient();
 
+// Dữ liệu users (đặt ở ngoài là đúng)
 const users = [
     // PARENT
     { email: 'parent1@gmail.com', full_name: 'Nguyễn Thị Mai', role: 'PARENT', password: 'parent1' },
@@ -20,7 +21,29 @@ const users = [
     { email: 'admin4@gmail.com', full_name: 'Lê Thị Thanh', role: 'ADMIN', password: 'admin4' },
 ];
 
+// Hàm main chứa TOÀN BỘ logic seed
 async function main() {
+    console.log('Start seeding ...');
+
+    // 0. XÓA DỮ LIỆU CŨ (theo thứ tự ngược lại để không lỗi khóa ngoại)
+    console.log('Deleting old data...');
+    // Xóa các bảng phụ thuộc trước
+    await prisma.route_stops.deleteMany();
+    await prisma.student_events.deleteMany();
+    await prisma.route_assignments.deleteMany();
+    await prisma.notifications.deleteMany();
+    await prisma.chatMessage.deleteMany();
+    await prisma.chat.deleteMany();
+    // Xóa các bảng chính
+    await prisma.routes.deleteMany();
+    await prisma.students.deleteMany();
+    await prisma.bus_stops.deleteMany();
+    await prisma.buses.deleteMany();
+    await prisma.users.deleteMany();
+    console.log('Old data deleted.');
+
+    // 1. TẠO USERS (với bcrypt)
+    console.log('Creating users...');
     for (const u of users) {
         const hashedPassword = await bcrypt.hash(u.password, 10);
         await prisma.users.create({
@@ -33,8 +56,111 @@ async function main() {
             },
         });
     }
+    console.log('Users created.');
+
+    // 2. TẠO CÁC TRẠM DỪNG (bus_stops)
+    console.log("Creating Bus Stops...");
+    const stop1 = await prisma.bus_stops.create({
+      data: {
+        address: "Đại học Sài Gòn (Cổng 1)",
+        latitude: 10.759948,
+        longitude: 106.682330,
+      },
+    });
+    const stop2 = await prisma.bus_stops.create({
+      data: {
+        address: "Trần Hưng Đạo - Nguyễn Văn Cừ",
+        latitude: 10.762145,
+        longitude: 106.686036,
+      },
+    });
+    const stop3 = await prisma.bus_stops.create({
+      data: {
+        address: "Công viên 23/9 (Trạm điều hành)",
+        latitude: 10.769498,
+        longitude: 106.692290,
+      },
+    });
+    const stop4 = await prisma.bus_stops.create({
+      data: {
+        address: "Chợ Bến Thành",
+        latitude: 10.772583,
+        longitude: 106.697967,
+      },
+    });
+    console.log("Bus Stops created.");
+
+    // 3. TẠO XE BUÝT (buses)
+    console.log("Creating Buses...");
+    const bus1 = await prisma.buses.create({
+      data: {
+        bus_number: "SGU-001",
+        license_plate: "51B-12345",
+        capacity: 30,
+        model: "Mercedes-Benz Sprinter",
+        status: "ACTIVE",
+      },
+    });
+    const bus2 = await prisma.buses.create({
+      data: {
+        bus_number: "SGU-002",
+        license_plate: "51B-67890",
+        capacity: 30,
+        model: "Ford Transit",
+        status: "MAINTENANCE",
+      },
+    });
+    console.log("Buses created.");
+
+    // 4. TẠO TUYẾN ĐƯỜNG (routes)
+    console.log("Creating Routes...");
+    const morningRoute = await prisma.routes.create({
+      data: {
+        route_type: "MORNING",
+        start_time: "06:30:00",
+        bus_id: bus1.bus_id, // Gán xe SGU-001
+      },
+    });
+    const eveningRoute = await prisma.routes.create({
+      data: {
+        route_type: "EVENING",
+        start_time: "16:30:00",
+        bus_id: bus1.bus_id, // Gán xe SGU-001
+      },
+    });
+    console.log("Routes created.");
+
+    // 5. GÁN TRẠM DỪNG VÀO TUYẾN (route_stops)
+    console.log("Assigning stops to routes...");
+    // Gán trạm cho tuyến Sáng
+    await prisma.route_stops.createMany({
+      data: [
+        { route_id: morningRoute.route_id, stop_id: stop1.stop_id, stop_order: 1 },
+        { route_id: morningRoute.route_id, stop_id: stop2.stop_id, stop_order: 2 },
+        { route_id: morningRoute.route_id, stop_id: stop3.stop_id, stop_order: 3 },
+        { route_id: morningRoute.route_id, stop_id: stop4.stop_id, stop_order: 4 },
+      ],
+    });
+    // Gán trạm cho tuyến Chiều (Thứ tự ngược lại)
+    await prisma.route_stops.createMany({
+      data: [
+        { route_id: eveningRoute.route_id, stop_id: stop4.stop_id, stop_order: 1 },
+        { route_id: eveningRoute.route_id, stop_id: stop3.stop_id, stop_order: 2 },
+        { route_id: eveningRoute.route_id, stop_id: stop2.stop_id, stop_order: 3 },
+        { route_id: eveningRoute.route_id, stop_id: stop1.stop_id, stop_order: 4 },
+      ],
+    });
+    console.log("Stops assigned to routes.");
+
+    console.log('Seeding finished.');
 }
 
+// Gọi hàm main để thực thi
 main()
-    .catch(e => console.error(e))
-    .finally(() => prisma.$disconnect());
+    .catch(e => {
+        console.error(e);
+        process.exit(1);
+    })
+    .finally(async () => {
+        await prisma.$disconnect();
+    });
