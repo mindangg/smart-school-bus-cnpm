@@ -152,6 +152,73 @@ async function main() {
     });
     console.log("Stops assigned to routes.");
 
+    // 6. TẠO PHÂN CÔNG LỊCH TRÌNH (route_assignments)
+    console.log("Creating Route Assignments...");
+
+    // 6a. Lấy ID của tài xế và xe buýt mà chúng ta đã tạo
+    // (Chúng ta đã có sẵn bus1, morningRoute, eveningRoute từ các bước trên)
+    
+    // Tìm tài xế chúng ta đã tạo ở đầu file seed
+    const driver1 = await prisma.users.findUnique({
+        where: { email: 'driver1@gmail.com' }
+    });
+    const driver2 = await prisma.users.findUnique({
+        where: { email: 'driver2@gmail.com' }
+    });
+
+    if (!driver1 || !driver2) {
+        console.error("Không thể tìm thấy driver1@gmail.com hoặc driver2@gmail.com. Vui lòng kiểm tra lại seed data users.");
+        return; // Dừng seed nếu không có tài xế
+    }
+
+    // 6b. Tạo các ngày demo
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    // Set giờ về 00:00:00 để đảm bảo tính đúng ngày
+    today.setHours(0, 0, 0, 0); 
+    tomorrow.setHours(0, 0, 0, 0);
+
+    // 6c. Tạo dữ liệu phân công
+    await prisma.route_assignments.createMany({
+        data: [
+            // --- Lịch trình hôm nay ---
+            {
+                route_id: morningRoute.route_id, // Tuyến sáng
+                driver_id: driver1.user_id,      // Tài xế 1
+                bus_id: bus1.bus_id,             // Xe 1
+                assignment_date: today,          // Ngày hôm nay
+                is_active: true
+            },
+            {
+                route_id: eveningRoute.route_id, // Tuyến chiều
+                driver_id: driver1.user_id,      // Tài xế 1
+                bus_id: bus1.bus_id,             // Xe 1
+                assignment_date: today,          // Ngày hôm nay
+                is_active: true
+            },
+
+            // --- Lịch trình ngày mai ---
+            {
+                route_id: morningRoute.route_id, // Tuyến sáng
+                driver_id: driver2.user_id,      // Tài xế 2
+                bus_id: bus1.bus_id,             // Xe 1
+                assignment_date: tomorrow,       // Ngày mai
+                is_active: true
+            },
+            {
+                route_id: eveningRoute.route_id, // Tuyến chiều
+                driver_id: driver2.user_id,      // Tài xế 2
+                bus_id: bus1.bus_id,             // Xe 1
+                assignment_date: tomorrow,       // Ngày mai
+                is_active: true
+            }
+        ]
+    });
+    
+    console.log("Route Assignments created.");
+
     console.log('Seeding finished.');
 }
 
