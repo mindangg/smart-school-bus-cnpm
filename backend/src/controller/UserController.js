@@ -31,7 +31,7 @@ const loginUser = async (req, res) => {
             maxAge:  3 * 24 * 60 * 60 * 1000,
         })
 
-        res.status(201).json({ message: 'Đăng nhập thành công', user })
+        res.status(200).json({ message: 'Đăng nhập thành công', user })
     }
     catch (error) {
         res.status(400).json({ message: error.message })
@@ -50,7 +50,7 @@ const logoutUser = async (_req, res) => {
 const getCurrentUser = async (req, res) => {
     try {
         const user = await userService.getCurrentUser(req.user_id)
-        res.json({ user })
+        res.json(user)
     }
     catch (error) {
         res.status(401).json({ message: 'Unauthorized' })

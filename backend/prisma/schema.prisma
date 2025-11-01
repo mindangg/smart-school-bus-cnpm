@@ -120,35 +120,39 @@ model users {
   is_active         Boolean?            @default(true)
   created_at        DateTime?           @default(now()) @db.Timestamp(0)
   updated_at        DateTime?           @default(now()) @db.Timestamp(0)
-  notifications     notifications[]
-  route_assignments route_assignments[]
-  students          students[]
   chats1            chat[]              @relation("chatUser1")
   chats2            chat[]              @relation("chatUser2")
   sentMessages      chatMessage[]       @relation("sentMessages")
+  notifications     notifications[]
+  route_assignments route_assignments[]
+  students          students[]
 }
 
 model chat {
   chat_id    Int           @id @default(autoincrement())
-  user1      users         @relation("chatUser1", fields: [user1_id], references: [user_id])
   user1_id   Int
-  user2      users         @relation("chatUser2", fields: [user2_id], references: [user_id])
   user2_id   Int
   created_at DateTime      @default(now())
   updated_at DateTime      @default(now()) @updatedAt
+  user1      users         @relation("chatUser1", fields: [user1_id], references: [user_id])
+  user2      users         @relation("chatUser2", fields: [user2_id], references: [user_id])
   messages   chatMessage[]
 
   @@unique([user1_id, user2_id])
+  @@index([user2_id], map: "chat_user2_id_fkey")
 }
 
 model chatMessage {
   message_id   Int      @id @default(autoincrement())
-  chat         chat     @relation(fields: [chat_id], references: [chat_id])
   chat_id      Int
-  sender       users    @relation("sentMessages", fields: [sender_id], references: [user_id])
   sender_id    Int
   message      String
-  message_type String   @default("text") // text, image, file
+  message_type String   @default("text")
   is_read      Boolean  @default(false)
   created_at   DateTime @default(now())
+  chat         chat     @relation(fields: [chat_id], references: [chat_id])
+  sender       users    @relation("sentMessages", fields: [sender_id], references: [user_id])
+
+  @@index([chat_id], map: "chatMessage_chat_id_fkey")
+  @@index([sender_id], map: "chatMessage_sender_id_fkey")
 }

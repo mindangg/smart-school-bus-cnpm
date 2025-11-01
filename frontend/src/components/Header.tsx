@@ -29,7 +29,7 @@ const Header = () => {
                 />
                 <h1 className='text-3xl font-bold italic text-[#0079CEFF]'>BusSGU</h1>
             </div>
-            {user ? (
+            {user && (
                 <div className='flex items-center gap-1'>
                     <Link href='/profile' className='hover:cursor-pointer inline-flex justify-center rounded-md p-2 text-md font-bold
                                 text-gray-700 hover:bg-blue-100 cursor-pointer' >
@@ -38,22 +38,11 @@ const Header = () => {
                             user?.role === 'DRIVER' ? <span className='ml-1'>(Tài Xế)</span> :
                                 user?.role === 'ADMIN' ? <span className='ml-1'>(Quản Lý)</span> : null}
                     </Link>
-
-                    <div>
-
-                    </div>
                     <Button variant='destructive' className='hover:cursor-pointer' onClick={logout}>
                         Đăng xuất
                     </Button>
                 </div>
-            ) : (
-                    <Button className='bg-blue-500 hover:bg-blue-600 hover:cursor-pointer'>
-                        <Link href='/login'>
-                            Đăng nhập
-                        </Link>
-                    </Button>
             )}
-
         </header>
     )
 }

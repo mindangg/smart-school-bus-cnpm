@@ -4,6 +4,7 @@ const { requireAuth } = require ('../middleware/requireAuth')
 
 const {
     getStudents,
+    getStudentsByParent,
     getStudentById,
     createStudent,
     deleteStudent,
@@ -15,6 +16,8 @@ const router = express.Router();
 router.use(requireAuth)
 
 router.get('/', getStudents)
+
+router.get('/parent', getStudentsByParent)
 
 router.get('/:id', getStudentById)
 

@@ -43,8 +43,21 @@ export const useAuthAction = () => {
                 password: password,
             })
 
-            toast.success('Đăng nhập thành công.')
             dispatch({ type: 'LOGIN', payload: res.data.user })
+            switch (res.data.user.role) {
+                case 'PARENT':
+                    router.replace('/user')
+                    break
+                case 'DRIVER':
+                    router.replace('/driver')
+                    break
+                case 'ADMIN':
+                    router.replace('/admin')
+                    break
+            }
+
+            toast.success('Đăng nhập thành công.')
+
 
         }
         catch (err: any) {
