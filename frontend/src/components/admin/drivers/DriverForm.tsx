@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from 'sonner'
 import api from '@/lib/axios'
 import { useEffect } from "react"
+import {useRouter} from "next/navigation";
 
 const baseSchema = z.object({
     email: z
@@ -69,10 +70,11 @@ type DriverFormProps = {
         user_id?: number
     }
     mode?: 'create' | 'update'
-    fetchDrivers: () => void
 }
 
-const DriverForm = ({ driver, mode = 'create', fetchDrivers }: DriverFormProps) => {
+const DriverForm = ({ driver, mode = 'create' }: DriverFormProps) => {
+    const router = useRouter()
+
     const schema = mode === 'create' ? createSchema : updateSchema
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
@@ -106,18 +108,18 @@ const DriverForm = ({ driver, mode = 'create', fetchDrivers }: DriverFormProps) 
                 if (!payload.password) 
                     delete payload.password
 
-                await api.put(`/api/users/${driver?.user_id}`, {
+                await api.put(`users/${driver?.user_id}`, {
                 ... values, 
-                role: 'Driver'
+                role: 'DRIVER'
             })
-            fetchDrivers()
+            router.refresh()
             toast.success('Cập nhật thành công.')
             }
             else {
-                await api.post('/api/users', { 
-                    ...values, role: 'Driver' 
+                await api.post('users/signup', {
+                    ...values, role: 'DRIVER'
                 })
-                fetchDrivers()
+                router.refresh()
                 toast.success('Tạo thành công.')
             }
 

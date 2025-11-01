@@ -41,10 +41,9 @@ interface Driver {
 interface DriverCardProps {
     driver: Driver,
     handleDelete: (user_id: number) => void
-    fetchDrivers: () => void
 }
 
-const DriverCard = ({ driver, handleDelete, fetchDrivers } : DriverCardProps) => {
+const DriverCard = ({ driver, handleDelete } : DriverCardProps) => {
     const [open, setOpen] = useState(false)
     const [openAlert, setOpenAlert] = useState(false)
     
@@ -87,9 +86,8 @@ const DriverCard = ({ driver, handleDelete, fetchDrivers } : DriverCardProps) =>
                     <DialogTitle>Chỉnh Sửa Tài Xế</DialogTitle>
                     </DialogHeader>
                     <DriverForm
-                    mode='update'
-                    driver={driver}
-                    fetchDrivers={fetchDrivers}
+                        mode='update'
+                        driver={driver}
                     />
                 </DialogContent>
                 </Dialog>

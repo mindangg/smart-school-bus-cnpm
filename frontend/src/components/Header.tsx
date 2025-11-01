@@ -30,21 +30,18 @@ const Header = () => {
                 <h1 className='text-3xl font-bold italic text-[#0079CEFF]'>BusSGU</h1>
             </div>
             {user ? (
-                <div className='flex items-center gap-7'>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger className='flex items-center gap-1'>
-                            <UserCog />
-                            <span className='text-md font-semibold'>Hồ Sơ</span>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuLabel>{user?.role}</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>Profile</DropdownMenuItem>
-                            <DropdownMenuItem>Billing</DropdownMenuItem>
-                            <DropdownMenuItem>Team</DropdownMenuItem>
-                            <DropdownMenuItem>Subscription</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                <div className='flex items-center gap-1'>
+                    <Link href='/profile' className='hover:cursor-pointer inline-flex justify-center rounded-md p-2 text-md font-bold
+                                text-gray-700 hover:bg-blue-100 cursor-pointer' >
+                        Hồ Sơ {
+                        user?.role === 'PARENT' ? <span className='ml-1'>(Phụ Huynh)</span> :
+                            user?.role === 'DRIVER' ? <span className='ml-1'>(Tài Xế)</span> :
+                                user?.role === 'ADMIN' ? <span className='ml-1'>(Quản Lý)</span> : null}
+                    </Link>
+
+                    <div>
+
+                    </div>
                     <Button variant='destructive' className='hover:cursor-pointer' onClick={logout}>
                         Đăng xuất
                     </Button>

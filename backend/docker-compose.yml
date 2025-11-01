@@ -4,7 +4,7 @@ services:
     container_name: smart_school_bus_mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: smart_school-bus
+      MYSQL_DATABASE: smart_school_bus
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
