@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient(); 
 
 const findRouteDetailsById = async (routeId) => {
-    return await prisma.routes.findUnique({
+    return prisma.routes.findUnique({
         where: {
             route_id: routeId,
         },
@@ -21,27 +21,27 @@ const findRouteDetailsById = async (routeId) => {
 };
 
 const findAllAssignments = async () => {
-    return await prisma.route_assignments.findMany({
+    return prisma.route_assignments.findMany({
         include: {
-            routes: { 
+            routes: {
                 select: {
                     route_type: true,
                     start_time: true
                 }
             },
-            users: { 
+            users: {
                 select: {
                     full_name: true
                 }
             },
-            buses: { 
+            buses: {
                 select: {
                     bus_number: true
                 }
             }
         },
         orderBy: {
-            assignment_date: 'desc' 
+            assignment_date: 'desc'
         }
     });
 };

@@ -1,4 +1,4 @@
-import StudentForm from '@/components/user/StudentForm'
+import StudentForm from '@/components/parent/StudentForm'
 import {createServerApi} from "@/lib/axiosServer";
 
 const page = async () => {

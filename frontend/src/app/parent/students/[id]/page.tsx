@@ -1,6 +1,5 @@
-import LiveTrackingMap from '@/components/parents/LiveTrackingMap'
-import { MapPin, BellRing, Bus } from 'lucide-react'
-import Image from 'next/image'
+import LiveTrackingMap from '@/components/parent/LiveTrackingMap'
+import {BellRing, Bus, MapPin} from 'lucide-react'
 
 const page = () => {
     return (

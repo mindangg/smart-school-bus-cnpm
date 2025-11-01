@@ -46,7 +46,7 @@ export const useAuthAction = () => {
             dispatch({ type: 'LOGIN', payload: res.data.user })
             switch (res.data.user.role) {
                 case 'PARENT':
-                    router.replace('/user')
+                    router.replace('/parent')
                     break
                 case 'DRIVER':
                     router.replace('/driver')
@@ -57,8 +57,6 @@ export const useAuthAction = () => {
             }
 
             toast.success('Đăng nhập thành công.')
-
-
         }
         catch (err: any) {
             const msg = err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.'

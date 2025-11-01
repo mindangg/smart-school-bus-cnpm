@@ -2,6 +2,7 @@ import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 const StudentForm = ({student}: any) => {
     return (
@@ -19,7 +20,11 @@ const StudentForm = ({student}: any) => {
                 <Label>Họ tên</Label>
                 <Input value={student.full_name} readOnly/>
             </div>
-            <Button className='w-full bg-blue-500 hover:bg-blue-600 hover:cursor-pointer'>Xem chuyến đi</Button>
+            <Button asChild className='w-full bg-blue-500 hover:bg-blue-600 hover:cursor-pointer'>
+                <Link href={`students/${student.student_id}`}>
+                    Xem chuyến đi
+                </Link>
+            </Button>
         </div>
     );
 };

@@ -124,24 +124,24 @@ const users = [
 
 // Hàm main chứa TOÀN BỘ logic seed
 async function main() {
-    console.log('Start seeding ...');
-
-    // 0. XÓA DỮ LIỆU CŨ (theo thứ tự ngược lại để không lỗi khóa ngoại)
-    console.log('Deleting old data...');
-    // Xóa các bảng phụ thuộc trước
-    await prisma.route_stops.deleteMany();
-    await prisma.student_events.deleteMany();
-    await prisma.route_assignments.deleteMany();
-    await prisma.notifications.deleteMany();
-    await prisma.chatMessage.deleteMany();
-    await prisma.chat.deleteMany();
-    // Xóa các bảng chính
-    await prisma.routes.deleteMany();
-    await prisma.students.deleteMany();
-    await prisma.bus_stops.deleteMany();
-    await prisma.buses.deleteMany();
-    await prisma.users.deleteMany();
-    console.log('Old data deleted.');
+    // console.log('Start seeding ...');
+    //
+    // // 0. XÓA DỮ LIỆU CŨ (theo thứ tự ngược lại để không lỗi khóa ngoại)
+    // console.log('Deleting old data...');
+    // // Xóa các bảng phụ thuộc trước
+    // await prisma.route_stops.deleteMany();
+    // await prisma.student_events.deleteMany();
+    // await prisma.route_assignments.deleteMany();
+    // await prisma.notifications.deleteMany();
+    // await prisma.chatMessage.deleteMany();
+    // await prisma.chat.deleteMany();
+    // // Xóa các bảng chính
+    // await prisma.routes.deleteMany();
+    // await prisma.students.deleteMany();
+    // await prisma.bus_stops.deleteMany();
+    // await prisma.buses.deleteMany();
+    // await prisma.users.deleteMany();
+    // console.log('Old data deleted.');
 
     // 1. TẠO USERS (với bcrypt)
     console.log('Creating users...');
@@ -183,7 +183,7 @@ async function main() {
                 }
             )
         } else {
-            // Other parents: 1 student each
+
             studentData.push({
                 full_name:
                     index === 1
@@ -208,7 +208,7 @@ async function main() {
         }
     }
 
-    console.log('✅ Seeded students successfully!')
+    console.log('Seeded students successfully!')
     console.log('Users created.');
 
     // 2. TẠO CÁC TRẠM DỪNG (bus_stops)

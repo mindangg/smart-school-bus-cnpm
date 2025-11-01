@@ -1,10 +1,10 @@
 import ControlCards from '@/components/admin/controls/ControlCard'
-import { User, Users, UsersRound, MapPin } from 'lucide-react'
+import { User, Users, CarFront, MapPin } from 'lucide-react'
 
 const controlItems = [
     { 'title': 'Phụ Huynh', 'icon': <User />, 'href': 'admin/parents' },
-    { 'title': 'Tài Xế', 'icon': <Users />, 'href': 'admin/drivers' },
-    { 'title': 'Học Sinh', 'icon': <UsersRound />, 'href': 'admin/students' },
+    { 'title': 'Học Sinh', 'icon': <Users />, 'href': 'admin/students' },
+    { 'title': 'Tài Xế', 'icon': <CarFront />, 'href': 'admin/drivers' },
     { 'title': 'Tuyến Đường Đang Hoạt Động', 'icon': <MapPin />, 'href': 'admin/paths' }
 ]
 
