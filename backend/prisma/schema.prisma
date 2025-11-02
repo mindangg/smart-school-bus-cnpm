@@ -138,7 +138,7 @@ model users {
   updated_at        DateTime?           @default(now()) @db.Timestamp(0)
   chats1            chat[]              @relation("chatUser1")
   chats2            chat[]              @relation("chatUser2")
-  sentMessages      chatMessage[]       @relation("sentMessages")
+  sentMessages      chat_messages[]       @relation("sentMessages")
   notifications     notifications[]
   route_assignments route_assignments[]
   students          students[]
@@ -152,13 +152,13 @@ model chat {
   updated_at DateTime      @default(now()) @updatedAt
   user1      users         @relation("chatUser1", fields: [user1_id], references: [user_id])
   user2      users         @relation("chatUser2", fields: [user2_id], references: [user_id])
-  messages   chatMessage[]
+  messages   chat_messages[]
 
   @@unique([user1_id, user2_id])
   @@index([user2_id], map: "chat_user2_id_fkey")
 }
 
-model chatMessage {
+model chat_messages {
   message_id   Int      @id @default(autoincrement())
   chat_id      Int
   sender_id    Int
