@@ -1,7 +1,9 @@
 const routeRepository = require('../repository/RouteRepository');
 const axios = require('axios');
+const UserRepository = require("../repository/UserRepository");
+const studentRepository = require("../repository/StudentRepository");
 
-const getRouteById = async (routeId) => {
+const getRouteById1 = async (routeId) => {
     const route = await routeRepository.findRouteDetailsById(routeId);
 
     if (!route) {
@@ -64,9 +66,23 @@ const getAllSchedules = async () => {
         start_time: a.routes.start_time,
         status: a.is_active ? 'Sắp chạy' : 'Hoàn thành', 
     }));
-};
+}
+
+const getRoutes = async () => {
+    return routeRepository.getAllRoutes();
+}
+
+const getRouteById = async (id) => {
+    const route = await routeRepository.getRouteById(id)
+    if (!route)
+        throw new Error('No route')
+
+    return route
+}
 
 module.exports = {
-    getRouteById,
+    getRouteById1,
     getAllSchedules,
-};
+    getRoutes,
+    getRouteById
+}

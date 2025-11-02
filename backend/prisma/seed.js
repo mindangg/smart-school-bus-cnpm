@@ -4,7 +4,6 @@ const prisma = new PrismaClient();
 const profilePhotoUrl =
     'http://res.cloudinary.com/dunovasag/image/upload/v1761980382/khjzek0vqcokb8vslzon.jpg'
 
-// Dữ liệu users (đặt ở ngoài là đúng)
 const users = [
     // PARENTS
 
@@ -215,10 +214,11 @@ async function main() {
     console.log('Creating Bus Stops...');
 
     const busStopsData = [
-        { address: 'Trần Hưng Đạo - Nguyễn Văn Cừ', latitude: 10.762145, longitude: 106.686036 },
-        { address: 'Đại học Sài Gòn (Cổng 1)', latitude: 10.759948, longitude: 106.682330 },
-        { address: 'Công viên 23/9 (Trạm điều hành)', latitude: 10.769498, longitude: 106.692290 },
-        { address: 'Chợ Bến Thành', latitude: 10.772583, longitude: 106.697967 },
+        { address: 'Trần Hưng Đạo - Nguyễn Văn Cừ', longitude: 106.686036, latitude: 10.762145 },
+        { address: 'Đại học Sài Gòn (Cổng 1)', longitude: 106.682330, latitude: 10.759948 },
+        { address: 'Chợ Bến Thành', longitude: 106.697967, latitude: 10.772583 },
+        { address: 'Công viên 23/9 (Trạm điều hành)', longitude: 106.692290, latitude: 10.769498 },
+
     ]
     const [stop1, stop2, stop3, stop4] = await Promise.all(
         busStopsData.map(stop => prisma.bus_stops.create({ data: stop }))
@@ -286,12 +286,12 @@ async function main() {
     const routesData = [
         {
             route_type: 'MORNING',
-            start_time: '06:30:00',
+            start_time: '06:30',
             bus_id: bus1.bus_id,
         },
         {
             route_type: 'EVENING',
-            start_time: '17:00:00',
+            start_time: '17:00',
             bus_id: bus1.bus_id,
         },
     ]
@@ -309,15 +309,15 @@ async function main() {
     // Sáng
     await prisma.route_stops.createMany({
       data: [
-        { route_id: morningRoute1.route_id, stop_id: stop1.stop_id, stop_order: 1, stop_type: 'PICKUP' },
-        { route_id: morningRoute1.route_id, stop_id: stop2.stop_id, stop_order: 2, stop_type: 'DROPOFF' },
+        { route_id: morningRoute1.route_id, stop_id: stop1.stop_id, stop_order: 1 },
+        { route_id: morningRoute1.route_id, stop_id: stop2.stop_id, stop_order: 2 },
       ],
     })
     // Chiều
     await prisma.route_stops.createMany({
       data: [
-        { route_id: eveningRoute1.route_id, stop_id: stop2.stop_id, stop_order: 1, stop_type: 'PICKUP' },
-        { route_id: eveningRoute1.route_id, stop_id: stop1.stop_id, stop_order: 2, stop_type: 'DROPOFF' },
+        { route_id: eveningRoute1.route_id, stop_id: stop2.stop_id, stop_order: 1 },
+        { route_id: eveningRoute1.route_id, stop_id: stop1.stop_id, stop_order: 2 },
       ],
     })
     console.log('Stops assigned to routes.')
@@ -326,7 +326,7 @@ async function main() {
     console.log('Creating Route Assignments...')
 
     // 6a. Lấy ID của tài xế và xe buýt mà chúng ta đã tạo
-    // (Chúng ta đã có sẵn bus1, morningRoute, eveningRoute từ các bước trên)
+    // (Chúng ta đã có sẵn bus1, morningRoute1, eveningRoute từ các bước trên)
     
     // Tìm tài xế chúng ta đã tạo ở đầu file seed
     const driver1 = await prisma.users.findUnique({
@@ -355,14 +355,14 @@ async function main() {
         data: [
             // --- Lịch trình hôm nay ---
             {
-                route_id: morningRoute.route_id, // Tuyến sáng
+                route_id: morningRoute1.route_id, // Tuyến sáng
                 driver_id: driver1.user_id,      // Tài xế 1
                 bus_id: bus1.bus_id,             // Xe 1
                 assignment_date: today,          // Ngày hôm nay
                 is_active: true
             },
             {
-                route_id: eveningRoute.route_id, // Tuyến chiều
+                route_id: eveningRoute1.route_id, // Tuyến chiều
                 driver_id: driver1.user_id,      // Tài xế 1
                 bus_id: bus1.bus_id,             // Xe 1
                 assignment_date: today,          // Ngày hôm nay
@@ -371,14 +371,14 @@ async function main() {
 
             // --- Lịch trình ngày mai ---
             {
-                route_id: morningRoute.route_id, // Tuyến sáng
+                route_id: morningRoute1.route_id, // Tuyến sáng
                 driver_id: driver2.user_id,      // Tài xế 2
                 bus_id: bus1.bus_id,             // Xe 1
                 assignment_date: tomorrow,       // Ngày mai
                 is_active: true
             },
             {
-                route_id: eveningRoute.route_id, // Tuyến chiều
+                route_id: eveningRoute1.route_id, // Tuyến chiều
                 driver_id: driver2.user_id,      // Tài xế 2
                 bus_id: bus1.bus_id,             // Xe 1
                 assignment_date: tomorrow,       // Ngày mai

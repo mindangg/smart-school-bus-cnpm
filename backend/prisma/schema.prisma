@@ -31,11 +31,10 @@ model buses {
 }
 
 model route_stops {
-  route_stop_id Int     @id @default(autoincrement())
+  route_stop_id Int @id @default(autoincrement())
   route_id      Int
   stop_id       Int
   stop_order    Int
-  stop_type     String? @db.VarChar(20)
 
   route routes    @relation(fields: [route_id], references: [route_id], onDelete: Cascade)
   stop  bus_stops @relation(fields: [stop_id], references: [stop_id], onDelete: Cascade)

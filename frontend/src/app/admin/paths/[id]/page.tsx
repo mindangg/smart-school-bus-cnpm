@@ -1,9 +1,16 @@
-import React from 'react'
+import React from 'react';
+import PathRouteDetails from "@/components/admin/paths/PathRouteDetails";
+import {createServerApi} from "@/lib/axiosServer";
 
-const page = () => {
+const Page = async ({ params } : any) => {
+    const { id } = await params
+    const api = await createServerApi()
+    const res =  await api.get(`routes/${id}`)
+    const route = res.data
+
     return (
-        <div>page</div>
+        <PathRouteDetails pathRoute={route} />
     )
 }
 
-export default page
+export default Page;

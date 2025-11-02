@@ -1,33 +1,62 @@
 const routeService = require('../service/RouteService')
 const axios = require('axios')
+const userService = require("../service/UserService")
+const studentService = require("../service/StudentService")
 
 const getRouteDetails = async (req, res) => {
     try{
-        const routeId = parseInt(req.params.id);
+        const routeId = parseInt(req.params.id)
         if(isNaN(routeId)){
-            return res.status(400).json({ error: 'Invalid route ID' });
+            return res.status(400).json({ error: 'Invalid route ID' })
         }
 
-        const routeData = await routeService.getRouteById(routeId);
+        const routeData = await routeService.getRouteById1(routeId)
 
         if(!routeData){
-            return res.status(404).json({ error: 'Route not found' });
+            return res.status(404).json({ error: 'Route not found' })
         }
-        res.json(routeData);
+        res.json(routeData)
     }
     catch (error) {
-        console.error('Error fetching route details:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error fetching route details:', error)
+        res.status(500).json({ error: 'Internal server error' })
     }
 }
 
 const getAllSchedules = async (req, res) => {
     try {
-        const schedules = await routeService.getAllSchedules();
-        res.json(schedules);
+        const schedules = await routeService.getAllSchedules()
+        res.json(schedules)
     } catch (error) {
-        console.error('Error fetching schedules:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error fetching schedules:', error)
+        res.status(500).json({ error: 'Internal server error' })
+    }
+}
+
+const getRoutes = async (req, res) => {
+    try {
+        const routes = await routeService.getRoutes()
+        res.status(200).json(routes)
+    }
+    catch (error) {
+        res.status(500).json({message: error.message})
+    }
+}
+
+const getRouteById = async (req, res) => {
+    try {
+        const { id } = req.params
+
+        if (!id) {
+            res.status(400).json({ message: 'ID is required' })
+            return
+        }
+
+        const route = await routeService.getRouteById(Number(id))
+        res.status(200).json(route)
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message })
     }
 }
 
@@ -38,21 +67,27 @@ const getRouteDirection = async (req, res) => {
         return res.status(400).json({ error: "Missing start or end coordinates" })
     }
 
+    const [startLng, startLat] = start.split(',').map(Number)
+    const [endLng, endLat] = end.split(',').map(Number)
+
+    if ([startLat, startLng, endLat, endLng].some(isNaN)) {
+        return res.status(400).json({ error: "Invalid coordinate format" })
+    }
+
     try {
-        const response = await axios.get(
-            `https://api.mapbox.com/directions/v5/mapbox/driving/${start};${end}.json`,
-            {
-                params: {
-                    geometries: "geojson",
-                    access_token: process.env.MAPBOX_TOKEN,
-                },
-            }
-        )
+        const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${startLng},${startLat};${endLng},${endLat}`;
+
+        const response = await axios.get(url, {
+            params: {
+                geometries: "geojson",
+                access_token: process.env.MAPBOX_TOKEN,
+            },
+        })
 
         res.json(response.data)
     }
     catch (error) {
-        console.error("Mapbox Directions API error:", error.message)
+        console.error("Mapbox Directions API error:", error.response?.data || error.message)
         res.status(500).json({ error: "Failed to fetch directions" })
     }
 }
@@ -61,6 +96,8 @@ const getRouteDirection = async (req, res) => {
 module.exports = {
     getRouteDetails,
     getAllSchedules,
+    getRoutes,
+    getRouteById,
     getRouteDirection
 }
 
