@@ -1,25 +1,33 @@
-import LiveTrackingMap from '@/components/parent/LiveTrackingMap'
 import {BellRing, Bus, MapPin} from 'lucide-react'
+import BusRoutesMap from "@/components/Map/BusRoutesMap";
+import {createServerApi} from "@/lib/axiosServer";
 
-const page = () => {
+const page = async ({ params }: any) => {
+    const { id }= params
+    const api = await createServerApi()
+
+    const res = await api.get(`/students/${id}`)
+    const student = res.data
+
     return (
         <main className='flex gap-7 w-full'>
             <section className='w-3/4 border border-gray-200 shadow-xl rounded-2xl'>
                 <div className='flex flex-col items-center'>
                     <div className='flex gap-3 items-center mt-2'>
-                        <MapPin />
+                        <MapPin size={24} className="text-blue-600"  />
                         <h1 className='text-xl font-bold'>Theo Dõi Thời Gian Thực</h1>
                     </div>
                     <p>Điều Khiển</p>
                 </div>
                 <div className="relative w-full h-full">
-                    <LiveTrackingMap/>
+                    {/*<LiveTrackingMap/>*/}
+                    <BusRoutesMap />
                 </div>
             </section>
             <section className='w-1/4 mr-10 flex flex-col gap-7'>
                 <div className='flex flex-col gap-3 bg-white border border-gray-200 shadow-md rounded-xl p-5'>
                     <h2 className='font-bold border-b border-gray-400 pb-3'>Trẻ & Thông tin Xe Buýt</h2>
-                    <p>Tên</p>
+                    <p>Tên: <span className='font-semibold'>{student.full_name}</span></p>
                     <p>Xe buýt số</p>
                     <p>Trạng thái</p>
                     <p>Địa điểm</p>

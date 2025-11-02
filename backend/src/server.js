@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser')
 
 const UserRoute = require('./route/UserRoute')
 const StudentRoute = require('./route/StudentRoute')
-const routeRouter = require('./route/RouteRoute');
+const RouteRoute = require('./route/RouteRoute');
 
 const app = express()
 
@@ -26,7 +26,7 @@ app.use(express.json())
 
 app.use('/api/users', UserRoute)
 app.use('/api/students', StudentRoute)
-app.use('/api/routes', routeRouter);
+app.use('/api/routes', RouteRoute);
 
 app.get('/', (req, res) => {
     res.send('Welcome to my app')

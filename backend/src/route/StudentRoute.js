@@ -1,30 +1,22 @@
 const express = require('express')
 
 const { requireAuth } = require ('../middleware/requireAuth')
-
-const {
-    getStudents,
-    getStudentsByParent,
-    getStudentById,
-    createStudent,
-    deleteStudent,
-    updateStudent
-} = require('../controller/StudentController')
+const studentController = require('../controller/StudentController')
 
 const router = express.Router();
 
 router.use(requireAuth)
 
-router.get('/', getStudents)
+router.get('/', studentController.getStudents)
 
-router.get('/parent', getStudentsByParent)
+router.get('/parent', studentController.getStudentsByParent)
 
-router.get('/:id', getStudentById)
+router.get('/:id', studentController.getStudentById)
 
-router.post('/', createStudent)
+router.post('/', studentController.createStudent)
 
-router.delete('/:id', deleteStudent)
+router.delete('/:id', studentController.deleteStudent)
 
-router.put('/:id', updateStudent)
+router.put('/:id', studentController.updateStudent)
 
 module.exports = router

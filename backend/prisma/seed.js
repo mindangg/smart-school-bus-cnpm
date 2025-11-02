@@ -212,101 +212,118 @@ async function main() {
     console.log('Users created.');
 
     // 2. TẠO CÁC TRẠM DỪNG (bus_stops)
-    console.log("Creating Bus Stops...");
-    const stop1 = await prisma.bus_stops.create({
-      data: {
-        address: "Đại học Sài Gòn (Cổng 1)",
-        latitude: 10.759948,
-        longitude: 106.682330,
-      },
-    });
-    const stop2 = await prisma.bus_stops.create({
-      data: {
-        address: "Trần Hưng Đạo - Nguyễn Văn Cừ",
-        latitude: 10.762145,
-        longitude: 106.686036,
-      },
-    });
-    const stop3 = await prisma.bus_stops.create({
-      data: {
-        address: "Công viên 23/9 (Trạm điều hành)",
-        latitude: 10.769498,
-        longitude: 106.692290,
-      },
-    });
-    const stop4 = await prisma.bus_stops.create({
-      data: {
-        address: "Chợ Bến Thành",
-        latitude: 10.772583,
-        longitude: 106.697967,
-      },
-    });
-    console.log("Bus Stops created.");
+    console.log('Creating Bus Stops...');
+
+    const busStopsData = [
+        { address: 'Trần Hưng Đạo - Nguyễn Văn Cừ', latitude: 10.762145, longitude: 106.686036 },
+        { address: 'Đại học Sài Gòn (Cổng 1)', latitude: 10.759948, longitude: 106.682330 },
+        { address: 'Công viên 23/9 (Trạm điều hành)', latitude: 10.769498, longitude: 106.692290 },
+        { address: 'Chợ Bến Thành', latitude: 10.772583, longitude: 106.697967 },
+    ]
+    const [stop1, stop2, stop3, stop4] = await Promise.all(
+        busStopsData.map(stop => prisma.bus_stops.create({ data: stop }))
+    )
+
+    console.log('Bus Stops created.')
+    // Dynamically assign to variables stop1, stop2, etc.
+    // const createdStops = await Promise.all(
+    //     busStopsData.map(stop => prisma.bus_stops.create({ data: stop }))
+    // )
+    // const stops = {};
+    // createdStops.forEach((stop, index) => {
+    //     stops[`stop${index + 1}`] = stop;
+    // })
 
     // 3. TẠO XE BUÝT (buses)
-    console.log("Creating Buses...");
-    const bus1 = await prisma.buses.create({
-      data: {
-        bus_number: "SGU-001",
-        license_plate: "51B-12345",
-        capacity: 30,
-        model: "Mercedes-Benz Sprinter",
-        status: "ACTIVE",
-      },
-    });
-    const bus2 = await prisma.buses.create({
-      data: {
-        bus_number: "SGU-002",
-        license_plate: "51B-67890",
-        capacity: 30,
-        model: "Ford Transit",
-        status: "MAINTENANCE",
-      },
-    });
-    console.log("Buses created.");
+    console.log('Creating Buses...');
+
+    const busesData = [
+        {
+            bus_number: 'SGU-001',
+            license_plate: '51B-12345',
+            capacity: 30,
+            model: 'Mercedes-Benz Sprinter',
+            status: 'ACTIVE',
+        },
+        {
+            bus_number: 'SGU-002',
+            license_plate: '51B-67890',
+            capacity: 30,
+            model: 'Ford Transit',
+            status: 'MAINTENANCE',
+        },
+        {
+            bus_number: 'SGU-003',
+            license_plate: '51B-54321',
+            capacity: 35,
+            model: 'Mercedes-Benz Sprinter',
+            status: 'ACTIVE',
+        },
+        {
+            bus_number: 'SGU-004',
+            license_plate: '51B-98765',
+            capacity: 25,
+            model: 'Toyota Coaster',
+            status: 'ACTIVE',
+        },
+    ]
+    const [bus1, bus2, bus3, bus4] = await Promise.all(
+        busesData.map(bus => prisma.buses.create({ data: bus }))
+    )
+
+    console.log('Buses created.')
+
+    // const createdBuses = await Promise.all(
+    //     busesData.map(bus => prisma.buses.create({ data: bus }))
+    // )
+    // const buses = {};
+    // createdBuses.forEach((bus, index) => {
+    //     buses[`bus${index + 1}`] = bus;
+    // })
 
     // 4. TẠO TUYẾN ĐƯỜNG (routes)
-    console.log("Creating Routes...");
-    const morningRoute = await prisma.routes.create({
-      data: {
-        route_type: "MORNING",
-        start_time: "06:30:00",
-        bus_id: bus1.bus_id, // Gán xe SGU-001
-      },
-    });
-    const eveningRoute = await prisma.routes.create({
-      data: {
-        route_type: "EVENING",
-        start_time: "16:30:00",
-        bus_id: bus1.bus_id, // Gán xe SGU-001
-      },
-    });
-    console.log("Routes created.");
+    console.log('Creating Routes...')
+    const routesData = [
+        {
+            route_type: 'MORNING',
+            start_time: '06:30:00',
+            bus_id: bus1.bus_id,
+        },
+        {
+            route_type: 'EVENING',
+            start_time: '17:00:00',
+            bus_id: bus1.bus_id,
+        },
+    ]
+    const [morningRoute1, eveningRoute1] = await Promise.all(
+        routesData.map(stop => prisma.routes.create({ data: stop }))
+    )
+    // const createdRoutes = await Promise.all(
+    //     routesData.map(route => prisma.routes.create({ data: route }))
+    // )
+
+    console.log('Routes created.');
 
     // 5. GÁN TRẠM DỪNG VÀO TUYẾN (route_stops)
-    console.log("Assigning stops to routes...");
-    // Gán trạm cho tuyến Sáng
+    console.log('Assigning stops to routes...')
+    // Sáng
     await prisma.route_stops.createMany({
       data: [
-        { route_id: morningRoute.route_id, stop_id: stop1.stop_id, stop_order: 1 },
-        { route_id: morningRoute.route_id, stop_id: stop2.stop_id, stop_order: 2 },
-        { route_id: morningRoute.route_id, stop_id: stop3.stop_id, stop_order: 3 },
-        { route_id: morningRoute.route_id, stop_id: stop4.stop_id, stop_order: 4 },
+        { route_id: morningRoute1.route_id, stop_id: stop1.stop_id, stop_order: 1, stop_type: 'PICKUP' },
+        { route_id: morningRoute1.route_id, stop_id: stop2.stop_id, stop_order: 2, stop_type: 'DROPOFF' },
       ],
-    });
-    // Gán trạm cho tuyến Chiều (Thứ tự ngược lại)
+    })
+    // Chiều
     await prisma.route_stops.createMany({
       data: [
-        { route_id: eveningRoute.route_id, stop_id: stop4.stop_id, stop_order: 1 },
-        { route_id: eveningRoute.route_id, stop_id: stop3.stop_id, stop_order: 2 },
-        { route_id: eveningRoute.route_id, stop_id: stop2.stop_id, stop_order: 3 },
-        { route_id: eveningRoute.route_id, stop_id: stop1.stop_id, stop_order: 4 },
+        { route_id: eveningRoute1.route_id, stop_id: stop2.stop_id, stop_order: 1, stop_type: 'PICKUP' },
+        { route_id: eveningRoute1.route_id, stop_id: stop1.stop_id, stop_order: 2, stop_type: 'DROPOFF' },
       ],
-    });
-    console.log("Stops assigned to routes.");
+    })
+    console.log('Stops assigned to routes.')
 
     // 6. TẠO PHÂN CÔNG LỊCH TRÌNH (route_assignments)
-    console.log("Creating Route Assignments...");
+    console.log('Creating Route Assignments...')
 
     // 6a. Lấy ID của tài xế và xe buýt mà chúng ta đã tạo
     // (Chúng ta đã có sẵn bus1, morningRoute, eveningRoute từ các bước trên)
@@ -320,7 +337,7 @@ async function main() {
     });
 
     if (!driver1 || !driver2) {
-        console.error("Không thể tìm thấy driver1@gmail.com hoặc driver2@gmail.com. Vui lòng kiểm tra lại seed data users.");
+        console.error('Không thể tìm thấy driver1@gmail.com hoặc driver2@gmail.com. Vui lòng kiểm tra lại seed data users.');
         return; // Dừng seed nếu không có tài xế
     }
 
@@ -370,12 +387,11 @@ async function main() {
         ]
     });
     
-    console.log("Route Assignments created.");
+    console.log('Route Assignments created.');
 
     console.log('Seeding finished.');
 }
 
-// Gọi hàm main để thực thi
 main()
     .catch(e => {
         console.error(e);

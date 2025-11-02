@@ -80,6 +80,17 @@ CREATE TABLE route_assignments
     UNIQUE KEY uniq_route_driver_date (route_id, driver_id, assignment_date)
 );
 
+CREATE TABLE route_stops (
+     route_stop_id INT AUTO_INCREMENT PRIMARY KEY,
+     route_id INT NOT NULL,
+     stop_id INT NOT NULL,
+     stop_order INT NOT NULL,
+     stop_type VARCHAR(20),
+     UNIQUE (route_id, stop_id),
+     UNIQUE (route_id, stop_order),
+     FOREIGN KEY (route_id) REFERENCES routes(route_id) ON DELETE CASCADE,
+     FOREIGN KEY (stop_id) REFERENCES bus_stops(stop_id) ON DELETE CASCADE
+);
 
 CREATE TABLE student_events
 (
