@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import RouteMap from "./RouteMap"; // <-- Component bản đồ (sẽ tạo tiếp)
+import RouteMap from "./RouteMap"; 
 
 interface RouteDetailModalProps {
     routeId: number | null;
@@ -30,7 +30,7 @@ const RouteDetailModal = ({ routeId, isOpen, onClose }: RouteDetailModalProps) =
             const fetchRouteDetails = async () => {
                 setIsLoading(true);
                 try {
-                    const res = await fetch(`http://localhost:4000/api/routes/${routeId}`);
+                    const res = await fetch(`http://localhost:4000/api/route_assignment/${routeId}`);
                     const data = await res.json();
                     setRouteDetails(data);
                 } catch (error) {
