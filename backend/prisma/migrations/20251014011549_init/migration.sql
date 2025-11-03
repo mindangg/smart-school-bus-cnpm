@@ -7,20 +7,7 @@
   - You are about to drop the `Student` table. If the table is not empty, all the data it contains will be lost.
 
 */
--- DropForeignKey
-ALTER TABLE `Student` DROP FOREIGN KEY `Student_parentId_fkey`;
-
--- DropTable
-DROP TABLE `Admin`;
-
--- DropTable
-DROP TABLE `Driver`;
-
--- DropTable
-DROP TABLE `Parent`;
-
--- DropTable
-DROP TABLE `Student`;
+DROP TABLE IF EXISTS bus_stops, buses, notifications, route_assignments, routes, student_events, students, users;
 
 -- CreateTable
 CREATE TABLE `bus_stops` (

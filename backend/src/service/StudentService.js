@@ -1,7 +1,7 @@
-const StudentRepository = require('../repository/StudentRepository')
+const studentRepository = require('../repository/StudentRepository')
 
 const createStudent = async (data) => {
-    const student = await StudentRepository.createStudent(data)
+    const student = await studentRepository.createStudent(data)
 
     if (!student)
         throw new Error('Can not create')
@@ -10,11 +10,15 @@ const createStudent = async (data) => {
 }
 
 const getStudents = async () => {
-    return await StudentRepository.getStudents()
+    return studentRepository.getStudents();
+}
+
+const getStudentsByParent = async (id) => {
+    return studentRepository.getStudentsByParent(id);
 }
 
 const getStudentById = async (id) => {
-    const student = await StudentRepository.getStudentById(id)
+    const student = await studentRepository.getStudentById(id)
     if (!student)
         throw new Error('No student')
 
@@ -22,7 +26,7 @@ const getStudentById = async (id) => {
 }
 
 const updateStudent = async (id, data) => {
-    const student = await StudentRepository.updateStudent(id, data)
+    const student = await studentRepository.updateStudent(id, data)
     if (!student)
         throw new Error('No student')
 
@@ -30,11 +34,12 @@ const updateStudent = async (id, data) => {
 }
 
 const deleteStudent = async (id) => {
-    return await StudentRepository.deleteStudent(id)
+    return studentRepository.deleteStudent(id);
 }
 
 module.exports = {
     getStudents,
+    getStudentsByParent,
     getStudentById,
     createStudent,
     deleteStudent,

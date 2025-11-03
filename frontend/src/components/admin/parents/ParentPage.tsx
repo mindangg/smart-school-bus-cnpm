@@ -67,7 +67,7 @@ const ParentPage = ({parents} : any) => {
                     </div>
 
                     {parents?.length > 0 ? (
-                        parents.map(parent => (
+                        parents.map((parent : any) => (
                             <ParentCard
                                 key={parent.user_id}
                                 parent={parent}

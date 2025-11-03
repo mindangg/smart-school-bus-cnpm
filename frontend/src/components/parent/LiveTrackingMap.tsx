@@ -1,10 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import { MapPin, Bus } from 'lucide-react';
-import Map, { Marker, NavigationControl } from 'react-map-gl';
-import { de } from 'zod/v4/locales';
+import React, {useState} from 'react';
+import {Bus, MapPin} from 'lucide-react';
+import Map, {Marker, NavigationControl} from 'react-map-gl';
 
 export default function LiveTrackingMap() {
     const [isMapLoaded, setIsMapLoaded] = useState(false);

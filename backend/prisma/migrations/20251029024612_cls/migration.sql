@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS bus_stops, buses, notifications, route_assignments, routes, student_events, students, users;
 -- CreateTable
 CREATE TABLE `bus_stops` (
     `stop_id` INTEGER NOT NULL AUTO_INCREMENT,

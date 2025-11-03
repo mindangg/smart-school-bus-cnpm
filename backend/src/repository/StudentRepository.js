@@ -1,25 +1,6 @@
 const { PrismaClient } = require('@prisma/client')
+const { studentGetSelect } = require('../dto/Student')
 const prisma = new PrismaClient()
-
-const mapStudent = (student) => ({
-    student_id: student.student_id,
-    full_name: student.full_name,
-    profile_photo_url: student.profile_photo_url ?? undefined,
-    is_active: student.is_active,
-
-    // ...(student.stop_id !== null && student.stop_id !== undefined
-    // ? { stop_id: student.stop_id }
-    // : {}),
-    // ...(student.users !== null && student.stop_id !== undefined
-    // ? { stop_id: student.stop_id }
-    // : {}),
-    // ...(student.stop_id !== null && student.stop_id !== undefined
-    // ? { stop_id: student.stop_id }
-    // : {}),
-    // ...(student.stop_id !== null && student.stop_id !== undefined
-    // ? { stop_id: student.stop_id }
-    // : {})
-})
 
 const createStudent = async (data) => {
     const student = await prisma.students.create({ data })
@@ -28,29 +9,34 @@ const createStudent = async (data) => {
 }
 
 const getStudents = async () => {
-    const students = await prisma.students.findMany()
+    return prisma.students.findMany({
+        select: studentGetSelect
+    });
+}
 
-    return students ? students.map(mapStudent) : []
+const getStudentsByParent = async (id) => {
+    return prisma.students.findMany({
+        where: {parent_id: id},
+        select: studentGetSelect
+    });
 }
 
 const getStudentById = async (student_id) => {
-    const student = await prisma.students.findUnique({
-        where: { student_id }
-    })
-
-    return student ? mapStudent(student) : null
+    return prisma.students.findUnique({
+        where: {student_id},
+        select: studentGetSelect
+    });
 }
 
 const updateStudent = async (
     student_id,
     data
 ) => {
-    const student = await prisma.students.update({
+    return  prisma.students.update({
         where: { student_id },
-        data
+        data,
+        select: studentGetSelect
     })
-
-    return student ? mapStudent(student) : null
 }
 
 const deleteStudent = (student_id) => {
@@ -61,6 +47,7 @@ const deleteStudent = (student_id) => {
 
 module.exports = {
     getStudents,
+    getStudentsByParent,
     getStudentById,
     createStudent,
     deleteStudent,

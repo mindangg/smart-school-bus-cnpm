@@ -1,0 +1,14 @@
+### Upload image (unsigned)
+POST https://api.cloudinary.com/v1_1/dunovasag/image/upload
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="example.jpg"
+Content-Type: image/png
+
+C:/Dang/Photo/bean.png/
+--boundary
+Content-Disposition: form-data; name="upload_preset"
+
+mindang-upload
+--boundary

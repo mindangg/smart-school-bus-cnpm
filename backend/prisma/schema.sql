@@ -63,7 +63,6 @@ CREATE TABLE routes
     FOREIGN KEY (bus_id) REFERENCES buses (bus_id) ON DELETE SET NULL
 );
 
-
 CREATE TABLE route_assignments
 (
     assignment_id   INT PRIMARY KEY AUTO_INCREMENT,

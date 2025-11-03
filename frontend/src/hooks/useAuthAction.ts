@@ -14,7 +14,7 @@ export const useAuthAction = () => {
         try {
             dispatch({ type: 'LOADING', payload: true })
 
-            const res = await api.post('users/signup', {
+            const res = await api.post('/api/users/signup', {
                 email: email,
                 password: password,
                 role: 'Parent'
@@ -38,14 +38,25 @@ export const useAuthAction = () => {
         try {
             dispatch({ type: 'LOADING' })
 
-            const res = await api.post('users/login', {
+            const res = await api.post('/api/users/login', {
                 email: email,
                 password: password,
             })
 
-            toast.success('Đăng nhập thành công.')
             dispatch({ type: 'LOGIN', payload: res.data.user })
+            switch (res.data.user.role) {
+                case 'PARENT':
+                    router.replace('/parent')
+                    break
+                case 'DRIVER':
+                    router.replace('/driver')
+                    break
+                case 'ADMIN':
+                    router.replace('/admin')
+                    break
+            }
 
+            toast.success('Đăng nhập thành công.')
         }
         catch (err: any) {
             const msg = err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.'
@@ -58,7 +69,7 @@ export const useAuthAction = () => {
 
     const logout = async () => {
         try {
-            await api.post('users/logout')
+            await api.post('/api/users/logout')
             toast.success('Hẹn gặp lại.')
             dispatch({ type: 'LOGOUT' })
             router.replace('/')
