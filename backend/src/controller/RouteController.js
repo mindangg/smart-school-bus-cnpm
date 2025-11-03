@@ -92,12 +92,63 @@ const getRouteDirection = async (req, res) => {
     }
 }
 
+const getRouteDirectionFull = async (req, res) => {
+    const { start, end } = req.query
+
+    if (!start || !end) {
+        return res.status(400).json({ error: "Missing start or end coordinates" })
+    }
+
+    const [startLng, startLat] = start.split(',').map(Number)
+    const [endLng, endLat] = end.split(',').map(Number)
+
+    if ([startLat, startLng, endLat, endLng].some(isNaN)) {
+        return res.status(400).json({ error: "Invalid coordinate format" })
+    }
+
+    try {
+        const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${startLng},${startLat};${endLng},${endLat}`;
+
+        const response = await axios.get(url, {
+            params: {
+                alternatives: true,
+                geometries: "geojson",
+                overview: "full",
+                steps: true,
+                language: "vi",
+                access_token: process.env.MAPBOX_TOKEN,
+            },
+        })
+
+        const route = response.data.routes[0]
+        const geometry = route.geometry
+        const steps = route.legs.flatMap((leg) => leg.steps)
+        const distance = route.distance
+        const duration = route.duration
+
+        res.json({
+            geometry,
+            steps,
+            distance,
+            duration,
+            waypoints: response.data.waypoints,
+        })
+
+        // res.json(response.data)
+    }
+    catch (error) {
+        console.error("Mapbox Directions API error:", error.response?.data || error.message)
+        res.status(500).json({ error: "Failed to fetch directions" })
+    }
+}
+
 
 module.exports = {
     getRouteDetails,
     getAllSchedules,
     getRoutes,
     getRouteById,
-    getRouteDirection
+    getRouteDirection,
+    getRouteDirectionFull
 }
 

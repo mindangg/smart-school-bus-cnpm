@@ -1,20 +1,21 @@
-'use client'
+"use client"
 
-import React, {useEffect, useRef, useState} from 'react'
-import {Bus, MapPin} from 'lucide-react'
-import Map, {Layer, Marker, NavigationControl, Source} from 'react-map-gl'
-import api from "@/lib/axios";
+import React, {useEffect, useRef, useState} from 'react';
 import mapboxgl from "mapbox-gl";
-import DriverTrackingMap from "@/components/driver/DriverTrackingMap";
+import api from "@/lib/axios";
+import Map, {Layer, Marker, NavigationControl, Source} from "react-map-gl";
+import {ArrowRight, Bus, MapPin} from "lucide-react";
 
-const LiveTrackingMap = ({ pathRoute } : any) => {
+const DriverTrackingMap = ({pathRoute}: any) => {
     const mapRef = useRef<any>(null)
-    const busMarkerRef = useRef<mapboxgl.Marker | null>(null)
 
     const [isMapLoaded, setIsMapLoaded] = useState(false)
     const [route, setRoute] = useState<any>(null)
 
-    const [busPos, setBusPos] = useState<[number, number] | null>(null)
+    const [steps, setSteps] = useState<any[]>([]);
+    const [distance, setDistance] = useState<number>(0);
+    const [duration, setDuration] = useState<number>(0);
+    const [busPos, setBusPos] = useState<[number, number] | null>(null);
 
     const start = {
         lng: pathRoute.route_stops[0].stop.longitude,
@@ -29,7 +30,7 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
         const fetchRoute = async () => {
             try {
                 const res = await api.get(
-                    `routes/direction`,
+                    `routes/direction_full`,
                     {
                         params: {
                             start: `${start.lng},${start.lat}`,
@@ -37,8 +38,13 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
                         }
                     }
                 )
-                const geometry = res.data.routes[0].geometry
+
+                const { geometry, steps, distance, duration } = res.data
+
                 setRoute(geometry)
+                setSteps(steps)
+                setDistance(distance)
+                setDuration(duration)
 
                 if (mapRef.current && geometry.coordinates.length > 0) {
                     const bounds = new mapboxgl.LngLatBounds()
@@ -70,16 +76,15 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
                 if (index >= route.coordinates.length - 1)
                     return
 
-                const [lng1, lat1] = route.coordinates[index]
                 const [lng2, lat2] = route.coordinates[index + 1]
 
                 setBusPos([lng2, lat2])
                 index += 1
                 setTimeout(moveBus, speed)
-            };
+            }
 
-            moveBus();
-        };
+            moveBus()
+        }
 
         map.once('moveend', startMovingBus)
 
@@ -127,7 +132,7 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
                             <div className='flex flex-col items-center'>
                                 <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
                                     <p className='text-sm font-semibold text-gray-900'>
-                                        Xe buyst
+                                        Xe buýt
                                     </p>
                                     <p className='text-xs text-gray-600'>Bus: 101</p>
                                 </div>
@@ -165,8 +170,29 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
                     </div>
                 )}
             </div>
-        </div>
-  )
-}
 
-export default LiveTrackingMap;
+            {steps?.length > 0 && (
+                <div className="mt-6 border-t pt-4 flex flex-col gap-2">
+                    <h3 className="text-lg font-semibold">Hướng dẫn lộ trình</h3>
+                    <p className="">
+                        Khoảng cách: {(distance / 1000).toFixed(2)} km
+                    </p>
+                    <p>Thời gian ước tính {(duration / 60).toFixed(1)} phút</p>
+                    <div className="max-h-[200px] overflow-y-auto space-y-2">
+                        {steps.map((step, i) => (
+                            <div
+                                key={i}
+                                className="flex items-start space-x-2 border-l-4 border-blue-500 pl-3"
+                            >
+                                <ArrowRight className="w-4 h-4 mt-1 text-blue-500" />
+                                <p className="text-sm text-gray-700">{step.maneuver.instruction}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default DriverTrackingMap;
