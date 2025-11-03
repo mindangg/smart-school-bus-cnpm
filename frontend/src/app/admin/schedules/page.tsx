@@ -28,7 +28,7 @@ const Page = () => {
         const fetchSchedules = async () => {
             try {
                 // Giả sử server backend chạy ở port 8000
-                const res = await fetch('http://localhost:4000/api/routes'); 
+                const res = await fetch('http://localhost:4000/api/route_assignment'); 
                 const data = await res.json();
                 setSchedules(data);
             } catch (error) {
