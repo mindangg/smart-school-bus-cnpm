@@ -34,7 +34,7 @@ const updateStudent = async (id, data) => {
 }
 
 const deleteStudent = async (id) => {
-    return studentRepository.deleteStudent(id);
+    return studentRepository.deleteStudent(id)
 }
 
 module.exports = {

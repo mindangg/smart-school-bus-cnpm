@@ -8,30 +8,14 @@ datasource db {
 }
 
 model bus_stops {
-  stop_id   Int        @id @default(autoincrement())
-  latitude  Decimal?   @db.Decimal(11, 8)
-  longitude Decimal?   @db.Decimal(11, 8)
-  address   String?    @db.VarChar(255)
-  is_active Boolean?   @default(true)
-  students  students[]
+  stop_id     Int           @id @default(autoincrement())
+  latitude    Decimal?      @db.Decimal(11, 8)
+  longitude   Decimal?      @db.Decimal(11, 8)
+  address     String?       @db.VarChar(255)
+  is_active   Boolean?      @default(true)
+  students    students[]
   route_stops route_stops[]
 }
-
-model route_stops {
-  route_stop_id Int      @id @default(autoincrement())
-  route_id      Int
-  stop_id       Int
-  stop_order    Int
-
-  // Quan hệ tới Route và BusStop
-  route routes   @relation(fields: [route_id], references: [route_id], onDelete: Cascade)
-  stop  bus_stops @relation(fields: [stop_id], references: [stop_id], onDelete: Cascade)
-
-  @@unique([route_id, stop_id])       // mỗi trạm chỉ xuất hiện 1 lần trong 1 tuyến
-  @@unique([route_id, stop_order])    // thứ tự trạm duy nhất trong mỗi tuyến
-  @@map("route_stops")                // ánh xạ đúng tên bảng trong DB
-}
-
 
 model buses {
   bus_id                Int                 @id @default(autoincrement())
@@ -46,20 +30,18 @@ model buses {
   routes                routes[]
 }
 
-model notifications {
-  notification_id   Int             @id @default(autoincrement())
-  user_id           Int
-  notification_type String?         @db.VarChar(20)
-  title             String          @db.VarChar(255)
-  message           String?         @db.Text
-  event_id          Int?
-  is_read           Boolean?        @default(false)
-  created_at        DateTime?       @default(now()) @db.Timestamp(0)
-  users             users           @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "notifications_ibfk_1")
-  student_events    student_events? @relation(fields: [event_id], references: [event_id], onUpdate: NoAction, map: "notifications_ibfk_2")
+model route_stops {
+  route_stop_id Int @id @default(autoincrement())
+  route_id      Int
+  stop_id       Int
+  stop_order    Int
 
-  @@index([event_id], map: "idx_notifications_event_id")
-  @@index([user_id], map: "idx_notifications_user_id")
+  route routes    @relation(fields: [route_id], references: [route_id], onDelete: Cascade)
+  stop  bus_stops @relation(fields: [stop_id], references: [stop_id], onDelete: Cascade)
+
+  @@unique([route_id, stop_id]) // mỗi trạm chỉ xuất hiện 1 lần trong 1 tuyến
+  @@unique([route_id, stop_order]) // thứ tự trạm duy nhất trong mỗi tuyến
+  @@map("route_stops") // ánh xạ đúng tên bảng trong DB
 }
 
 model route_assignments {
@@ -94,6 +76,22 @@ model routes {
   route_stops       route_stops[]
 
   @@index([bus_id], map: "idx_routes_bus_id")
+}
+
+model notifications {
+  notification_id   Int             @id @default(autoincrement())
+  user_id           Int
+  notification_type String?         @db.VarChar(20)
+  title             String          @db.VarChar(255)
+  message           String?         @db.Text
+  event_id          Int?
+  is_read           Boolean?        @default(false)
+  created_at        DateTime?       @default(now()) @db.Timestamp(0)
+  users             users           @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "notifications_ibfk_1")
+  student_events    student_events? @relation(fields: [event_id], references: [event_id], onUpdate: NoAction, map: "notifications_ibfk_2")
+
+  @@index([event_id], map: "idx_notifications_event_id")
+  @@index([user_id], map: "idx_notifications_user_id")
 }
 
 model student_events {
@@ -140,7 +138,7 @@ model users {
   updated_at        DateTime?           @default(now()) @db.Timestamp(0)
   chats1            chat[]              @relation("chatUser1")
   chats2            chat[]              @relation("chatUser2")
-  sentMessages      chatMessage[]       @relation("sentMessages")
+  sentMessages      chat_messages[]       @relation("sentMessages")
   notifications     notifications[]
   route_assignments route_assignments[]
   students          students[]
@@ -154,13 +152,13 @@ model chat {
   updated_at DateTime      @default(now()) @updatedAt
   user1      users         @relation("chatUser1", fields: [user1_id], references: [user_id])
   user2      users         @relation("chatUser2", fields: [user2_id], references: [user_id])
-  messages   chatMessage[]
+  messages   chat_messages[]
 
   @@unique([user1_id, user2_id])
   @@index([user2_id], map: "chat_user2_id_fkey")
 }
 
-model chatMessage {
+model chat_messages {
   message_id   Int      @id @default(autoincrement())
   chat_id      Int
   sender_id    Int

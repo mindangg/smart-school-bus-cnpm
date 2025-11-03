@@ -1,0 +1,3 @@
+GET http://localhost:4000/api/routes/direction?start=106.697967,10.772583&end=106.682330,10.759948
+
+Accept: application/json

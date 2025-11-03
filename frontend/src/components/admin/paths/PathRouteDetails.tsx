@@ -1,19 +1,16 @@
 'use client'
 
 import React, {useEffect, useRef, useState} from 'react'
-import {Bus, MapPin} from 'lucide-react'
 import Map, {Layer, Marker, NavigationControl, Source} from 'react-map-gl'
-import api from "@/lib/axios";
-import mapboxgl from "mapbox-gl";
+import {Bus, MapPin} from 'lucide-react'
+import mapboxgl from 'mapbox-gl'
+import api from '@/lib/axios'
 
-export default function LiveTrackingMap({ pathRoute } : any) {
+const PathRouteDetails = ({ pathRoute } : any) => {
     const mapRef = useRef<any>(null)
-    const busMarkerRef = useRef<mapboxgl.Marker | null>(null)
 
     const [isMapLoaded, setIsMapLoaded] = useState(false)
     const [route, setRoute] = useState<any>(null)
-
-    const [busPos, setBusPos] = useState<[number, number] | null>(null)
 
     const start = {
         lng: pathRoute.route_stops[0].stop.longitude,
@@ -55,36 +52,6 @@ export default function LiveTrackingMap({ pathRoute } : any) {
         fetchRoute()
     }, [])
 
-    // useEffect(() => {
-    //     if (!route || !mapRef.current || !isMapLoaded)
-    //         return
-    //
-    //     const map = mapRef.current.getMap()
-    //
-    //     const startMovingBus = () => {
-    //         let index = 0
-    //         const speed = 2000
-    //
-    //         const moveBus = () => {
-    //             if (index >= route.coordinates.length - 1)
-    //                 return
-    //
-    //             const [lng1, lat1] = route.coordinates[index]
-    //             const [lng2, lat2] = route.coordinates[index + 1]
-    //
-    //             setBusPos([lng2, lat2])
-    //             index += 1
-    //             setTimeout(moveBus, speed)
-    //         };
-    //
-    //         moveBus();
-    //     };
-    //
-    //     map.once('moveend', startMovingBus)
-    //
-    //     return () => map.off('moveend', startMovingBus)
-    // }, [route, isMapLoaded])
-
     return (
         <div className='bg-white rounded-lg shadow-lg p-6'>
             <div className='relative w-full h-[450px] bg-gray-200 rounded-md overflow-hidden'>
@@ -121,20 +88,6 @@ export default function LiveTrackingMap({ pathRoute } : any) {
                         </Source>
                     )}
 
-                    {busPos && (
-                        <Marker longitude={busPos[0]} latitude={busPos[1]} anchor='bottom'>
-                            <div className='flex flex-col items-center'>
-                                <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
-                                    <p className='text-sm font-semibold text-gray-900'>
-                                        Xe buyst
-                                    </p>
-                                    <p className='text-xs text-gray-600'>Bus: 101</p>
-                                </div>
-                                <Bus size={32} className='text-yellow-500 fill-yellow-400' />
-                            </div>
-                        </Marker>
-                    )}
-
                     <Marker longitude={start.lng} latitude={start.lat} anchor='bottom'>
                         <div className='flex flex-col items-center'>
                             <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
@@ -165,5 +118,7 @@ export default function LiveTrackingMap({ pathRoute } : any) {
                 )}
             </div>
         </div>
-  )
+    )
 }
+
+export default PathRouteDetails

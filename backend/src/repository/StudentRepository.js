@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 const createStudent = async (data) => {
     const student = await prisma.students.create({ data })
 
-    return student ? mapStudent(student) : null
+    return student
 }
 
 const getStudents = async () => {

@@ -1,0 +1,3 @@
+### GET request to example server
+GET localhost:4000/api/route_assignment/driver
+###
