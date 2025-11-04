@@ -69,7 +69,7 @@ const getRouteDirection = async (req, res) => {
 
     const [startLng, startLat] = start.split(',').map(Number)
     const [endLng, endLat] = end.split(',').map(Number)
-
+    console.log(process.env.MAPBOX_TOKEN)
     if ([startLat, startLng, endLat, endLng].some(isNaN)) {
         return res.status(400).json({ error: "Invalid coordinate format" })
     }
@@ -87,8 +87,8 @@ const getRouteDirection = async (req, res) => {
         res.json(response.data)
     }
     catch (error) {
-        console.error("Mapbox Directions API error:", error.response?.data || error.message)
-        res.status(500).json({ error: "Failed to fetch directions" })
+        console.error("Mapbox Directions API error:", error.response?.data || error.message);
+        res.status(500).json({ error: "Failed to fetch directions" });
     }
 }
 

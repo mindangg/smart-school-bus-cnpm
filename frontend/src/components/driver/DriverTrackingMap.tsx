@@ -8,7 +8,8 @@ import {ArrowRight, Bus, MapPin} from "lucide-react";
 
 const DriverTrackingMap = ({pathRoute}: any) => {
     const mapRef = useRef<any>(null)
-
+    console.log(pathRoute.route_stops[0].stop.address)
+    console.log(pathRoute.route_stops[6].stop.address)
     const [isMapLoaded, setIsMapLoaded] = useState(false)
     const [route, setRoute] = useState<any>(null)
 
@@ -22,74 +23,121 @@ const DriverTrackingMap = ({pathRoute}: any) => {
         lat: pathRoute.route_stops[0].stop.latitude
     }
     const end = {
-        lng: pathRoute.route_stops[1].stop.longitude,
-        lat: pathRoute.route_stops[1].stop.latitude
+        lng: pathRoute.route_stops[6].stop.longitude,
+        lat: pathRoute.route_stops[6].stop.latitude
     }
 
+    // useEffect(() => {
+    //     const fetchRoute = async () => {
+    //         try {
+    //             const res = await api.get(
+    //                 `routes/direction_full`,
+    //                 {
+    //                     params: {
+    //                         start: `${start.lng},${start.lat}`,
+    //                         end: `${end.lng},${end.lat}`,
+    //                     }
+    //                 }
+    //             )
+    //
+    //             const { geometry, steps, distance, duration } = res.data
+    //
+    //             setRoute(geometry)
+    //             setSteps(steps)
+    //             setDistance(distance)
+    //             setDuration(duration)
+    //
+    //             if (mapRef.current && geometry.coordinates.length > 0) {
+    //                 const bounds = new mapboxgl.LngLatBounds()
+    //                 geometry.coordinates.forEach(([lng, lat]: [number, number]) => {
+    //                     bounds.extend([lng, lat])
+    //                 })
+    //                 mapRef.current.fitBounds(bounds, { padding: 50 })
+    //             }
+    //         }
+    //         catch (error) {
+    //             console.error('Error fetching route direction:', error)
+    //         }
+    //     }
+    //
+    //     fetchRoute()
+    // }, [])
+
     useEffect(() => {
-        const fetchRoute = async () => {
+        const fetchFullRoute = async () => {
             try {
-                const res = await api.get(
-                    `routes/direction_full`,
-                    {
+                const coordinates: [number, number][] = [];
+
+                for (let i = 0; i < pathRoute.route_stops.length - 1; i++) {
+                    const current = pathRoute.route_stops[i].stop;
+                    const next = pathRoute.route_stops[i + 1].stop;
+
+                    const res = await api.get("routes/direction_full", {
                         params: {
-                            start: `${start.lng},${start.lat}`,
-                            end: `${end.lng},${end.lat}`,
-                        }
+                            start: `${current.longitude},${current.latitude}`,
+                            end: `${next.longitude},${next.latitude}`,
+                        },
+                    });
+
+                    const { geometry } = res.data;
+                    if (geometry?.coordinates?.length > 0) {
+                        coordinates.push(...geometry.coordinates);
                     }
-                )
-
-                const { geometry, steps, distance, duration } = res.data
-
-                setRoute(geometry)
-                setSteps(steps)
-                setDistance(distance)
-                setDuration(duration)
-
-                if (mapRef.current && geometry.coordinates.length > 0) {
-                    const bounds = new mapboxgl.LngLatBounds()
-                    geometry.coordinates.forEach(([lng, lat]: [number, number]) => {
-                        bounds.extend([lng, lat])
-                    })
-                    mapRef.current.fitBounds(bounds, { padding: 50 })
                 }
+
+                // Gộp tất cả đoạn thành 1 tuyến hoàn chỉnh
+                const fullGeometry = {
+                    type: "LineString",
+                    coordinates,
+                };
+
+                setRoute(fullGeometry);
+
+                // Fit map theo toàn tuyến
+                if (mapRef.current && coordinates.length > 0) {
+                    const bounds = new mapboxgl.LngLatBounds();
+                    coordinates.forEach(([lng, lat]) => bounds.extend([lng, lat]));
+                    mapRef.current.fitBounds(bounds, { padding: 50 });
+                }
+
+                console.log("✅ Route loaded with", coordinates.length, "points");
+            } catch (error) {
+                console.error("❌ Error fetching full route:", error);
             }
-            catch (error) {
-                console.error('Error fetching route direction:', error)
-            }
-        }
+        };
 
-        fetchRoute()
-    }, [])
+        fetchFullRoute();
+    }, [pathRoute]);
 
-    useEffect(() => {
-        if (!route || !mapRef.current || !isMapLoaded)
-            return
 
-        const map = mapRef.current.getMap()
-
-        const startMovingBus = () => {
-            let index = 0
-            const speed = 2000
-
-            const moveBus = () => {
-                if (index >= route.coordinates.length - 1)
-                    return
-
-                const [lng2, lat2] = route.coordinates[index + 1]
-
-                setBusPos([lng2, lat2])
-                index += 1
-                setTimeout(moveBus, speed)
-            }
-
-            moveBus()
-        }
-
-        map.once('moveend', startMovingBus)
-
-        return () => map.off('moveend', startMovingBus)
-    }, [route, isMapLoaded])
+    // useEffect(() => {
+    //     if (!route || !mapRef.current || !isMapLoaded)
+    //         return
+    //
+    //     const map = mapRef.current.getMap()
+    //
+    //     const startMovingBus = () => {
+    //         let index = 0
+    //         const speed = 3000
+    //
+    //         const moveBus = () => {
+    //             if (index >= route.coordinates.length - 1)
+    //                 return
+    //
+    //             const [lng1, lat1] = route.coordinates[index + 1]
+    //
+    //             setBusPos([lng1, lat1])
+    //             index += 1
+    //             setTimeout(moveBus, speed)
+    //         }
+    //
+    //         moveBus()
+    //     }
+    //
+    //     map.once('moveend', startMovingBus)
+    //
+    //     return () => map.off('moveend', startMovingBus)
+    // }, [route, isMapLoaded])
 
     return (
         <div className='bg-white rounded-lg shadow-lg p-6'>
@@ -141,25 +189,23 @@ const DriverTrackingMap = ({pathRoute}: any) => {
                         </Marker>
                     )}
 
-                    <Marker longitude={start.lng} latitude={start.lat} anchor='bottom'>
-                        <div className='flex flex-col items-center'>
-                            <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
-                                <p className='text-sm font-semibold text-gray-900'>
-                                    {pathRoute.route_stops[0].stop.address}
-                                </p>
+                    {pathRoute.route_stops.map((stop: any, index: number) => (
+                        <Marker
+                            key={index}
+                            longitude={stop.stop.longitude}
+                            latitude={stop.stop.latitude}
+                            anchor='bottom'
+                        >
+                            <div className='flex flex-col items-center'>
+                                <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
+                                    <p className='text-sm font-semibold text-gray-900'>
+                                        {stop.stop.address}
+                                    </p>
+                                </div>
+                                <MapPin size={32} className='text-green-500 fill-green-400'  />
                             </div>
-                            <MapPin size={32} className='text-green-500 fill-green-400'  />
-                        </div>
-                    </Marker>
-
-                    <Marker longitude={end.lng} latitude={end.lat} anchor='bottom'>
-                        <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
-                            <p className='text-sm font-semibold text-gray-900'>
-                                {pathRoute.route_stops[1].stop.address}
-                            </p>
-                        </div>
-                        <MapPin size={32} className='text-red-500 fill-red-400'  />
-                    </Marker>
+                        </Marker>
+                    ))}
                 </Map>
 
                 {!isMapLoaded && (
