@@ -3,35 +3,35 @@ const axios = require('axios')
 const userService = require("../service/UserService")
 const studentService = require("../service/StudentService")
 
-const getRouteDetails = async (req, res) => {
-    try{
-        const routeId = parseInt(req.params.id)
-        if(isNaN(routeId)){
-            return res.status(400).json({ error: 'Invalid route ID' })
-        }
+// const getRouteDetails = async (req, res) => {
+//     try{
+//         const routeId = parseInt(req.params.id)
+//         if(isNaN(routeId)){
+//             return res.status(400).json({ error: 'Invalid route ID' })
+//         }
 
-        const routeData = await routeService.getRouteById1(routeId)
+//         const routeData = await routeService.getRouteById1(routeId)
 
-        if(!routeData){
-            return res.status(404).json({ error: 'Route not found' })
-        }
-        res.json(routeData)
-    }
-    catch (error) {
-        console.error('Error fetching route details:', error)
-        res.status(500).json({ error: 'Internal server error' })
-    }
-}
+//         if(!routeData){
+//             return res.status(404).json({ error: 'Route not found' })
+//         }
+//         res.json(routeData)
+//     }
+//     catch (error) {
+//         console.error('Error fetching route details:', error)
+//         res.status(500).json({ error: 'Internal server error' })
+//     }
+// }
 
-const getAllSchedules = async (req, res) => {
-    try {
-        const schedules = await routeService.getAllSchedules()
-        res.json(schedules)
-    } catch (error) {
-        console.error('Error fetching schedules:', error)
-        res.status(500).json({ error: 'Internal server error' })
-    }
-}
+// const getAllSchedules = async (req, res) => {
+//     try {
+//         const schedules = await routeService.getAllSchedules()
+//         res.json(schedules)
+//     } catch (error) {
+//         console.error('Error fetching schedules:', error)
+//         res.status(500).json({ error: 'Internal server error' })
+//     }
+// }
 
 const getRoutes = async (req, res) => {
     try {
@@ -144,8 +144,8 @@ const getRouteDirectionFull = async (req, res) => {
 
 
 module.exports = {
-    getRouteDetails,
-    getAllSchedules,
+    // getRouteDetails,
+    // getAllSchedules,
     getRoutes,
     getRouteById,
     getRouteDirection,
