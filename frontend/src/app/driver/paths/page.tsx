@@ -32,6 +32,7 @@ const page = async () => {
         <main className='relative flex flex-col gap-6 bg-gray-50'>   
             <h1 className='text-2xl font-bold'>Bảng Điều Khiển Tài Xế - Lịch Trình Hôm Nay</h1>
             <p className='text-gray-700'>{formattedDate}</p>
+
             <section className='bg-white p-4 border border-gray-100 shadow-xs rounded-xl'>
                 <h2 className='text-md font-bold mb-2'>Chi Tiết Tuyến Đường Hiện Tại</h2>
                 <p className='text-[15px] md:text-[17px] text-gray-600 line-clamp-1'>
@@ -48,7 +49,7 @@ const page = async () => {
             </section>
             <section className='bg-white p-4 border border-gray-100 shadow-xs rounded-xl cursor-pointer'>
                 <h2 className='text-md font-bold mb-2'>Vị Trí Xe Buýt Thời Gian Thực</h2> 
-                <DriverTrackingMap pathRoute={route_assignment[0].routes}/>
+                <DriverTrackingMap pathRoute={route_assignment[0].routes} bus={route_assignment[0]?.buses?.bus_number}/>
             </section>
         </main>
     )

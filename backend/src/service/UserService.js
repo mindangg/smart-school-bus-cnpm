@@ -12,9 +12,6 @@ const signupSchema = z.object({
     password: z
         .string()
         .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." }),
-    // .regex(/[A-Z]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự viết hoa." })
-    // .regex(/[0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự số." })
-    // .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." }),
 
     role: z.string()
 })
@@ -28,8 +25,6 @@ const createSchema = z.object({
     password: z
         .string()
         .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." }),
-    // .regex(/[A-Z]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự viết hoa." })
-    // .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." }),
 
     full_name: z.string().min(1, {
         message: "Vui lòng nhập họ tên.",

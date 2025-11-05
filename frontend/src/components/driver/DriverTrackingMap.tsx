@@ -1,22 +1,22 @@
-"use client"
+'use client'
 
-import React, {useEffect, useRef, useState} from 'react';
-import mapboxgl from "mapbox-gl";
-import api from "@/lib/axios";
-import Map, {Layer, Marker, NavigationControl, Source} from "react-map-gl";
-import {ArrowRight, Bus, MapPin} from "lucide-react";
+import React, {useEffect, useRef, useState} from 'react'
+import mapboxgl from 'mapbox-gl'
+import api from '@/lib/axios'
+import Map, {Layer, Marker, NavigationControl, Source} from 'react-map-gl'
+import {ArrowRight, Bus, BusFront, MapPin} from 'lucide-react'
 
-const DriverTrackingMap = ({pathRoute}: any) => {
+const DriverTrackingMap = ({pathRoute, bus}: any) => {
     const mapRef = useRef<any>(null)
     console.log(pathRoute.route_stops[0].stop.address)
     console.log(pathRoute.route_stops[6].stop.address)
     const [isMapLoaded, setIsMapLoaded] = useState(false)
     const [route, setRoute] = useState<any>(null)
 
-    const [steps, setSteps] = useState<any[]>([]);
-    const [distance, setDistance] = useState<number>(0);
-    const [duration, setDuration] = useState<number>(0);
-    const [busPos, setBusPos] = useState<[number, number] | null>(null);
+    const [steps, setSteps] = useState<any[]>([])
+    const [distance, setDistance] = useState<number>(0)
+    const [duration, setDuration] = useState<number>(0)
+    const [busPos, setBusPos] = useState<[number, number] | null>(null)
 
     const start = {
         lng: pathRoute.route_stops[0].stop.longitude,
@@ -27,117 +27,139 @@ const DriverTrackingMap = ({pathRoute}: any) => {
         lat: pathRoute.route_stops[6].stop.latitude
     }
 
-    // useEffect(() => {
-    //     const fetchRoute = async () => {
-    //         try {
-    //             const res = await api.get(
-    //                 `routes/direction_full`,
-    //                 {
-    //                     params: {
-    //                         start: `${start.lng},${start.lat}`,
-    //                         end: `${end.lng},${end.lat}`,
-    //                     }
-    //                 }
-    //             )
-    //
-    //             const { geometry, steps, distance, duration } = res.data
-    //
-    //             setRoute(geometry)
-    //             setSteps(steps)
-    //             setDistance(distance)
-    //             setDuration(duration)
-    //
-    //             if (mapRef.current && geometry.coordinates.length > 0) {
-    //                 const bounds = new mapboxgl.LngLatBounds()
-    //                 geometry.coordinates.forEach(([lng, lat]: [number, number]) => {
-    //                     bounds.extend([lng, lat])
-    //                 })
-    //                 mapRef.current.fitBounds(bounds, { padding: 50 })
-    //             }
-    //         }
-    //         catch (error) {
-    //             console.error('Error fetching route direction:', error)
-    //         }
-    //     }
-    //
-    //     fetchRoute()
-    // }, [])
-
     useEffect(() => {
         const fetchFullRoute = async () => {
             try {
-                const coordinates: [number, number][] = [];
+                const coordinates: [number, number][] = []
+                let totalDistance = 0
+                let totalDuration = 0
+                const allSteps: any[] = []
 
+                // Lặp qua từng cặp trạm để nối tuyến hoàn chỉnh
                 for (let i = 0; i < pathRoute.route_stops.length - 1; i++) {
-                    const current = pathRoute.route_stops[i].stop;
-                    const next = pathRoute.route_stops[i + 1].stop;
+                    const current = pathRoute.route_stops[i].stop
+                    const next = pathRoute.route_stops[i + 1].stop
 
-                    const res = await api.get("routes/direction_full", {
+                    const res = await api.get('routes/direction_full', {
                         params: {
                             start: `${current.longitude},${current.latitude}`,
                             end: `${next.longitude},${next.latitude}`,
                         },
-                    });
+                    })
 
-                    const { geometry } = res.data;
+                    const { geometry, steps, distance, duration } = res.data
+
+                    // Gộp tọa độ
                     if (geometry?.coordinates?.length > 0) {
-                        coordinates.push(...geometry.coordinates);
+                        coordinates.push(...geometry.coordinates)
+                    }
+
+                    // Cộng dồn distance/duration
+                    totalDistance += distance || 0
+                    totalDuration += duration || 0
+
+                    // Gộp tất cả steps
+                    if (Array.isArray(steps)) {
+                        allSteps.push(...steps)
                     }
                 }
 
                 // Gộp tất cả đoạn thành 1 tuyến hoàn chỉnh
                 const fullGeometry = {
-                    type: "LineString",
+                    type: 'LineString',
                     coordinates,
-                };
-
-                setRoute(fullGeometry);
-
-                // Fit map theo toàn tuyến
-                if (mapRef.current && coordinates.length > 0) {
-                    const bounds = new mapboxgl.LngLatBounds();
-                    coordinates.forEach(([lng, lat]) => bounds.extend([lng, lat]));
-                    mapRef.current.fitBounds(bounds, { padding: 50 });
                 }
 
-                console.log("✅ Route loaded with", coordinates.length, "points");
+                setRoute(fullGeometry)
+                setSteps(allSteps)
+                setDistance(totalDistance)
+                setDuration(totalDuration)
+
+                if (mapRef.current && coordinates.length > 0) {
+                    const bounds = new mapboxgl.LngLatBounds()
+                    coordinates.forEach(([lng, lat]) => bounds.extend([lng, lat]))
+                    mapRef.current.fitBounds(bounds, { padding: 50 })
+                }
             } catch (error) {
-                console.error("❌ Error fetching full route:", error);
+                console.error('Error fetching full route:', error)
             }
+        }
+
+        if (pathRoute?.route_stops?.length > 1) {
+            fetchFullRoute()
+        }
+    }, [pathRoute])
+
+    useEffect(() => {
+        if (!route || !mapRef.current || !isMapLoaded)
+            return;
+
+        // const desiredSimTime = 120;
+        const desiredSimTime = duration / 30;
+
+        const map = mapRef.current.getMap();
+        let animationFrameId: number;
+        let progress = 0;
+
+        const coordinates = route.coordinates;
+        if (!coordinates || coordinates.length < 2) return;
+
+        const simulatedSpeed = distance / desiredSimTime; // m/s
+
+        // Tính khoảng cách thực (mét)
+        const getDistance = (lng1: number, lat1: number, lng2: number, lat2: number) => {
+            const R = 6371000;
+            const toRad = (deg: number) => (deg * Math.PI) / 180;
+            const dLat = toRad(lat2 - lat1);
+            const dLng = toRad(lng2 - lng1);
+            const a =
+                Math.sin(dLat / 2) ** 2 +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
         };
 
-        fetchFullRoute();
-    }, [pathRoute]);
+        let segmentIndex = 0;
+        let lastTimestamp = 0;
 
+        const animateBus = (timestamp: number) => {
+            if (!lastTimestamp) lastTimestamp = timestamp;
 
-    // useEffect(() => {
-    //     if (!route || !mapRef.current || !isMapLoaded)
-    //         return
-    //
-    //     const map = mapRef.current.getMap()
-    //
-    //     const startMovingBus = () => {
-    //         let index = 0
-    //         const speed = 3000
-    //
-    //         const moveBus = () => {
-    //             if (index >= route.coordinates.length - 1)
-    //                 return
-    //
-    //             const [lng1, lat1] = route.coordinates[index + 1]
-    //
-    //             setBusPos([lng1, lat1])
-    //             index += 1
-    //             setTimeout(moveBus, speed)
-    //         }
-    //
-    //         moveBus()
-    //     }
-    //
-    //     map.once('moveend', startMovingBus)
-    //
-    //     return () => map.off('moveend', startMovingBus)
-    // }, [route, isMapLoaded])
+            const deltaTime = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+
+            const [lng1, lat1] = coordinates[segmentIndex];
+            const [lng2, lat2] = coordinates[segmentIndex + 1];
+
+            const segmentLength = getDistance(lng1, lat1, lng2, lat2);
+            const travelFraction = (simulatedSpeed * deltaTime) / segmentLength;
+            progress += travelFraction;
+
+            if (progress >= 1) {
+                progress = 0;
+                segmentIndex++;
+                if (segmentIndex >= coordinates.length - 1)
+                    return;
+            }
+
+            const lng = lng1 + (lng2 - lng1) * progress;
+            const lat = lat1 + (lat2 - lat1) * progress;
+            setBusPos([lng, lat]);
+
+            animationFrameId = requestAnimationFrame(animateBus);
+        };
+
+        map.once("moveend", () => {
+            animationFrameId = requestAnimationFrame(animateBus);
+        });
+
+        return () => {
+            if (animationFrameId)
+                cancelAnimationFrame(animationFrameId);
+
+            map.off("moveend", animateBus);
+        };
+    }, [route, isMapLoaded, distance, duration]);
 
     return (
         <div className='bg-white rounded-lg shadow-lg p-6'>
@@ -180,9 +202,9 @@ const DriverTrackingMap = ({pathRoute}: any) => {
                             <div className='flex flex-col items-center'>
                                 <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
                                     <p className='text-sm font-semibold text-gray-900'>
-                                        Xe buýt
+                                        {bus}
                                     </p>
-                                    <p className='text-xs text-gray-600'>Bus: 101</p>
+                                    {/*<p className='text-xs text-gray-600'>Bus: 101</p>*/}
                                 </div>
                                 <Bus size={32} className='text-yellow-500 fill-yellow-400' />
                             </div>
@@ -202,7 +224,11 @@ const DriverTrackingMap = ({pathRoute}: any) => {
                                         {stop.stop.address}
                                     </p>
                                 </div>
-                                <MapPin size={32} className='text-green-500 fill-green-400'  />
+                                {
+                                    index == 0 ? <MapPin size={32} className='text-green-500 fill-green-400'  /> :
+                                    index == 6 ? <MapPin size={32} className='text-red-500 fill-red-400'  /> :
+                                    <BusFront size={25} className='text-blue-500 fill-blue-400' />
+                                }
                             </div>
                         </Marker>
                     ))}
@@ -218,27 +244,39 @@ const DriverTrackingMap = ({pathRoute}: any) => {
             </div>
 
             {steps?.length > 0 && (
-                <div className="mt-6 border-t pt-4 flex flex-col gap-2">
-                    <h3 className="text-lg font-semibold">Hướng dẫn lộ trình</h3>
-                    <p className="">
+                <div className='mt-6 border-t pt-4 flex flex-col gap-2'>
+                    <h3 className='text-lg font-semibold'>Hướng dẫn lộ trình</h3>
+                    <p className=''>
                         Khoảng cách: {(distance / 1000).toFixed(2)} km
                     </p>
-                    <p>Thời gian ước tính {(duration / 60).toFixed(1)} phút</p>
-                    <div className="max-h-[200px] overflow-y-auto space-y-2">
+                    {(() => {
+                        const totalMinutes = Math.round(duration / 60);
+                        const hours = Math.floor(totalMinutes / 60);
+                        const minutes = totalMinutes % 60;
+                        return (
+                            <p>
+                                Thời gian ước tính{" "}
+                                {hours > 0
+                                    ? `${hours} giờ ${minutes > 0 ? `${minutes} phút` : ""}`
+                                    : `${minutes} phút`}
+                            </p>
+                        );
+                    })()}
+                    <div className='max-h-[200px] overflow-y-auto space-y-2'>
                         {steps.map((step, i) => (
                             <div
                                 key={i}
-                                className="flex items-start space-x-2 border-l-4 border-blue-500 pl-3"
+                                className='flex items-start space-x-2 border-l-4 border-blue-500 pl-3'
                             >
-                                <ArrowRight className="w-4 h-4 mt-1 text-blue-500" />
-                                <p className="text-sm text-gray-700">{step.maneuver.instruction}</p>
+                                <ArrowRight className='w-4 h-4 mt-1 text-blue-500' />
+                                <p className='text-sm text-gray-700'>{step.maneuver.instruction}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             )}
         </div>
-    );
-};
+    )
+}
 
-export default DriverTrackingMap;
+export default DriverTrackingMap

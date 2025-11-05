@@ -13,9 +13,11 @@ const PathCard = ({ route }: any) => {
     return (
         <div className='grid grid-cols-[1.5fr_5fr_1.5fr_1.5fr_1.5fr] py-6 text-center text-black border-b border-gray-300'>
             <span>{route.route_id}</span>
-            <span>{route.route_stops[0].stop.address} - {route.route_stops[1].stop.address}</span>
+            <span>
+                {route.route_stops[0].stop.address} → {route.route_stops[6].stop.address}
+            </span>
             <span>{route.start_time}</span>
-            <span>{route.routes_type ? 'Buổi sáng' : 'Buổi chiều'}</span>
+            <span>{route.route_type === 'MORNING' ? 'Buổi sáng' : 'Buổi chiều'}</span>
             <span>
                 <DropdownMenu>
                 <DropdownMenuTrigger><Ellipsis /></DropdownMenuTrigger>
