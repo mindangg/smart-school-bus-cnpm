@@ -1,35 +1,35 @@
 'use client'
 
 import React, {useState} from 'react';
-import {Button} from "@/components/ui/button";
-import {RefreshCcw} from "lucide-react";
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
-import ParentForm from "@/components/admin/parents/ParentForm";
-import ParentCard from "@/components/admin/parents/ParentCard";
 import {useRouter} from "next/navigation";
 import api from "@/lib/axios";
 import {toast} from "sonner";
+import {Button} from "@/components/ui/button";
+import {RefreshCcw} from "lucide-react";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import StudentCard from "@/components/admin/students/StudentCard";
+import StudentForm from "@/components/admin/students/StudentForm";
 
-const ParentPage = ({parents} : any) => {
+const StudentPage = ({students}: any) => {
     const [open, setOpen] = useState(false)
     const router = useRouter()
 
     const handleDelete = async (id: number) => {
         try {
-            await api.delete(`users/${id}`)
+            await api.delete(`students/${id}`)
             toast.success('Xóa thành công')
             router.refresh()
         }
         catch (err) {
             console.error(err)
-            toast.error("Xóa thất bại, vui lòng thử lại.")
+            toast.success("Xóa thất bại, vui lòng thử lại.")
         }
     }
 
     return (
         <main className='flex flex-col gap-5'>
             <div className='flex gap-5'>
-                <h1 className='text-2xl font-bold'>Danh sách phụ huynh</h1>
+                <h1 className='text-2xl font-bold'>Danh sách học sinh</h1>
 
                 <Button
                     variant="outline"
@@ -43,14 +43,14 @@ const ParentPage = ({parents} : any) => {
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
                         <Button >
-                            Thêm Phụ Huynh
+                            Thêm học sinh
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-md">
                         <DialogHeader>
-                            <DialogTitle>Thêm Phụ Huynh</DialogTitle>
+                            <DialogTitle>Thêm học sinh</DialogTitle>
                         </DialogHeader>
-                        <ParentForm
+                        <StudentForm
                         />
                     </DialogContent>
                 </Dialog>
@@ -58,24 +58,24 @@ const ParentPage = ({parents} : any) => {
 
             <div className="overflow-x-auto">
                 <div className="min-w-[900px]">
-                    <div className="grid grid-cols-[3fr_3fr_3fr_5fr_2fr] py-6 text-center text-black border-b border-gray-300 font-bold">
-                        <span>Email</span>
+                    <div className="grid grid-cols-[2fr_3fr_3fr_2fr] py-6 text-center text-black border-b border-gray-300 font-bold">
+                        <span>Phụ Huynh</span>
+                        <span>Avatar</span>
                         <span>Họ Tên</span>
-                        <span>Số Điện Thoại</span>
-                        <span>Địa Chỉ</span>
+                        <span>Hành Động</span>
                     </div>
 
-                    {parents?.length > 0 ? (
-                        parents.map((parent : any) => (
-                            <ParentCard
-                                key={parent.user_id}
-                                parent={parent}
+                    {students?.length > 0 ? (
+                        students.map((student : any) => (
+                            <StudentCard
+                                key={student.student_id}
+                                student={student}
                                 handleDelete={handleDelete}
                             />
                         ))
                     ) : (
                         <p className="py-6 text-center text-gray-700">
-                            Không có phụ huynh nào.
+                            Không có học sinh nào.
                         </p>
                     )}
                 </div>
@@ -84,4 +84,4 @@ const ParentPage = ({parents} : any) => {
     );
 };
 
-export default ParentPage;
+export default StudentPage;

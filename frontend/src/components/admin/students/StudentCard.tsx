@@ -1,16 +1,15 @@
 'use client'
 
+import React, {useState} from 'react';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {Ellipsis} from "lucide-react"
-import {Dialog, DialogContent, DialogHeader, DialogTitle,} from "@/components/ui/dialog"
-import {useState} from "react"
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import {Ellipsis} from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -19,33 +18,28 @@ import {
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import ParentForm from "@/components/admin/parents/ParentForm";
+    AlertDialogTitle
+} from "@/components/ui/alert-dialog";
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import StudentForm from "@/components/admin/students/StudentForm";
+import Image from "next/image";
 
-interface Parent {
-    user_id: number,
-    email: string,
-    full_name: string,
-    phone_number: string,
-    address: string,
-}
-
-interface ParentCardProps {
-    parent: Parent,
-    handleDelete: (user_id: number) => void
-}
-
-const ParentCard = ({ parent, handleDelete } : ParentCardProps) => {
+const StudentCard = ({ student, handleDelete }: any) => {
     const [open, setOpen] = useState(false)
     const [openAlert, setOpenAlert] = useState(false)
 
     return (
-        <div className='grid grid-cols-[3fr_3fr_3fr_5fr_2fr] py-6 text-center text-black border-b border-gray-300'>
-            <span>{parent.email}</span>
-            <span>{parent.full_name}</span>
-            <span>{parent.phone_number}</span>
-            <span>{parent.address}</span>
+        <div className='grid grid-cols-[2fr_3fr_3fr_2fr] items-center py-6 text-center text-black border-b border-gray-300'>
+            <span>{student?.users?.full_name}</span>
+            <span className="w-50 h-12 relative overflow-hidden rounded-full mx-auto">
+                <Image
+                    src={student.profile_photo_url}
+                    alt={student.full_name}
+                    fill
+                    style={{ objectFit: 'contain' }}
+                />
+            </span>
+            <span>{student.full_name}</span>
             <span>
                 <DropdownMenu>
                 <DropdownMenuTrigger><Ellipsis /></DropdownMenuTrigger>
@@ -67,7 +61,7 @@ const ParentCard = ({ parent, handleDelete } : ParentCardProps) => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                     <AlertDialogCancel>Hủy</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleDelete(parent.user_id)}>Đồng ý</AlertDialogAction>
+                    <AlertDialogAction onClick={() => handleDelete(student.student_id)}>Đồng ý</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
                 </AlertDialog>
@@ -77,9 +71,9 @@ const ParentCard = ({ parent, handleDelete } : ParentCardProps) => {
                     <DialogHeader>
                     <DialogTitle>Chỉnh Sửa Phụ Huynh</DialogTitle>
                     </DialogHeader>
-                    <ParentForm
+                    <StudentForm
                         mode='update'
-                        parent={parent}
+                        student={student}
                     />
                 </DialogContent>
                 </Dialog>
@@ -88,4 +82,4 @@ const ParentCard = ({ parent, handleDelete } : ParentCardProps) => {
     );
 };
 
-export default ParentCard;
+export default StudentCard;

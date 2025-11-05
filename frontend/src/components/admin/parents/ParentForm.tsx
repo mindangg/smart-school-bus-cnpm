@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { toast } from 'sonner'
 import api from '@/lib/axios'
-import { useEffect } from "react"
+import {useEffect, useState} from "react"
 import {useRouter} from "next/navigation";
 
 const baseSchema = z.object({
@@ -69,8 +69,8 @@ type ParentFormProps = {
 }
 
 const ParentForm = ({ parent, mode = 'create' } : ParentFormProps ) => {
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const router = useRouter()
-
     const schema = mode === 'create' ? createSchema : updateSchema
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
@@ -116,7 +116,7 @@ const ParentForm = ({ parent, mode = 'create' } : ParentFormProps ) => {
                     ...values, role: 'PARENT'
                 })
                 router.refresh()
-                toast.success('Tạo thành công.')
+                toast.success('Thêm thành công.')
             }
 
             form.reset()
@@ -124,11 +124,16 @@ const ParentForm = ({ parent, mode = 'create' } : ParentFormProps ) => {
         }
         catch (err: any) {
             console.error(err)
-            toast.error(mode === 'update' ? 'Cập nhật thất bại.' : 'Tạo thất bại.')
+
+            const msg =
+                err.response?.data?.message ||
+                (mode === 'create'
+                    ? 'Thêm thất bại. Vui lòng thử lại.'
+                    : 'Cập nhật thất bại. Vui lòng thử lại.')
+
+            toast.error(msg)
         }
     }
-
-    const { isLoading } = form.formState
 
     return (
         <Form {...form}>

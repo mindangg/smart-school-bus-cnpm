@@ -30,20 +30,6 @@ model buses {
   routes                routes[]
 }
 
-model route_stops {
-  route_stop_id Int @id @default(autoincrement())
-  route_id      Int
-  stop_id       Int
-  stop_order    Int
-
-  route routes    @relation(fields: [route_id], references: [route_id], onDelete: Cascade)
-  stop  bus_stops @relation(fields: [stop_id], references: [stop_id], onDelete: Cascade)
-
-  @@unique([route_id, stop_id]) // mỗi trạm chỉ xuất hiện 1 lần trong 1 tuyến
-  @@unique([route_id, stop_order]) // thứ tự trạm duy nhất trong mỗi tuyến
-  @@map("route_stops") // ánh xạ đúng tên bảng trong DB
-}
-
 model route_assignments {
   assignment_id   Int              @id @default(autoincrement())
   route_id        Int
@@ -76,6 +62,20 @@ model routes {
   route_stops       route_stops[]
 
   @@index([bus_id], map: "idx_routes_bus_id")
+}
+
+model route_stops {
+  route_stop_id Int @id @default(autoincrement())
+  route_id      Int
+  stop_id       Int
+  stop_order    Int
+
+  route routes    @relation(fields: [route_id], references: [route_id], onDelete: Cascade)
+  stop  bus_stops @relation(fields: [stop_id], references: [stop_id], onDelete: Cascade)
+
+  @@unique([route_id, stop_id]) // mỗi trạm chỉ xuất hiện 1 lần trong 1 tuyến
+  @@unique([route_id, stop_order]) // thứ tự trạm duy nhất trong mỗi tuyến
+  @@map("route_stops") // ánh xạ đúng tên bảng trong DB
 }
 
 model notifications {
@@ -138,20 +138,20 @@ model users {
   updated_at        DateTime?           @default(now()) @db.Timestamp(0)
   chats1            chat[]              @relation("chatUser1")
   chats2            chat[]              @relation("chatUser2")
-  sentMessages      chat_messages[]       @relation("sentMessages")
+  sentMessages      chat_messages[]     @relation("sentMessages")
   notifications     notifications[]
   route_assignments route_assignments[]
   students          students[]
 }
 
 model chat {
-  chat_id    Int           @id @default(autoincrement())
+  chat_id    Int             @id @default(autoincrement())
   user1_id   Int
   user2_id   Int
-  created_at DateTime      @default(now())
-  updated_at DateTime      @default(now()) @updatedAt
-  user1      users         @relation("chatUser1", fields: [user1_id], references: [user_id])
-  user2      users         @relation("chatUser2", fields: [user2_id], references: [user_id])
+  created_at DateTime        @default(now())
+  updated_at DateTime        @default(now()) @updatedAt
+  user1      users           @relation("chatUser1", fields: [user1_id], references: [user_id])
+  user2      users           @relation("chatUser2", fields: [user2_id], references: [user_id])
   messages   chat_messages[]
 
   @@unique([user1_id, user2_id])

@@ -3,28 +3,32 @@ const { studentGetSelect } = require('../dto/Student')
 const prisma = new PrismaClient()
 
 const createStudent = async (data) => {
-    const student = await prisma.students.create({ data })
-
-    return student
+    return prisma.students.create({data})
 }
 
 const getStudents = async () => {
     return prisma.students.findMany({
-        select: studentGetSelect
+        include: {
+            users: true,
+        },
     });
 }
 
 const getStudentsByParent = async (id) => {
     return prisma.students.findMany({
         where: {parent_id: id},
-        select: studentGetSelect
+        include: {
+            users: true,
+        },
     });
 }
 
 const getStudentById = async (student_id) => {
     return prisma.students.findUnique({
         where: {student_id},
-        select: studentGetSelect
+        include: {
+            users: true,
+        },
     });
 }
 
@@ -35,7 +39,9 @@ const updateStudent = async (
     return  prisma.students.update({
         where: { student_id },
         data,
-        select: studentGetSelect
+        include: {
+            users: true,
+        },
     })
 }
 
