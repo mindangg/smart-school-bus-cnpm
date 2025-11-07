@@ -19,4 +19,10 @@ router.delete('/:id', studentController.deleteStudent)
 
 router.put('/:id', studentController.updateStudent)
 
+router.put(
+    '/:studentId/stop',
+    requireAuth,
+    studentController.updateStudentStops
+);
+
 module.exports = router

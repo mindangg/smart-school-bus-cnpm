@@ -51,6 +51,7 @@ const deleteStudent = (student_id) => {
     });
 }
 
+
 module.exports = {
     getStudents,
     getStudentsByParent,

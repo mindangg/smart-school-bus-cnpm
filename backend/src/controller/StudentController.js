@@ -82,11 +82,43 @@ const deleteStudent = async (req, res) => {
     }
 }
 
+// update cho diem ruoc va diem don
+const updateStudentStops = async (req, res, next) => {
+    try {
+            // SỬA DÒNG NÀY:
+            // Đọc trực tiếp 'user_id' từ 'req', không qua 'req.user'
+            const parentId = req.user_id; 
+            
+            // (Đảm bảo req.user_id tồn tại)
+            if (!parentId) {
+                throw new Error('Authentication error: User ID not found.');
+            }
+
+            const studentId = parseInt(req.params.studentId, 10);
+            const { stopId } = req.body; 
+
+            if (!stopId) {
+                throw new Error('Stop ID is required');
+            }
+
+            const updatedStudent = await studentService.updateStudentStops(
+                parentId,
+                studentId,
+                parseInt(stopId, 10)
+            );
+            
+            res.status(200).json(updatedStudent);
+        } catch (error) {
+            next(error); // Chuyển lỗi cho middleware xử lý (đã thêm ở lần trước)
+        }
+}
+
 module.exports = {
     getStudents,
     getStudentsByParent,
     getStudentById,
     createStudent,
     deleteStudent,
-    updateStudent
+    updateStudent,
+    updateStudentStops
 }
