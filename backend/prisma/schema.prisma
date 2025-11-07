@@ -70,25 +70,39 @@ model route_stops {
   stop_id       Int
   stop_order    Int
 
-  route routes    @relation(fields: [route_id], references: [route_id], onDelete: Cascade)
-  stop  bus_stops @relation(fields: [stop_id], references: [stop_id], onDelete: Cascade)
+  route    routes                @relation(fields: [route_id], references: [route_id], onDelete: Cascade)
+  stop     bus_stops             @relation(fields: [stop_id], references: [stop_id], onDelete: Cascade)
+  students route_stop_students[]
 
   @@unique([route_id, stop_id]) // mỗi trạm chỉ xuất hiện 1 lần trong 1 tuyến
   @@unique([route_id, stop_order]) // thứ tự trạm duy nhất trong mỗi tuyến
   @@map("route_stops") // ánh xạ đúng tên bảng trong DB
 }
 
+model route_stop_students {
+  id            Int @id @default(autoincrement())
+  route_stop_id Int
+  student_id    Int
+
+  // Relations
+  route_stop route_stops @relation(fields: [route_stop_id], references: [route_stop_id], onDelete: Cascade)
+  student    students    @relation(fields: [student_id], references: [student_id], onDelete: Cascade)
+
+  @@unique([route_stop_id, student_id])
+}
+
 model notifications {
-  notification_id   Int             @id @default(autoincrement())
+  notification_id   Int       @id @default(autoincrement())
   user_id           Int
-  notification_type String?         @db.VarChar(20)
-  title             String          @db.VarChar(255)
-  message           String?         @db.Text
+  notification_type String?   @db.VarChar(20)
+  title             String    @db.VarChar(255)
+  message           String?   @db.Text
   event_id          Int?
-  is_read           Boolean?        @default(false)
-  created_at        DateTime?       @default(now()) @db.Timestamp(0)
-  users             users           @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "notifications_ibfk_1")
-  student_events    student_events? @relation(fields: [event_id], references: [event_id], onUpdate: NoAction, map: "notifications_ibfk_2")
+  is_read           Boolean?  @default(false)
+  created_at        DateTime? @default(now()) @db.Timestamp(0)
+
+  users          users           @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "notifications_ibfk_1")
+  student_events student_events? @relation(fields: [event_id], references: [event_id], onUpdate: NoAction, map: "notifications_ibfk_2")
 
   @@index([event_id], map: "idx_notifications_event_id")
   @@index([user_id], map: "idx_notifications_user_id")
@@ -110,16 +124,17 @@ model student_events {
 }
 
 model students {
-  student_id        Int              @id @default(autoincrement())
+  student_id        Int                   @id @default(autoincrement())
   parent_id         Int?
-  full_name         String           @db.VarChar(255)
-  profile_photo_url String?          @db.VarChar(255)
-  is_active         Boolean?         @default(true)
-  created_at        DateTime?        @default(now()) @db.Timestamp(0)
+  full_name         String                @db.VarChar(255)
+  profile_photo_url String?               @db.VarChar(255)
+  is_active         Boolean?              @default(true)
+  created_at        DateTime?             @default(now()) @db.Timestamp(0)
   stop_id           Int?
   student_events    student_events[]
-  users             users?           @relation(fields: [parent_id], references: [user_id], onUpdate: NoAction, map: "students_ibfk_1")
-  bus_stops         bus_stops?       @relation(fields: [stop_id], references: [stop_id], onUpdate: NoAction, map: "students_ibfk_2")
+  users             users?                @relation(fields: [parent_id], references: [user_id], onUpdate: NoAction, map: "students_ibfk_1")
+  bus_stops         bus_stops?            @relation(fields: [stop_id], references: [stop_id], onUpdate: NoAction, map: "students_ibfk_2")
+  route_stops       route_stop_students[]
 
   @@index([parent_id], map: "idx_students_parent_id")
   @@index([stop_id], map: "idx_students_stop_id")

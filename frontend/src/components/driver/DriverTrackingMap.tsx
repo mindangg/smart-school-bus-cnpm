@@ -8,8 +8,6 @@ import {ArrowRight, Bus, BusFront, MapPin} from 'lucide-react'
 
 const DriverTrackingMap = ({pathRoute, bus}: any) => {
     const mapRef = useRef<any>(null)
-    console.log(pathRoute.route_stops[0].stop.address)
-    console.log(pathRoute.route_stops[6].stop.address)
     const [isMapLoaded, setIsMapLoaded] = useState(false)
     const [route, setRoute] = useState<any>(null)
 
@@ -35,7 +33,6 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                 let totalDuration = 0
                 const allSteps: any[] = []
 
-                // Lặp qua từng cặp trạm để nối tuyến hoàn chỉnh
                 for (let i = 0; i < pathRoute.route_stops.length - 1; i++) {
                     const current = pathRoute.route_stops[i].stop
                     const next = pathRoute.route_stops[i + 1].stop
@@ -49,22 +46,18 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
 
                     const { geometry, steps, distance, duration } = res.data
 
-                    // Gộp tọa độ
                     if (geometry?.coordinates?.length > 0) {
                         coordinates.push(...geometry.coordinates)
                     }
 
-                    // Cộng dồn distance/duration
                     totalDistance += distance || 0
                     totalDuration += duration || 0
 
-                    // Gộp tất cả steps
                     if (Array.isArray(steps)) {
                         allSteps.push(...steps)
                     }
                 }
 
-                // Gộp tất cả đoạn thành 1 tuyến hoàn chỉnh
                 const fullGeometry = {
                     type: 'LineString',
                     coordinates,

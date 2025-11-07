@@ -35,7 +35,7 @@ CREATE TABLE students
     stop_id           INT,
 
     FOREIGN KEY (parent_id) REFERENCES users (user_id) ON DELETE SET NULL,
-    FOREIGN KEY (stop_id) REFERENCES bus_stops (stop_id) ON DELETE SET NULL
+    FOREIGN KEY (stop_id) REFERENCES route_stops (stop_id) ON DELETE SET NULL
 );
 
 CREATE TABLE buses
@@ -86,10 +86,22 @@ CREATE TABLE route_stops (
      stop_id INT NOT NULL,
      stop_order INT NOT NULL,
      stop_type VARCHAR(20),
+
      UNIQUE (route_id, stop_id),
      UNIQUE (route_id, stop_order),
      FOREIGN KEY (route_id) REFERENCES routes(route_id) ON DELETE CASCADE,
      FOREIGN KEY (stop_id) REFERENCES bus_stops(stop_id) ON DELETE CASCADE
+);
+
+CREATE TABLE route_stop_students (
+     id INT AUTO_INCREMENT PRIMARY KEY,
+     route_stop_id INT NOT NULL,
+     student_id INT NOT NULL,
+
+     UNIQUE (route_stop_id, student_id),
+
+     FOREIGN KEY (route_stop_id) REFERENCES route_stops(route_stop_id) ON DELETE CASCADE,
+     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE
 );
 
 CREATE TABLE student_events
