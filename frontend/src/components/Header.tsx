@@ -1,18 +1,8 @@
 'use client'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { UserCog } from "lucide-react";
-import { useAuthAction } from '@/hooks/useAuthAction'
 import { useAuth } from '@/contexts/AuthContext'
-import Link from 'next/link';
+import { useAuthAction } from '@/hooks/useAuthAction'
+import Image from 'next/image'
 
 const Header = () => {
     const { logout } = useAuthAction()

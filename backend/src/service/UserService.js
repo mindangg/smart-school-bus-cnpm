@@ -1,6 +1,6 @@
 const UserRepository = require('../repository/UserRepository')
 const bcrypt = require('bcrypt')
-const {z} = require('zod')
+const { z } = require('zod')
 const jwt = require('jsonwebtoken')
 
 const signupSchema = z.object({

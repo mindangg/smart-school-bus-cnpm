@@ -9,6 +9,7 @@ const getUserByEmail = (email) => {
 const signupUser = (data) => {
     return prisma.users.create({data, select: userGetSelect});
 }
+
 const loginUser = (email) => {
     return prisma.users.findUnique({
         where: {email},

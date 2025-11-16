@@ -129,59 +129,8 @@ const createRoutesAndAssignRouteStops = async () => {
     console.log('🎉 All routes and route_stops seeded successfully!');
 };
 
-
-// // ========== 5. CREATE ROUTES ==========
-// const createRoutes = async () => {
-//     console.log('Creating routes...');
-//     const routes = Array.from({ length: 10 }, (_, i) => [
-//         { route_type: 'MORNING', start_time: '06:30', bus_id: i + 1 },
-//         { route_type: 'EVENING', start_time: '17:30', bus_id: i + 1 },
-//     ]).flat();
-//
-//     await prisma.routes.createMany({ data: routes, skipDuplicates: true });
-//     console.log('Routes created.');
-// };
-//
-// // ========== 6. ASSIGN STOPS TO ROUTES ==========
-// const assignStopsToRoutes = async () => {
-//     console.log('Assigning stops to routes...');
-//     const totalBuses = 10;
-//     const stopsPerRoute = 4;
-//     const totalStops = 40;
-//     let routeId = 1;
-//
-//     for (let bus_id = 1; bus_id <= totalBuses; bus_id++) {
-//         const startStop = (bus_id - 1) * (stopsPerRoute - 1) + 1;
-//         const stopIds = Array.from(
-//             { length: stopsPerRoute },
-//             (_, i) => (startStop + i) % totalStops || totalStops
-//         );
-//
-//         const morningStops = stopIds.map((stopId, index) => ({
-//             route_id: routeId,
-//             stop_id: stopId,
-//             stop_order: index + 1,
-//         }));
-//
-//         const eveningStops = [...stopIds].reverse().map((stopId, index) => ({
-//             route_id: routeId + 1,
-//             stop_id: stopId,
-//             stop_order: index + 1,
-//         }));
-//
-//         await prisma.route_stops.createMany({ data: [...morningStops, ...eveningStops] });
-//         console.log(`Assigned stops for bus ${bus_id}`);
-//         routeId += 2;
-//     }
-//
-//     console.log('Stops assigned to routes.');
-// };
-
-
-
 // ========== 7. CREATE ROUTE ASSIGNMENTS ==========
 const createRouteAssignments = async () => {
-    console.log('Creating route assignments...');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -214,6 +163,10 @@ const createRouteAssignments = async () => {
     await prisma.route_assignments.createMany({ data: assignments, skipDuplicates: true });
     console.log('Route assignments created.');
 };
+
+const createStudentInRoutes = async () => {
+
+}
 
 // ========== 8. (OPTIONAL) MOCK STUDENT EVENTS ==========
 //     const createMockStudentEvents = async () => {
