@@ -8,12 +8,13 @@ datasource db {
 }
 
 model bus_stops {
-  stop_id     Int           @id @default(autoincrement())
-  latitude    Decimal?      @db.Decimal(11, 8)
-  longitude   Decimal?      @db.Decimal(11, 8)
-  address     String?       @db.VarChar(255)
-  is_active   Boolean?      @default(true)
-  students    students[]
+  stop_id   Int        @id @default(autoincrement())
+  latitude  Decimal?   @db.Decimal(11, 8)
+  longitude Decimal?   @db.Decimal(11, 8)
+  address   String?    @db.VarChar(255)
+  is_active Boolean?   @default(true)
+  students  students[]
+
   route_stops route_stops[]
 }
 
@@ -27,41 +28,35 @@ model buses {
   status                String?             @db.VarChar(20)
   last_maintenance_date DateTime?           @db.Date
   route_assignments     route_assignments[]
-  routes                routes[]
 }
 
 model route_assignments {
-  assignment_id   Int              @id @default(autoincrement())
-  route_id        Int
-  driver_id       Int
-  bus_id          Int
-  assignment_date DateTime         @db.Date
-  is_active       Boolean?         @default(true)
-  created_at      DateTime?        @default(now()) @db.Timestamp(0)
-  routes          routes           @relation(fields: [route_id], references: [route_id], onDelete: Cascade, onUpdate: NoAction, map: "route_assignments_ibfk_1")
-  users           users            @relation(fields: [driver_id], references: [user_id], onUpdate: NoAction, map: "route_assignments_ibfk_2")
-  buses           buses            @relation(fields: [bus_id], references: [bus_id], onUpdate: NoAction, map: "route_assignments_ibfk_3")
-  student_events  student_events[]
+  assignment_id  Int              @id @default(autoincrement())
+  route_id       Int
+  driver_id      Int
+  bus_id         Int
+  is_active      Boolean?         @default(true)
+  created_at     DateTime?        @default(now()) @db.Timestamp(0)
+  routes         routes           @relation(fields: [route_id], references: [route_id], onDelete: Cascade, onUpdate: NoAction, map: "route_assignments_ibfk_1")
+  users          users            @relation(fields: [driver_id], references: [user_id], onUpdate: NoAction, map: "route_assignments_ibfk_2")
+  buses          buses            @relation(fields: [bus_id], references: [bus_id], onUpdate: NoAction, map: "route_assignments_ibfk_3")
+  student_events student_events[]
 
-  @@unique([route_id, driver_id, assignment_date], map: "uniq_route_driver_date")
   @@index([bus_id], map: "idx_route_assignments_bus_id")
   @@index([driver_id], map: "idx_route_assignments_driver_id")
   @@index([route_id], map: "idx_route_assignments_route_id")
 }
 
 model routes {
-  route_id          Int                 @id @default(autoincrement())
-  route_type        String?             @db.VarChar(20)
-  bus_id            Int?
-  start_time        String?             @db.VarChar(8)
-  is_active         Boolean?            @default(true)
-  created_at        DateTime?           @default(now()) @db.Timestamp(0)
-  updated_at        DateTime?           @default(now()) @db.Timestamp(0)
-  route_assignments route_assignments[]
-  buses             buses?              @relation(fields: [bus_id], references: [bus_id], onUpdate: NoAction, map: "routes_ibfk_1")
-  route_stops       route_stops[]
+  route_id   Int       @id @default(autoincrement())
+  route_type String?   @db.VarChar(20)
+  start_time String?   @db.VarChar(8)
+  is_active  Boolean?  @default(true)
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @default(now()) @db.Timestamp(0)
 
-  @@index([bus_id], map: "idx_routes_bus_id")
+  route_assignments route_assignments[]
+  route_stops       route_stops[]
 }
 
 model route_stops {

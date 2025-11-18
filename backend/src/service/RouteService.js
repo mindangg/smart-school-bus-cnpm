@@ -1,4 +1,5 @@
 const routeRepository = require('../repository/RouteRepository');
+const routeAssignmentService = require('./RouteAssignmentService');
 const axios = require('axios');
 const UserRepository = require("../repository/UserRepository");
 const studentRepository = require("../repository/StudentRepository");
@@ -80,9 +81,25 @@ const getRouteById = async (id) => {
     return route
 }
 
+const getAvailableRoutes = async () => {
+    const allRoutes = await routeRepository.getAllMorningRoutes();
+    const allAssignments = await routeAssignmentService.getRouteAssignments();
+
+    const assignedRouteIds = new Set(
+        allAssignments
+            .filter(assignment => assignment.is_active)
+            .map(assignment => assignment.route_id)
+    );
+
+    return allRoutes.filter(
+        route => !assignedRouteIds.has(route.route_id)
+    );
+}
+
 module.exports = {
     // getRouteById1,
     // getAllSchedules,
+    getAvailableRoutes,
     getRoutes,
     getRouteById
 }

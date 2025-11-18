@@ -69,11 +69,22 @@ const getAllSchedules = async (req, res) => {
     }
 }
 
+const createRouteAssignment = async (req, res) => {
+    try {
+        const routeAssignmentData = req.body
+        const newRouteAssignment = await routeAssignmentService.createRouteAssignment(routeAssignmentData)
+        res.status(201).json(newRouteAssignment)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+}
+
 module.exports = {
     getRouteAssignments,
     getRouteAssignmentById,
     getRouteAssignmentByDriver,
     getAllSchedules,
-    getRouteDetails
+    getRouteDetails,
+    createRouteAssignment
 }
 

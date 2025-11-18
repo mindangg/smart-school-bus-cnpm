@@ -54,13 +54,10 @@ CREATE TABLE routes
 (
     route_id   INT PRIMARY KEY AUTO_INCREMENT,
     route_type varchar(20),
-    bus_id     INT,
     start_time time,
     is_active  boolean                     DEFAULT TRUE,
     created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-    updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (bus_id) REFERENCES buses (bus_id) ON DELETE SET NULL
+    updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE route_assignments
@@ -164,7 +161,6 @@ CREATE TABLE chat_messages (
 
 CREATE INDEX idx_students_parent_id ON students (parent_id);
 CREATE INDEX idx_students_stop_id ON students (stop_id);
-CREATE INDEX idx_routes_bus_id ON routes (bus_id);
 CREATE INDEX idx_route_assignments_route_id ON route_assignments (route_id);
 CREATE INDEX idx_route_assignments_driver_id ON route_assignments (driver_id);
 CREATE INDEX idx_route_assignments_bus_id ON route_assignments (bus_id);

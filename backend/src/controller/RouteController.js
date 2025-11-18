@@ -34,7 +34,13 @@ const studentService = require("../service/StudentService")
 // }
 
 const getRoutes = async (req, res) => {
+    const {isAvailable} = req.query
     try {
+        if (isAvailable) {
+            const allRoutes = await routeService.getAvailableRoutes()
+            res.status(200).json(allRoutes)
+            return
+        }
         const routes = await routeService.getRoutes()
         res.status(200).json(routes)
     }
@@ -102,6 +108,7 @@ const getRouteDirectionFull = async (req, res) => {
     const [startLng, startLat] = start.split(',').map(Number)
     const [endLng, endLat] = end.split(',').map(Number)
 
+
     if ([startLat, startLng, endLat, endLng].some(isNaN)) {
         return res.status(400).json({ error: "Invalid coordinate format" })
     }
@@ -133,6 +140,7 @@ const getRouteDirectionFull = async (req, res) => {
             duration,
             waypoints: response.data.waypoints,
         })
+
 
         // res.json(response.data)
     }

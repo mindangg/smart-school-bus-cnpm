@@ -58,6 +58,18 @@ const getAllRoutes = async () => {
     })
 }
 
+const getAllMorningRoutes = async () => {
+    return prisma.routes.findMany({
+        where: {route_type: 'MORNING'},
+        include: {
+            route_stops: {
+                include: {stop: true},
+                orderBy: {stop_order: 'asc'},
+            },
+        },
+    })
+}
+
 const getRouteById = async (route_id) => {
     return prisma.routes.findUnique({
         where: { route_id },
@@ -79,5 +91,7 @@ module.exports = {
     // findRouteDetailsById,
     // findAllAssignments,
     getAllRoutes,
-    getRouteById
+    getRouteById,
+    getAllMorningRoutes,
+
 }

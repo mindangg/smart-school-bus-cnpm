@@ -63,10 +63,13 @@ const getStudentAssignmentDetails = async (studentId) => {
                     // 1b. Lấy thông tin về Tuyến đường (route) của trạm dừng đó
                     route: {    
                         include: {
-                            // 1b-i. Lấy xe buýt (buses) được gán cho tuyến đường này
-                            buses: true, 
-                            // 1b-ii. Lấy TẤT CẢ các trạm dừng (route_stops)
-                            //        thuộc tuyến đường này
+                            // === SỬA Ở ĐÂY: Thay 'buses: true' bằng đoạn dưới ===
+                            route_assignments: {
+                                where: { is_active: true }, // Chỉ lấy xe đang phân công hoạt động
+                                include: {
+                                    buses: true // Lấy thông tin xe từ bảng phân công
+                                }
+                            },
                             route_stops: { 
                                 include: {
                                     stop: true // Lấy chi tiết của TẤT CẢ trạm dừng

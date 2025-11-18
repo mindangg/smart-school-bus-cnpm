@@ -126,7 +126,7 @@ const LiveTrackingMap = ({ pathRoute }: any) => {
                         longitude: start.lng,
                         latitude: start.lat,
                     }}
-                    style={{ width: '100%', height: '100%' }}
+                    style={{ width: '100%', height: '100%' }}   
                     mapStyle='mapbox://styles/mapbox/streets-v11'
                     onLoad={() => setIsMapLoaded(true)}
                 >

@@ -69,7 +69,7 @@ export const useAuthAction = () => {
 
     const logout = async () => {
         try {
-            await api.post('users/logout')
+            await api.post('/users/logout')
             toast.success('Hẹn gặp lại.')
             dispatch({ type: 'LOGOUT' })
             router.replace('/')

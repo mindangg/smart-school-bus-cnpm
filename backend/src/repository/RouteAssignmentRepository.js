@@ -22,6 +22,24 @@ const getRouteAssignmentByDriver = async (driver_id) => {
     })
 }
 
+const getRouteAssignmentByRouteId = async (route_id) => {
+    return prisma.route_assignments.findMany({
+        where: { route_id },
+    })
+}
+
+const getRouteAssignmentByDriverId = async (driver_id) => {
+    return prisma.route_assignments.findMany({
+        where: { driver_id },
+    })
+}
+
+const getRouteAssignmentByBusId = async (bus_id) => {
+    return prisma.route_assignments.findMany({
+        where: { bus_id },
+    })
+}
+
 //hbao
 const findRouteDetailsById = async (routeId) => {
     return prisma.routes.findUnique({
@@ -29,7 +47,12 @@ const findRouteDetailsById = async (routeId) => {
             route_id: routeId,
         },
         include: {
-            buses: true, // Lấy thông tin xe buýt
+            route_assignments: {
+                where: { is_active: true }, // Chỉ lấy xe đang được phân công chạy
+                include: {
+                    buses: true // Lấy thông tin xe từ bảng assignment
+                }
+            }, // Lấy thông tin xe buýt
             route_stops: { // Lấy các trạm dừng của tuyến
                 orderBy: {
                     stop_order: 'asc', // Sắp xếp theo thứ tự
@@ -62,16 +85,24 @@ const findAllAssignments = async () => {
                 }
             }
         },
-        orderBy: {
-            assignment_date: 'desc'
-        }
     });
 };
+
+const createRouteAssignment = async (data) => {
+    console.log(data)
+    return prisma.route_assignments.create({
+        data
+    });
+}
 
 module.exports = {
     getAllRouteAssignments,
     getRouteAssignmentById,
     getRouteAssignmentByDriver,
     findRouteDetailsById,
-    findAllAssignments
+    findAllAssignments,
+    getRouteAssignmentByRouteId,
+    getRouteAssignmentByDriverId,
+    getRouteAssignmentByBusId,
+    createRouteAssignment
 }
