@@ -75,7 +75,7 @@ const getRouteDirection = async (req, res) => {
 
     const [startLng, startLat] = start.split(',').map(Number)
     const [endLng, endLat] = end.split(',').map(Number)
-    console.log(process.env.MAPBOX_TOKEN)
+    console.log(process.env.MAPBOX_ACCESS_TOKEN)
     if ([startLat, startLng, endLat, endLng].some(isNaN)) {
         return res.status(400).json({ error: "Invalid coordinate format" })
     }
@@ -86,7 +86,7 @@ const getRouteDirection = async (req, res) => {
         const response = await axios.get(url, {
             params: {
                 geometries: "geojson",
-                access_token: process.env.MAPBOX_TOKEN,
+                access_token: process.env.MAPBOX_ACCESS_TOKEN,
             },
         })
 
@@ -123,7 +123,7 @@ const getRouteDirectionFull = async (req, res) => {
                 overview: "full",
                 steps: true,
                 language: "vi",
-                access_token: process.env.MAPBOX_TOKEN,
+                access_token: process.env.MAPBOX_ACCESS_TOKEN,
             },
         })
 

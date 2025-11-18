@@ -6,7 +6,7 @@ export async function createServerApi() {
     const cookieHeader = cookieStore.toString();
 
     return axios.create({
-        baseURL: process.env.NEXT_PUBLIC_API_URL,
+        baseURL: process.env.BACKEND_URL + '/api'  ,
         withCredentials: true,
         headers: {
             'Content-Type': 'application/json',

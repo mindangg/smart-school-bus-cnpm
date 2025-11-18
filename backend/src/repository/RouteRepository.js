@@ -1,5 +1,4 @@
 const { PrismaClient } = require('@prisma/client');
-const routeRepository = require("../service/RouteService");
 const {studentGetSelect} = require("../dto/Student");
 const prisma = new PrismaClient(); 
 

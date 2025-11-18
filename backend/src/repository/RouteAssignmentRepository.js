@@ -47,7 +47,12 @@ const findRouteDetailsById = async (routeId) => {
             route_id: routeId,
         },
         include: {
-            buses: true, // Lấy thông tin xe buýt
+            route_assignments: {
+                where: { is_active: true }, // Chỉ lấy xe đang được phân công chạy
+                include: {
+                    buses: true // Lấy thông tin xe từ bảng assignment
+                }
+            }, // Lấy thông tin xe buýt
             route_stops: { // Lấy các trạm dừng của tuyến
                 orderBy: {
                     stop_order: 'asc', // Sắp xếp theo thứ tự
