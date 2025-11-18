@@ -1,8 +1,8 @@
 'use client'
+import { Button } from '@/components/ui/button'
+import { useAuth } from '@/contexts/AuthContext'
+import { useAuthAction } from '@/hooks/useAuthAction'
 import Image from 'next/image'
-import {Button} from '@/components/ui/button'
-import {useAuthAction} from '@/hooks/useAuthAction'
-import {useAuth} from '@/contexts/AuthContext'
 
 const Header = () => {
     const { logout } = useAuthAction()

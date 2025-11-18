@@ -3,9 +3,6 @@
 import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 
-// --- QUAN TRỌNG: Thêm Access Token của bạn vào file .env.local ---
-// Tạo file .env.local ở thư mục gốc frontend nếu chưa có
-// Thêm dòng: NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=pk.YOUR_TOKEN_HERE
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 interface RouteMapProps {

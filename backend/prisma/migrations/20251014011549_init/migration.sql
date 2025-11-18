@@ -58,14 +58,13 @@ CREATE TABLE `route_assignments` (
     `route_id` INTEGER NOT NULL,
     `driver_id` INTEGER NOT NULL,
     `bus_id` INTEGER NOT NULL,
-    `assignment_date` DATE NOT NULL,
     `is_active` BOOLEAN NULL DEFAULT true,
     `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
 
     INDEX `idx_route_assignments_bus_id`(`bus_id`),
     INDEX `idx_route_assignments_driver_id`(`driver_id`),
     INDEX `idx_route_assignments_route_id`(`route_id`),
-    UNIQUE INDEX `uniq_route_driver_date`(`route_id`, `driver_id`, `assignment_date`),
+    UNIQUE INDEX `uniq_route_driver_date`(`route_id`, `driver_id`),
     PRIMARY KEY (`assignment_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -73,13 +72,11 @@ CREATE TABLE `route_assignments` (
 CREATE TABLE `routes` (
     `route_id` INTEGER NOT NULL AUTO_INCREMENT,
     `route_type` VARCHAR(20) NULL,
-    `bus_id` INTEGER NULL,
     `start_time` TIME(0) NULL,
     `is_active` BOOLEAN NULL DEFAULT true,
     `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updated_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
 
-    INDEX `idx_routes_bus_id`(`bus_id`),
     PRIMARY KEY (`route_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -143,9 +140,6 @@ ALTER TABLE `route_assignments` ADD CONSTRAINT `route_assignments_ibfk_2` FOREIG
 
 -- AddForeignKey
 ALTER TABLE `route_assignments` ADD CONSTRAINT `route_assignments_ibfk_3` FOREIGN KEY (`bus_id`) REFERENCES `buses`(`bus_id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `routes` ADD CONSTRAINT `routes_ibfk_1` FOREIGN KEY (`bus_id`) REFERENCES `buses`(`bus_id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `student_events` ADD CONSTRAINT `student_events_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students`(`student_id`) ON DELETE CASCADE ON UPDATE NO ACTION;

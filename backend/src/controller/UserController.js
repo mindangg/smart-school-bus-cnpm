@@ -59,9 +59,14 @@ const getCurrentUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
     try {
-        const { role } = req.query
+        const { role, isAvailable } = req.query
+        const filter = {}
 
-        let filter = {}
+        if (isAvailable === 'true') {
+            const users = await userService.getAvailableDrivers()
+            res.status(200).json(users)
+            return
+        }
 
         if (role)
             filter.role = role

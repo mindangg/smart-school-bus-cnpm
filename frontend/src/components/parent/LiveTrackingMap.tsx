@@ -2,11 +2,12 @@
 
 import React, {useEffect, useRef, useState} from 'react'
 import {Bus, MapPin} from 'lucide-react'
+import mapboxgl from "mapbox-gl";
 import Map, {Layer, Marker, NavigationControl, Source} from 'react-map-gl'
 import api from "@/lib/axios";
-import mapboxgl from "mapbox-gl";
+import DriverTrackingMap from "@/components/driver/DriverTrackingMap";
 
-export default function LiveTrackingMap({ pathRoute } : any) {
+const LiveTrackingMap = ({ pathRoute } : any) => {
     const mapRef = useRef<any>(null)
     const busMarkerRef = useRef<mapboxgl.Marker | null>(null)
 
@@ -55,35 +56,35 @@ export default function LiveTrackingMap({ pathRoute } : any) {
         fetchRoute()
     }, [])
 
-    // useEffect(() => {
-    //     if (!route || !mapRef.current || !isMapLoaded)
-    //         return
-    //
-    //     const map = mapRef.current.getMap()
-    //
-    //     const startMovingBus = () => {
-    //         let index = 0
-    //         const speed = 2000
-    //
-    //         const moveBus = () => {
-    //             if (index >= route.coordinates.length - 1)
-    //                 return
-    //
-    //             const [lng1, lat1] = route.coordinates[index]
-    //             const [lng2, lat2] = route.coordinates[index + 1]
-    //
-    //             setBusPos([lng2, lat2])
-    //             index += 1
-    //             setTimeout(moveBus, speed)
-    //         };
-    //
-    //         moveBus();
-    //     };
-    //
-    //     map.once('moveend', startMovingBus)
-    //
-    //     return () => map.off('moveend', startMovingBus)
-    // }, [route, isMapLoaded])
+    useEffect(() => {
+        if (!route || !mapRef.current || !isMapLoaded)
+            return
+
+        const map = mapRef.current.getMap()
+
+        const startMovingBus = () => {
+            let index = 0
+            const speed = 2000
+
+            const moveBus = () => {
+                if (index >= route.coordinates.length - 1)
+                    return
+
+                const [lng1, lat1] = route.coordinates[index]
+                const [lng2, lat2] = route.coordinates[index + 1]
+
+                setBusPos([lng2, lat2])
+                index += 1
+                setTimeout(moveBus, speed)
+            };
+
+            moveBus();
+        };
+
+        map.once('moveend', startMovingBus)
+
+        return () => map.off('moveend', startMovingBus)
+    }, [route, isMapLoaded])
 
     return (
         <div className='bg-white rounded-lg shadow-lg p-6'>
@@ -95,7 +96,7 @@ export default function LiveTrackingMap({ pathRoute } : any) {
                         longitude: start.lng,
                         latitude: start.lat,
                     }}
-                    style={{ width: '100%', height: '100%' }}
+                    style={{ width: '100%', height: '100%' }}   
                     mapStyle='mapbox://styles/mapbox/streets-v11'
                     onLoad={() => setIsMapLoaded(true)}
                 >
@@ -167,3 +168,5 @@ export default function LiveTrackingMap({ pathRoute } : any) {
         </div>
   )
 }
+
+export default LiveTrackingMap;

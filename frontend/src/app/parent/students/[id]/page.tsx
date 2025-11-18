@@ -1,5 +1,4 @@
 import {BellRing, Bus, MapPin} from 'lucide-react'
-import BusRoutesMap from "@/components/Map/BusRoutesMap";
 import {createServerApi} from "@/lib/axiosServer";
 import LiveTrackingMap from "@/components/parent/LiveTrackingMap";
 
@@ -10,9 +9,9 @@ const page = async ({ params }: any) => {
     const res = await api.get(`/students/${id}`)
     const student = res.data
 
-    const res1 = await api.get(`/student_events/student/${id}`)
+    const res1 = await api.get(`student_events/student/${id}`)
     const student_event = res1.data
-    console.log(student_event)
+
     return (
         <main className='flex gap-7 w-full'>
             <section className='w-3/4 border border-gray-200 shadow-xl rounded-2xl'>
@@ -25,7 +24,6 @@ const page = async ({ params }: any) => {
                 </div>
                 <div className="relative w-full h-full">
                     <LiveTrackingMap pathRoute={student_event[0].route_assignments.routes} />
-                    {/*<BusRoutesMap />*/}
                 </div>
             </section>
             <section className='w-1/4 mr-10 flex flex-col gap-7'>

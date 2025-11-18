@@ -1,6 +1,7 @@
 const UserRepository = require('../repository/UserRepository')
 const bcrypt = require('bcrypt')
-const {z} = require('zod')
+const routeAssignmentService = require('./RouteAssignmentService')
+const { z } = require('zod')
 const jwt = require('jsonwebtoken')
 
 const signupSchema = z.object({
@@ -12,9 +13,6 @@ const signupSchema = z.object({
     password: z
         .string()
         .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." }),
-    // .regex(/[A-Z]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự viết hoa." })
-    // .regex(/[0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự số." })
-    // .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." }),
 
     role: z.string()
 })
@@ -28,8 +26,6 @@ const createSchema = z.object({
     password: z
         .string()
         .min(6, { message: "Mật khẩu phải ít nhất 6 ký tự." }),
-    // .regex(/[A-Z]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự viết hoa." })
-    // .regex(/[^a-zA-Z0-9]/, { message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt." }),
 
     full_name: z.string().min(1, {
         message: "Vui lòng nhập họ tên.",
@@ -96,6 +92,21 @@ const getUsers = (filter) => {
     return UserRepository.getUsers(filter);
 }
 
+const getAvailableDrivers = async () => {
+    const allDrivers = await UserRepository.getUsers({ role: 'DRIVER' });
+    const allAssignments = await routeAssignmentService.getRouteAssignments();
+
+    const assignedDriverIds = new Set(
+        allAssignments
+            .filter(assignment => assignment.is_active)
+            .map(assignment => assignment.driver_id)
+    );
+
+    return allDrivers.filter(
+        driver => !assignedDriverIds.has(driver.user_id)
+    );
+}
+
 const getUserById = async (id) => {
     const userExist = await UserRepository.getUserById(id)
     if (!userExist)
@@ -129,6 +140,7 @@ const deleteUser = async (id) => {
 }
 
 module.exports = {
+    getAvailableDrivers,
     signupUser,
     loginUser,
     getCurrentUser,

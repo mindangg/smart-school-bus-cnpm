@@ -14,7 +14,7 @@ export const useAuthAction = () => {
         try {
             dispatch({ type: 'LOADING', payload: true })
 
-            const res = await api.post('/api/users/signup', {
+            const res = await api.post('users/signup', {
                 email: email,
                 password: password,
                 role: 'Parent'
@@ -38,7 +38,7 @@ export const useAuthAction = () => {
         try {
             dispatch({ type: 'LOADING' })
 
-            const res = await api.post('/api/users/login', {
+            const res = await api.post('users/login', {
                 email: email,
                 password: password,
             })
@@ -69,7 +69,7 @@ export const useAuthAction = () => {
 
     const logout = async () => {
         try {
-            await api.post('/api/users/logout')
+            await api.post('/users/logout')
             toast.success('Hẹn gặp lại.')
             dispatch({ type: 'LOGOUT' })
             router.replace('/')

@@ -35,7 +35,7 @@ CREATE TABLE students
     stop_id           INT,
 
     FOREIGN KEY (parent_id) REFERENCES users (user_id) ON DELETE SET NULL,
-    FOREIGN KEY (stop_id) REFERENCES bus_stops (stop_id) ON DELETE SET NULL
+    FOREIGN KEY (stop_id) REFERENCES route_stops (stop_id) ON DELETE SET NULL
 );
 
 CREATE TABLE buses
@@ -54,13 +54,10 @@ CREATE TABLE routes
 (
     route_id   INT PRIMARY KEY AUTO_INCREMENT,
     route_type varchar(20),
-    bus_id     INT,
     start_time time,
     is_active  boolean                     DEFAULT TRUE,
     created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-    updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (bus_id) REFERENCES buses (bus_id) ON DELETE SET NULL
+    updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE route_assignments
@@ -86,10 +83,22 @@ CREATE TABLE route_stops (
      stop_id INT NOT NULL,
      stop_order INT NOT NULL,
      stop_type VARCHAR(20),
+
      UNIQUE (route_id, stop_id),
      UNIQUE (route_id, stop_order),
      FOREIGN KEY (route_id) REFERENCES routes(route_id) ON DELETE CASCADE,
      FOREIGN KEY (stop_id) REFERENCES bus_stops(stop_id) ON DELETE CASCADE
+);
+
+CREATE TABLE route_stop_students (
+     id INT AUTO_INCREMENT PRIMARY KEY,
+     route_stop_id INT NOT NULL,
+     student_id INT NOT NULL,
+
+     UNIQUE (route_stop_id, student_id),
+
+     FOREIGN KEY (route_stop_id) REFERENCES route_stops(route_stop_id) ON DELETE CASCADE,
+     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE
 );
 
 CREATE TABLE student_events
@@ -152,7 +161,6 @@ CREATE TABLE chat_messages (
 
 CREATE INDEX idx_students_parent_id ON students (parent_id);
 CREATE INDEX idx_students_stop_id ON students (stop_id);
-CREATE INDEX idx_routes_bus_id ON routes (bus_id);
 CREATE INDEX idx_route_assignments_route_id ON route_assignments (route_id);
 CREATE INDEX idx_route_assignments_driver_id ON route_assignments (driver_id);
 CREATE INDEX idx_route_assignments_bus_id ON route_assignments (bus_id);

@@ -1,13 +1,13 @@
 import PathCard from "@/components/admin/paths/PathCard";
 import PathForm from "@/components/admin/paths/PathForm";
 
-const PathsPage = ({ routes, drivers } : any) => {
+const PathsPage = ({ routes, drivers, buses } : any) => {
     return (
         <main>
             <section className='bg-white flex flex-col gap-3 mb-10'>
                 <h1 className='text-2xl font-bold'>Bảng Phân Công Tuyến Đường</h1>
                 <h2 className='text-md font-bold'>Phân Công Tài Xế và Xe Buýt cho Tuyến Đường</h2>
-                <PathForm routes={routes} drivers={drivers}/>
+                <PathForm routes={routes} drivers={drivers} buses={buses}/>
             </section>
 
             <section>

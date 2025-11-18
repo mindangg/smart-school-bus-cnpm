@@ -8,6 +8,7 @@ const StudentRoute = require('./route/StudentRoute')
 const RouteRoute = require('./route/RouteRoute')
 const StudentEventRoute = require('./route/StudentEventRoute')
 const RouteAssignmentRoute = require('./route/RouteAssignmentRoute')
+const BusRoute = require('./route/BusRoute')
 
 const app = express()
 
@@ -31,6 +32,7 @@ app.use('/api/students', StudentRoute)
 app.use('/api/routes', RouteRoute)
 app.use('/api/student_events', StudentEventRoute)
 app.use('/api/route_assignment', RouteAssignmentRoute)
+app.use('/api/buses', BusRoute)
 
 app.get('/', (req, res) => {
     res.send('Welcome to my app')
