@@ -3,7 +3,7 @@ import {createServerApi} from "@/lib/axiosServer";
 
 const page = async () => {
     const api = await createServerApi()
-    const res = await api.get("/students/parent")
+    const res = await api.get("students/parent")
     const students = res.data
 
     return (

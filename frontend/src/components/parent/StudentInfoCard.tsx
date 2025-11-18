@@ -1,57 +1,44 @@
-// components/parent/StudentInfoCard.js
+// components/parent/StudentInfoCard.tsx (ĐÃ SỬA)
 'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import BusStopSelectionModal from './BusStopSelectionModal'
-// Giả sử bạn có file helper để gọi API từ client
-// import { createBrowserApi } from '@/lib/axiosBrowser'
+import api from '@/lib/axios'
 
-const StudentInfoCard = ({ student, studentEvent }) => {
+// 1. === SỬA Ở ĐÂY ===
+//    Đổi tên prop từ 'studentEvent' thành 'assignment'
+const StudentInfoCard = ({ student, assignment }: any) => {
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Lấy thông tin một cách an toàn (giống như trong file page.js cũ của bạn)
-    const busNumber = studentEvent?.route_assignments?.buses?.bus_number;
-    // Đây là trạm dừng HIỆN TẠI HỌC SINH ĐĂNG KÝ (từ bảng students)
-    const currentRegisteredStop = student.bus_stops?.address; 
-    // Đây là trạm dừng CỦA CHUYẾN ĐI (từ bảng student_events)
-    const pickupStop = studentEvent?.route_assignments?.routes?.route_stops[0]?.stop?.address;
-    const destinationStop = studentEvent?.route_assignments?.routes?.route_stops[1]?.stop?.address;
+    // 2. === SỬA Ở ĐÂY ===
+    //    Cập nhật logic để đọc từ object 'assignment' mới
+    const route = assignment?.route_stop?.route;
+    const bus = route?.buses; // Lấy xe buýt từ tuyến
+    const studentStop = assignment?.route_stop?.stop; // Đây là trạm đón CỦA HỌC SINH
+    
+    // Lấy trạm cuối cùng (điểm đến) từ danh sách TẤT CẢ các trạm của tuyến
+    const destinationStop = route?.route_stops[route.route_stops.length - 1]?.stop;
 
-    // Ưu tiên hiển thị trạm dừng đã đăng ký
-    const displayStop = currentRegisteredStop || pickupStop;
 
-    const handleSaveBusStop = async (newStopId) => {
-        // const api = createBrowserApi(); // Khởi tạo API client
-        console.log('Đang lưu trạm dừng mới:', newStopId, 'cho học sinh:', student.student_id);
-
+    // Hàm 'handleSaveBusStop' bạn cung cấp đã chính xác (gửi cả routeId và stopId)
+    // nên chúng ta giữ nguyên nó.
+    const handleSaveBusStop = async (newStopId: string, newRouteId: string) => {
+        console.log('Đang lưu trạm dừng mới:', newStopId, 'cho tuyến:', newRouteId);
         try {
-            // Đây là nơi bạn gọi API PUT (từ backend đã thiết kế)
-            const response = await fetch(`/api/students/${student.student_id}/stop`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // (Cần đính kèm token xác thực nếu có)
-                    // 'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ stopId: newStopId })
+            // 2. SỬA LẠI: Dùng api.put (không có /api/)
+            await api.put(`/students/${student.student_id}/stop`, { 
+                stopId: newStopId,
+                routeId: newRouteId 
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Lỗi khi lưu thay đổi');
-            }
-
-            // const updatedStudent = await response.json();
             console.log('Lưu thành công!');
-
-            setIsModalOpen(false); // Đóng modal
-            router.refresh(); // Tải lại Server Component để cập nhật dữ liệu mới
+            setIsModalOpen(false);
+            router.refresh();
         } catch (error) {
             console.error('Lỗi khi lưu trạm dừng:', error);
-            // (Hiển thị thông báo lỗi cho người dùng)
         }
     };
 
@@ -62,17 +49,18 @@ const StudentInfoCard = ({ student, studentEvent }) => {
 
                 <p>Tên: <span className='font-semibold'>{student.full_name}</span></p>
 
-                {studentEvent ? (
+                {/* 3. === SỬA Ở ĐÂY ===
+                    Kiểm tra 'assignment' và dùng các biến mới */}
+                {assignment ? (
                     <>
-                        <p>Xe buýt số: <span className='font-semibold'>{busNumber || 'N/A'}</span></p>
-                        <p>Địa điểm đón: <span className='font-semibold'>{displayStop || 'N/A'}</span></p>
-                        <p>Địa điểm đi: <span className='font-semibold'>{destinationStop || 'N/A'}</span></p>
+                        <p>Xe buýt số: <span className='font-semibold'>{bus?.bus_number || 'N/A'}</span></p>
+                        <p>Địa điểm đón: <span className='font-semibold'>{studentStop?.address || 'N/A'}</span></p>
+                        <p>Địa điểm đi: <span className='font-semibold'>{destinationStop?.address || 'N/A'}</span></p>
                     </>
                 ) : (
-                    <p className="text-gray-600">Không tìm thấy thông tin chuyến đi.</p>
+                    <p className="text-gray-600">Học sinh chưa đăng ký chuyến đi.</p>
                 )}
 
-                {/* Nút "Thay đổi" để mở Modal */}
                 <Button
                     onClick={() => setIsModalOpen(true)}
                     className="mt-3 bg-blue-600 hover:bg-blue-700"
@@ -81,12 +69,11 @@ const StudentInfoCard = ({ student, studentEvent }) => {
                 </Button>
             </div>
 
-            {/* Component Modal: Chỉ hiển thị khi isModalOpen là true */}
             {isModalOpen && (
                 <BusStopSelectionModal
                     studentId={student.student_id}
                     onClose={() => setIsModalOpen(false)}
-                    onSave={handleSaveBusStop} // Truyền hàm lưu
+                    onSave={handleSaveBusStop}
                 />
             )}
         </>

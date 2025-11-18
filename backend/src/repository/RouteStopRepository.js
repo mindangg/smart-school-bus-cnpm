@@ -31,7 +31,22 @@ const isStopOnActiveRoute = async (stopId) => {
         });
         return count > 0;
 }
+
+const findRouteStop = async (routeId, stopId) => {
+    return prisma.route_stops.findFirst({
+        where: {
+            route_id: routeId,
+            stop_id: stopId,
+            route: { is_active: true }, // Đảm bảo tuyến vẫn active
+            stop: { is_active: true }   // Đảm bảo trạm vẫn active
+        },
+        select: {
+            route_stop_id: true // Chỉ cần ID của nó
+        }
+    });
+}
 module.exports = {
     findStopsByRouteOrdered,
-    isStopOnActiveRoute
+    isStopOnActiveRoute,
+    findRouteStop
 }

@@ -13,6 +13,8 @@ router.get('/parent', studentController.getStudentsByParent)
 
 router.get('/:id', studentController.getStudentById)
 
+router.get('/:id/assignment', studentController.getStudentAssignment);
+
 router.post('/', studentController.createStudent)
 
 router.delete('/:id', studentController.deleteStudent)

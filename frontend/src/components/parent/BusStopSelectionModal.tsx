@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select"
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import api from '@/lib/axios'
 
 const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -29,67 +30,75 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
     const [stops, setStops] = useState([]); // Dữ liệu Bước 2
     const [selectedStop, setSelectedStop] = useState(undefined); // Bước 2: Trạm đã chọn
 
-    // Hàm gọi API (giữ nguyên)
-    const fetchApi = async (url) => {
-        const token = localStorage.getItem('authToken'); // (hoặc nơi bạn lưu token)
+    
+    // const fetchApi = async (url) => {
+    //     const token = localStorage.getItem('authToken'); // (hoặc nơi bạn lưu token)
         
-        const res = await fetch(url, {
-            headers: {
-                'Content-Type': 'application/json',
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-            }
-        });
+    //     const res = await fetch(url, {
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             ...(token && { 'Authorization': `Bearer ${token}` }),
+    //         }
+    //     });
 
-        if (!res.ok) {
-            const errorBody = await res.text();
-            console.error(`API Error: ${res.status} ${res.statusText}`, errorBody);
-            throw new Error(`Failed to fetch data. Status: ${res.status}`);
-        }
+    //     if (!res.ok) {
+    //         const errorBody = await res.text();
+    //         console.error(`API Error: ${res.status} ${res.statusText}`, errorBody);
+    //         throw new Error(`Failed to fetch data. Status: ${res.status}`);
+    //     }
         
-        return res.json();
-    };
+    //     return res.json();
+    // };
 
     // BƯỚC 1: Tải tất cả Tuyến đường đang hoạt động
     useEffect(() => {
         const fetchRoutes = async () => {
             try {
-                // Gọi API 1: GET /api/routes (Không cần filter)
-                const data = await fetchApi(`/api/routes`);
-                setRoutes(data || []);
+                // 3. SỬA LẠI: Gọi bằng api.get (không có /api/)
+                const res = await api.get('/routes');
+                setRoutes(res.data || []);
             } catch (error) {
                 console.error("Lỗi tải tuyến đường:", error);
                 setRoutes([]);
             }
         };
         fetchRoutes();
-    }, []); // Chỉ chạy 1 lần khi modal mở
+    }, []);
 
     // BƯỚC 2: Tải Trạm dừng khi Tuyến đường thay đổi
     useEffect(() => {
         if (!selectedRoute) {
             setStops([]);
-            setSelectedStop(undefined);
+            setSelectedStop(undefined); // <-- THÊM DÒNG NÀY
             return;
         }
+
+        setSelectedStop(undefined);
+        
         const fetchStops = async () => {
             try {
-                // Gọi API 2: GET /api/routes/:routeId/stops
-                const data = await fetchApi(`/api/routes/${selectedRoute}/stops`);
-                setStops(data || []);
+                // 4. SỬA LẠI: Gọi bằng api.get (không có /api/)
+                const res = await api.get(`/routes/${selectedRoute}/stops`);
+                setStops(res.data || []);
             } catch (error) {
                 console.error("Lỗi tải trạm dừng:", error);
                 setStops([]);
             }
         };
         fetchStops();
-    }, [selectedRoute]); // Chạy lại khi selectedRoute thay đổi
+    }, [selectedRoute]);
 
 
     const handleSubmit = async () => {
-        if (!selectedStop) return;
+        if (!selectedStop || !selectedRoute) { // Đảm bảo đã chọn cả hai
+            alert("Vui lòng chọn đầy đủ tuyến đường và điểm đón.");
+            return;
+        }
+        
         setIsLoading(true);
         try {
-            await onSave(selectedStop); 
+            // SỬA Ở ĐÂY: Truyền cả 2 ID
+            await onSave(selectedStop, selectedRoute); 
         } catch (error) {
             console.error(error);
         } finally {

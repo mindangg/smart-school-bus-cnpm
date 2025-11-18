@@ -1,53 +1,41 @@
 'use client'
 
-import React, {useEffect, useRef, useState} from 'react'
-import {Bus, MapPin} from 'lucide-react'
-import Map, {Layer, Marker, NavigationControl, Source} from 'react-map-gl'
-import api from "@/lib/axios";
+import React, { useEffect, useRef, useState } from 'react'
+import { Bus, MapPin } from 'lucide-react'
+import Map, { Layer, Marker, NavigationControl, Source } from 'react-map-gl'
+import api from "@/lib/axios"; // <-- Import file axios.ts của bạn
 import mapboxgl from "mapbox-gl";
-// import DriverTrackingMap from "@/components/driver/DriverTrackingMap"; // (Bạn không dùng)
 
-const LiveTrackingMap = ({ pathRoute } : any) => {
+const LiveTrackingMap = ({ pathRoute }: any) => {
+    // === BƯỚC 1: GỌI TẤT CẢ HOOK LÊN ĐẦU ===
     const mapRef = useRef<any>(null)
     const [isMapLoaded, setIsMapLoaded] = useState(false)
     const [route, setRoute] = useState<any>(null)
     const [busPos, setBusPos] = useState<[number, number] | null>(null)
 
-    // ==================================================================
-    // 1. THÊM ĐIỀU KIỆN BẢO VỆ TẠI ĐÂY
-    // ==================================================================
-    // Kiểm tra xem pathRoute có tồn tại VÀ có ít nhất 2 điểm dừng (start/end) không
-    if (!pathRoute || !pathRoute.route_stops || pathRoute.route_stops.length < 2) {
-        return (
-            <div className='bg-white rounded-lg shadow-lg p-6'>
-                <div className='relative w-full h-[450px] bg-gray-200 rounded-md overflow-hidden
-                                flex items-center justify-center'>
-                    <p className='text-gray-700 font-semibold'>
-                        Không có dữ liệu theo dõi tuyến đường.
-                    </p>
-                </div>
-            </div>
-        )
-    }
-    
-    // ==================================================================
-    // 2. TỪ ĐÂY TRỞ ĐI, CODE LÀ AN TOÀN
-    //    (Vì chúng ta đã chắc chắn pathRoute tồn tại)
-    // ==================================================================
-    const start = {
-        lng: pathRoute.route_stops[0].stop.longitude,
-        lat: pathRoute.route_stops[0].stop.latitude
-    }
-    const end = {
-        lng: pathRoute.route_stops[1].stop.longitude,
-        lat: pathRoute.route_stops[1].stop.latitude
-    }
-
+    // Hook 'useEffect' TẢI ĐƯỜNG ĐI (LUÔN ĐƯỢC GỌI)
     useEffect(() => {
+        // Thêm điều kiện 'if' VÀO BÊN TRONG hook
+        if (!pathRoute || !pathRoute.route_stops || pathRoute.route_stops.length < 2) {
+            setRoute(null); // Xóa đường đi cũ nếu không có dữ liệu mới
+            return; // Không làm gì cả
+        }
+        
+        // Chỉ chạy nếu pathRoute tồn tại
+        const start = {
+            lng: pathRoute.route_stops[0].stop.longitude,
+            lat: pathRoute.route_stops[0].stop.latitude
+        }
+        const end = {
+            lng: pathRoute.route_stops[pathRoute.route_stops.length - 1].stop.longitude, // Lấy điểm cuối cùng
+            lat: pathRoute.route_stops[pathRoute.route_stops.length - 1].stop.latitude
+        }
+
         const fetchRoute = async () => {
             try {
+                // Sửa lời gọi API: (Dùng file axios.ts, không cần '/api/')
                 const res = await api.get(
-                    `routes/direction`,
+                    `/routes/direction`, // <-- Phải có dấu '/' ở đầu
                     {
                         params: {
                             start: `${start.lng},${start.lat}`,
@@ -72,8 +60,9 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
         }
 
         fetchRoute()
-    }, [pathRoute]) // <-- Thêm pathRoute vào dependency array
+    }, [pathRoute]) // <-- Phụ thuộc vào pathRoute
 
+    // Hook 'useEffect' DI CHUYỂN XE BUÝT (LUÔN ĐƯỢC GỌI)
     useEffect(() => {
         if (!route || !mapRef.current || !isMapLoaded)
             return
@@ -82,7 +71,7 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
 
         const startMovingBus = () => {
             let index = 0
-            const speed = 2000 // Tốc độ (ms)
+            const speed = 2000
 
             const moveBus = () => {
                 if (index >= route.coordinates.length - 1)
@@ -95,15 +84,37 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
                 index += 1
                 setTimeout(moveBus, speed)
             };
-
             moveBus();
         };
 
-        // Chờ map load xong rồi mới bắt đầu di chuyển
         map.once('moveend', startMovingBus)
 
         return () => map.off('moveend', startMovingBus)
     }, [route, isMapLoaded])
+    
+    // === BƯỚC 2: KIỂM TRA VÀ RETURN TRẠNG THÁI RỖNG (SAU KHI GỌI HOOK) ===
+    if (!pathRoute || !pathRoute.route_stops || pathRoute.route_stops.length < 2) {
+        return (
+            <div className='bg-white rounded-lg shadow-lg p-6'>
+                <div className='relative w-full h-[450px] bg-gray-200 rounded-md overflow-hidden
+                                flex items-center justify-center'>
+                    <p className='text-gray-700 font-semibold'>
+                        Không có dữ liệu theo dõi tuyến đường.
+                    </p>
+                </div>
+            </div>
+        )
+    }
+
+    // === BƯỚC 3: DỮ LIỆU ĐÃ HỢP LỆ, TRẢ VỀ BẢN ĐỒ ===
+    const start = {
+        lng: pathRoute.route_stops[0].stop.longitude,
+        lat: pathRoute.route_stops[0].stop.latitude
+    }
+    const end = {
+        lng: pathRoute.route_stops[pathRoute.route_stops.length - 1].stop.longitude,
+        lat: pathRoute.route_stops[pathRoute.route_stops.length - 1].stop.latitude
+    }
 
     return (
         <div className='bg-white rounded-lg shadow-lg p-6'>
@@ -125,18 +136,12 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
                         <Source
                             id='route'
                             type='geojson'
-                            data={{
-                                type: 'Feature',
-                                properties: {},
-                                geometry: route,
-                            }}>
+                            data={{ type: 'Feature', properties: {}, geometry: route }}
+                        >
                             <Layer
                                 id='route-line'
                                 type='line'
-                                paint={{
-                                    'line-color': '#007AFF',
-                                    'line-width': 5,
-                                }}
+                                paint={{ 'line-color': '#007AFF', 'line-width': 5 }}
                             />
                         </Source>
                     )}
@@ -148,7 +153,6 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
                                     <p className='text-sm font-semibold text-gray-900'>
                                         Xe buýt
                                     </p>
-                                    <p className='text-xs text-gray-600'>Bus: 101</p>
                                 </div>
                                 <Bus size={32} className='text-yellow-500 fill-yellow-400' />
                             </div>
@@ -162,7 +166,7 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
                                     {pathRoute.route_stops[0].stop.address}
                                 </p>
                             </div>
-                            <MapPin size={32} className='text-green-500 fill-green-400'  />
+                            <MapPin size={32} className='text-green-500 fill-green-400' />
                         </div>
                     </Marker>
 
@@ -170,10 +174,10 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
                         <div className='flex flex-col items-center'>
                             <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
                                 <p className='text-sm font-semibold text-gray-900'>
-                                    {pathRoute.route_stops[1].stop.address}
+                                    {pathRoute.route_stops[pathRoute.route_stops.length - 1].stop.address}
                                 </p>
                             </div>
-                            <MapPin size={32} className='text-red-500 fill-red-400'  />
+                            <MapPin size={32} className='text-red-500 fill-red-400' />
                         </div>
                     </Marker>
                 </Map>
@@ -181,13 +185,13 @@ const LiveTrackingMap = ({ pathRoute } : any) => {
                 {!isMapLoaded && (
                     <div className='absolute inset-0 flex items-center justify-center bg-black/30 z-10'>
                         <span className='text-white text-lg font-bold bg-black/50 px-4 py-2 rounded'>
-                          Đang tải bản đồ...
+                            Đang tải bản đồ...
                         </span>
                     </div>
                 )}
             </div>
         </div>
-  )
+    )
 }
 
 export default LiveTrackingMap;

@@ -1,21 +1,21 @@
-// app/students/[id]/page.js
+// app/students/[id]/page.tsx (ĐÃ SỬA)
 import { BellRing, Bus, MapPin } from 'lucide-react'
 import { createServerApi } from "@/lib/axiosServer";
 import LiveTrackingMap from "@/components/parent/LiveTrackingMap";
-import StudentInfoCard from '@/components/parent/StudentInfoCard'; // <-- 1. Import component mới
+import StudentInfoCard from '@/components/parent/StudentInfoCard'; 
 
-const page = async ({ params }) => {
+const page = async ({ params }: any) => {
     const { id } = params
     const api = await createServerApi()
 
-    const res = await api.get(`/students/${id}`)
+    // 1. Lấy thông tin học sinh (Giữ nguyên)
+    const res = await api.get(`students/${id}`)
     const student = res.data
 
-    const res1 = await api.get(`/student_events/student/${id}`)
-    const student_event = res1.data
-
-    // 2. Lấy sự kiện đầu tiên một cách an toàn
-    const firstEvent = student_event?.length > 0 ? student_event[0] : null;
+    // 2. === SỬA Ở ĐÂY ===
+    // Gọi API mới để lấy dữ liệu chuyến đi, thay vì 'student_events'
+    const res1 = await api.get(`students/${id}/assignment`)
+    const assignmentData = res1.data // Đây là object từ 'route_stop_students' (hoặc null)
 
     return (
         <main className='flex gap-7 w-full'>
@@ -28,16 +28,21 @@ const page = async ({ params }) => {
                     <p>Điều Khiển</p>
                 </div>
                 <div className="relative w-full h-full">
-                    <LiveTrackingMap pathRoute={firstEvent?.route_assignments.routes} />
+                    {/* 3. === SỬA Ở ĐÂY ===
+                        Truyền object 'route' (bao gồm tất cả các trạm) vào bản đồ */}
+                    <LiveTrackingMap 
+                        pathRoute={assignmentData?.route_stop?.route} 
+                    />
                 </div>
             </section>
 
             <section className='w-1/4 mr-10 flex flex-col gap-7'>
 
-                {/* 3. Thay thế toàn bộ <div> cũ bằng component mới */}
+                {/* 4. === SỬA Ở ĐÂY ===
+                    Truyền prop 'assignment' (thay vì 'studentEvent') */}
                 <StudentInfoCard
                     student={student}
-                    studentEvent={firstEvent}
+                    assignment={assignmentData}
                 />
 
                 {/* Phần thông báo giữ nguyên */}
@@ -49,7 +54,6 @@ const page = async ({ params }) => {
                         </div>
                         <p className='text-sm text-gray-700 text-center'>Xóa tất cả</p>
                     </div>
-                    {/* ... (Các thông báo còn lại) ... */}
                     <div className='flex gap-3 items-center border-t border-gray-300 w-full p-4'>
                         <Bus />
                         <div>
