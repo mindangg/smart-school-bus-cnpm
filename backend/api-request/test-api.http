@@ -1,8 +1,1 @@
-POST http://localhost:4000/api/route_assignment
-Content-Type: application/json
-
-{
-    "route_id": 11,
-    "driver_id": 11,
-    "bus_id": 6
-}
+GET http://localhost:4000/api/bus_stops

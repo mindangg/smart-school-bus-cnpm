@@ -106,6 +106,7 @@ const createRoutesAndAssignRouteStops = async () => {
                 route_type: route.route_type,
                 start_time: route.start_time,
                 is_active: true,
+                generated_from: route.generated_from,
             },
         });
 
@@ -131,7 +132,7 @@ const createRoutesAndAssignRouteStops = async () => {
 // ========== 7. CREATE ROUTE ASSIGNMENTS ==========
 const createRouteAssignments = async () => {
 
-    const totalBuses = 7;
+    const totalBuses = 3;
     const assignments = [];
 
     for (let busId = 1; busId <= totalBuses; busId++) {
