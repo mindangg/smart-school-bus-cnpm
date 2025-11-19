@@ -66,6 +66,7 @@ CREATE TABLE `routes` (
     `is_active` BOOLEAN NULL DEFAULT true,
     `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updated_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `generated_from` INTEGER DEFAULT NULL,
 
     PRIMARY KEY (`route_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

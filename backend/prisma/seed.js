@@ -132,7 +132,6 @@ const createRoutesAndAssignRouteStops = async () => {
             create: {
                 route_id: route.route_id,
                 route_type: route.route_type,
-                bus_id: route.bus_id,
                 start_time: route.start_time,
                 is_active: true,
             },
@@ -165,31 +164,32 @@ const createRoutesAndAssignRouteStops = async () => {
 const createRouteAssignments = async () => {
     console.log("Creating route assignments...");
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
+    const totalBuses = 3;
     const assignments = [];
 
-    for (const routeEntry of routesData) {
-        const route = routeEntry.route;
+    for (let busId = 1; busId <= totalBuses; busId++) {
+        const driverId = busId + 5;
+        const morningRouteId = (busId - 1) * 2 + 1;
+        const eveningRouteId = (busId - 1) * 2 + 2;
 
-        const driverId = route.bus_id + 5;
-
-        assignments.push({
-            route_id: route.route_id,
-            driver_id: driverId,
-            bus_id: route.bus_id,
-            assignment_date: today,
-            is_active: true,
-        });
+        assignments.push(
+            {
+                route_id: morningRouteId,
+                driver_id: driverId,
+                bus_id: busId,
+                is_active: true,
+            },
+            {
+                route_id: eveningRouteId,
+                driver_id: driverId,
+                bus_id: busId,
+                is_active: true,
+            }
+        );
     }
 
-    await prisma.route_assignments.createMany({
-        data: assignments,
-        skipDuplicates: true,
-    });
-
-    console.log("Route assignments created.");
+    await prisma.route_assignments.createMany({ data: assignments, skipDuplicates: true });
+    console.log('Route assignments created.');
 };
 
 // ==========================================================

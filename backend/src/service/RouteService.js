@@ -82,7 +82,7 @@ const getRouteById = async (id) => {
 }
 
 const getAvailableRoutes = async () => {
-    const allRoutes = await routeRepository.getAllMorningRoutes();
+    const allRoutes = await routeRepository.getAllRoutes();
     const allAssignments = await routeAssignmentService.getRouteAssignments();
 
     const assignedRouteIds = new Set(
