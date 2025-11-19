@@ -5,7 +5,7 @@ const studentController = require('../controller/StudentController')
 
 const router = express.Router();
 
-// router.use(requireAuth)
+router.use(requireAuth)
 
 router.get('/', studentController.getStudents)
 
@@ -23,7 +23,6 @@ router.put('/:id', studentController.updateStudent)
 
 router.put(
     '/:studentId/stop',
-    requireAuth,
     studentController.updateStudentStops
 );
 

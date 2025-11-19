@@ -1,41 +1,33 @@
 // src/repository/RouteStopStudentRepository.js
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-// (Hoặc import file prisma chung của bạn: const prisma = require('../../lib/prisma');)
-
 
 /**
- * Cập nhật hoặc Tạo mới (Upsert) một đăng ký trạm dừng cho học sinh.
- * Đây là logic bạn đã có trong Service.
+ * Cập nhật phân công trạm dừng cho học sinh.
+ * Sử dụng Transaction để đảm bảo sạch dữ liệu: Xóa cũ -> Tạo mới.
  */
 const upsertAssignment = async (studentId, newRouteStopId) => {
     
-    // 1. Tìm xem học sinh đã có đăng ký nào chưa
-    const existingAssignment = await prisma.route_stop_students.findFirst({
-        where: { student_id: studentId }
-        // Lưu ý: Giả định 1 học sinh chỉ có 1 đăng ký.
-        // Nếu dùng @@unique([student_id]), hãy đổi .findFirst
-        // thành .findUnique({ where: { student_id: studentId }})
-    });
-
-    let resultAssignment;
-    if (existingAssignment) {
-        // 2. Nếu đã tồn tại, cập nhật
-        resultAssignment = await prisma.route_stop_students.update({
-            where: { id: existingAssignment.id }, // Cập nhật bằng ID của bản ghi
-            data: { route_stop_id: newRouteStopId }
+    // Sử dụng transaction để đảm bảo tính toàn vẹn
+    return prisma.$transaction(async (tx) => {
+        
+        // 1. Xóa TẤT CẢ phân công cũ của học sinh này (để tránh dư thừa data rác)
+        await tx.route_stop_students.deleteMany({
+            where: { 
+                student_id: studentId 
+            }
         });
-    } else {
-        // 3. Nếu chưa, tạo mới
-        resultAssignment = await prisma.route_stop_students.create({
+
+        // 2. Tạo bản ghi mới
+        const newAssignment = await tx.route_stop_students.create({
             data: {
                 student_id: studentId,
                 route_stop_id: newRouteStopId
             }
         });
-    }
 
-    return resultAssignment;
+        return newAssignment;
+    });
 }
 
 module.exports = {
