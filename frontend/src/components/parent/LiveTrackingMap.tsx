@@ -7,30 +7,35 @@ import api from "@/lib/axios"; // <-- Import file axios.ts của bạn
 import mapboxgl from "mapbox-gl";
 
 const LiveTrackingMap = ({ pathRoute }: any) => {
+    // === BƯỚC 1: GỌI TẤT CẢ HOOK LÊN ĐẦU ===
     const mapRef = useRef<any>(null)
     const [isMapLoaded, setIsMapLoaded] = useState(false)
     const [route, setRoute] = useState<any>(null)
     const [busPos, setBusPos] = useState<[number, number] | null>(null)
 
+    // Hook 'useEffect' TẢI ĐƯỜNG ĐI (LUÔN ĐƯỢC GỌI)
     useEffect(() => {
+        // Thêm điều kiện 'if' VÀO BÊN TRONG hook
         if (!pathRoute || !pathRoute.route_stops || pathRoute.route_stops.length < 2) {
-            setRoute(null);
-            return;
+            setRoute(null); // Xóa đường đi cũ nếu không có dữ liệu mới
+            return; // Không làm gì cả
         }
-
+        
+        // Chỉ chạy nếu pathRoute tồn tại
         const start = {
             lng: pathRoute.route_stops[0].stop.longitude,
             lat: pathRoute.route_stops[0].stop.latitude
         }
         const end = {
-            lng: pathRoute.route_stops[pathRoute.route_stops.length - 1].stop.longitude,
+            lng: pathRoute.route_stops[pathRoute.route_stops.length - 1].stop.longitude, // Lấy điểm cuối cùng
             lat: pathRoute.route_stops[pathRoute.route_stops.length - 1].stop.latitude
         }
 
         const fetchRoute = async () => {
             try {
+                // Sửa lời gọi API: (Dùng file axios.ts, không cần '/api/')
                 const res = await api.get(
-                    `/routes/direction`,
+                    `/routes/direction`, // <-- Phải có dấu '/' ở đầu
                     {
                         params: {
                             start: `${start.lng},${start.lat}`,
@@ -55,8 +60,9 @@ const LiveTrackingMap = ({ pathRoute }: any) => {
         }
 
         fetchRoute()
-    }, [pathRoute])
+    }, [pathRoute]) // <-- Phụ thuộc vào pathRoute
 
+    // Hook 'useEffect' DI CHUYỂN XE BUÝT (LUÔN ĐƯỢC GỌI)
     useEffect(() => {
         if (!route || !mapRef.current || !isMapLoaded)
             return
@@ -85,7 +91,7 @@ const LiveTrackingMap = ({ pathRoute }: any) => {
 
         return () => map.off('moveend', startMovingBus)
     }, [route, isMapLoaded])
-
+    
     // === BƯỚC 2: KIỂM TRA VÀ RETURN TRẠNG THÁI RỖNG (SAU KHI GỌI HOOK) ===
     if (!pathRoute || !pathRoute.route_stops || pathRoute.route_stops.length < 2) {
         return (
@@ -100,6 +106,7 @@ const LiveTrackingMap = ({ pathRoute }: any) => {
         )
     }
 
+    // === BƯỚC 3: DỮ LIỆU ĐÃ HỢP LỆ, TRẢ VỀ BẢN ĐỒ ===
     const start = {
         lng: pathRoute.route_stops[0].stop.longitude,
         lat: pathRoute.route_stops[0].stop.latitude
@@ -119,7 +126,7 @@ const LiveTrackingMap = ({ pathRoute }: any) => {
                         longitude: start.lng,
                         latitude: start.lat,
                     }}
-                    style={{ width: '100%', height: '100%' }}
+                    style={{ width: '100%', height: '100%' }}   
                     mapStyle='mapbox://styles/mapbox/streets-v11'
                     onLoad={() => setIsMapLoaded(true)}
                 >

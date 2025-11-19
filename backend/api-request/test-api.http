@@ -1,1 +1,1 @@
-GET http://localhost:4000/api/bus_stops
+GET http://localhost:4000/api/routes?isAvailable=true
