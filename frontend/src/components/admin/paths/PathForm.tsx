@@ -25,7 +25,6 @@ const schema = z.object({
     }),
 })
 
-
 const PathForm = ({ routes, drivers, buses }: any) => {
     const [loading, setLoading] = useState(false)
     const [selectedRoute, setSelectedRoute] = useState<any>(null);

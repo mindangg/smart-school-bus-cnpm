@@ -172,16 +172,17 @@ const createRouteAssignments = async () => {
 
     for (const routeEntry of routesData) {
         const route = routeEntry.route;
-
-        const driverId = route.bus_id + 5;
+        let busId = 1
+        const driverId = busId + 5;
 
         assignments.push({
             route_id: route.route_id,
             driver_id: driverId,
-            bus_id: route.bus_id,
+            bus_id: busId,
             assignment_date: today,
             is_active: true,
         });
+        busId += 1;
     }
 
     await prisma.route_assignments.createMany({

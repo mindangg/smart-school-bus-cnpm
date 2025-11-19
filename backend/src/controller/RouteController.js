@@ -75,7 +75,7 @@ const getRouteDirection = async (req, res) => {
 
     const [startLng, startLat] = start.split(',').map(Number)
     const [endLng, endLat] = end.split(',').map(Number)
-    console.log(process.env.MAPBOX_ACCESS_TOKEN)
+
     if ([startLat, startLng, endLat, endLng].some(isNaN)) {
         return res.status(400).json({ error: "Invalid coordinate format" })
     }

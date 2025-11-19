@@ -17,12 +17,12 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
     const [busPos, setBusPos] = useState<[number, number] | null>(null)
 
     const start = {
-        lng: pathRoute.route_stops[0].stop.longitude,
-        lat: pathRoute.route_stops[0].stop.latitude
+        lng: pathRoute?.route_stops[0]?.stop?.longitude,
+        lat: pathRoute?.route_stops[0]?.stop?.latitude
     }
     const end = {
-        lng: pathRoute.route_stops[6].stop.longitude,
-        lat: pathRoute.route_stops[6].stop.latitude
+        lng: pathRoute?.route_stops[6]?.stop?.longitude,
+        lat: pathRoute?.route_stops[6]?.stop?.latitude
     }
 
     useEffect(() => {
@@ -153,6 +153,18 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
             map.off("moveend", animateBus);
         };
     }, [route, isMapLoaded, distance, duration]);
+    if (!pathRoute || !pathRoute.route_stops || pathRoute.route_stops.length < 2) {
+        return (
+            <div className='bg-white rounded-lg shadow-lg p-6'>
+                <div className='relative w-full h-[450px] bg-gray-200 rounded-md overflow-hidden
+                                flex items-center justify-center'>
+                    <p className='text-gray-700 font-semibold'>
+                        Không có dữ liệu theo dõi tuyến đường.
+                    </p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className='bg-white rounded-lg shadow-lg p-6'>

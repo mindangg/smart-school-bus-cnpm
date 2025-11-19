@@ -49,7 +49,7 @@ const page = async () => {
             </section>
             <section className='bg-white p-4 border border-gray-100 shadow-xs rounded-xl cursor-pointer'>
                 <h2 className='text-md font-bold mb-2'>Vị Trí Xe Buýt Thời Gian Thực</h2> 
-                <DriverTrackingMap pathRoute={route_assignment[0].routes} bus={route_assignment[0]?.buses?.bus_number}/>
+                <DriverTrackingMap pathRoute={route_assignment[0]?.routes} bus={route_assignment[0]?.buses?.bus_number}/>
             </section>
         </main>
     )

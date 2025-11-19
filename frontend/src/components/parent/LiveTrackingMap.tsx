@@ -35,7 +35,7 @@ const LiveTrackingMap = ({ pathRoute }: any) => {
             try {
                 // Sửa lời gọi API: (Dùng file axios.ts, không cần '/api/')
                 const res = await api.get(
-                    `/routes/direction`, // <-- Phải có dấu '/' ở đầu
+                    `routes/direction`, // <-- Phải có dấu '/' ở đầu
                     {
                         params: {
                             start: `${start.lng},${start.lat}`,
