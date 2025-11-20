@@ -209,7 +209,6 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                                     <p className='text-sm font-semibold text-gray-900'>
                                         {bus}
                                     </p>
-                                    {/*<p className='text-xs text-gray-600'>Bus: 101</p>*/}
                                 </div>
                                 <Bus size={32} className='text-yellow-500 fill-yellow-400' />
                             </div>
@@ -226,7 +225,7 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                             <div className='flex flex-col items-center'>
                                 <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
                                     <p className='text-sm font-semibold text-gray-900'>
-                                        {stop.stop.address}
+                                        {index + 1}. {stop.stop.address}
                                     </p>
                                 </div>
                                 {

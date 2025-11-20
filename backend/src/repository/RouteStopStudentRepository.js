@@ -38,6 +38,18 @@ const upsertAssignment = async (studentId, newRouteStopId) => {
     return resultAssignment;
 }
 
+const getStudentsAtRouteStop = async (routeStopId) => {
+    return prisma.route_stop_students.findMany({
+        where: {
+            route_stop_id: routeStopId,
+        },
+        select: {
+            student: true,
+        },
+    });
+}
+
 module.exports = {
-    upsertAssignment
+    upsertAssignment,
+    getStudentsAtRouteStop
 }

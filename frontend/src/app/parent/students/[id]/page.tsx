@@ -1,4 +1,3 @@
-// app/students/[id]/page.tsx (ĐÃ SỬA)
 import { BellRing, Bus, MapPin } from 'lucide-react'
 import { createServerApi } from "@/lib/axiosServer";
 import LiveTrackingMap from "@/components/parent/LiveTrackingMap";
@@ -8,14 +7,11 @@ const page = async ({ params }: any) => {
     const { id } = params
     const api = await createServerApi()
 
-    // 1. Lấy thông tin học sinh (Giữ nguyên)
     const res = await api.get(`students/${id}`)
     const student = res.data
 
-    // 2. === SỬA Ở ĐÂY ===
-    // Gọi API mới để lấy dữ liệu chuyến đi, thay vì 'student_events'
     const res1 = await api.get(`students/${id}/assignment`)
-    const assignmentData = res1.data // Đây là object từ 'route_stop_students' (hoặc null)
+    const assignmentData = res1.data
 
     return (
         <main className='flex gap-7 w-full'>
@@ -28,8 +24,6 @@ const page = async ({ params }: any) => {
                     <p>Điều Khiển</p>
                 </div>
                 <div className="relative w-full h-full">
-                    {/* 3. === SỬA Ở ĐÂY ===
-                        Truyền object 'route' (bao gồm tất cả các trạm) vào bản đồ */}
                     <LiveTrackingMap 
                         pathRoute={assignmentData?.route_stop?.route} 
                     />
@@ -38,8 +32,6 @@ const page = async ({ params }: any) => {
 
             <section className='w-1/4 mr-10 flex flex-col gap-7'>
 
-                {/* 4. === SỬA Ở ĐÂY ===
-                    Truyền prop 'assignment' (thay vì 'studentEvent') */}
                 <StudentInfoCard
                     student={student}
                     assignment={assignmentData}

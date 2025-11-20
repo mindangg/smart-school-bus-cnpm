@@ -30,10 +30,10 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
     const [stops, setStops] = useState([]); // Dữ liệu Bước 2
     const [selectedStop, setSelectedStop] = useState(undefined); // Bước 2: Trạm đã chọn
 
-    
+
     // const fetchApi = async (url) => {
     //     const token = localStorage.getItem('authToken'); // (hoặc nơi bạn lưu token)
-        
+
     //     const res = await fetch(url, {
     //         headers: {
     //             'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
     //         console.error(`API Error: ${res.status} ${res.statusText}`, errorBody);
     //         throw new Error(`Failed to fetch data. Status: ${res.status}`);
     //     }
-        
+
     //     return res.json();
     // };
 

@@ -3,7 +3,7 @@ import PathsPage from "@/components/admin/paths/PathsPage";
 
 const Paths = async () => {
     const api = await createServerApi()
-    const res = await api.get('routes?isAvailable=true')
+    const res = await api.get('routes')
     const routes = res.data
     const res1 = await api.get('users?role=DRIVER&isAvailable=true')
     const drivers = res1.data

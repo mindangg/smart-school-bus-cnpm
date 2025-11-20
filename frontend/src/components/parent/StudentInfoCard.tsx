@@ -7,28 +7,20 @@ import { Button } from '@/components/ui/button'
 import BusStopSelectionModal from './BusStopSelectionModal'
 import api from '@/lib/axios'
 
-// 1. === SỬA Ở ĐÂY ===
-//    Đổi tên prop từ 'studentEvent' thành 'assignment'
 const StudentInfoCard = ({ student, assignment }: any) => {
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // 2. === SỬA Ở ĐÂY ===
-    //    Cập nhật logic để đọc từ object 'assignment' mới
     const route = assignment?.route_stop?.route;
-    const bus = route?.buses; // Lấy xe buýt từ tuyến
-    const studentStop = assignment?.route_stop?.stop; // Đây là trạm đón CỦA HỌC SINH
-    
-    // Lấy trạm cuối cùng (điểm đến) từ danh sách TẤT CẢ các trạm của tuyến
+    const bus = route?.buses;
+    const studentStop = assignment?.route_stop?.stop;
+
     const destinationStop = route?.route_stops[route.route_stops.length - 1]?.stop;
 
 
-    // Hàm 'handleSaveBusStop' bạn cung cấp đã chính xác (gửi cả routeId và stopId)
-    // nên chúng ta giữ nguyên nó.
     const handleSaveBusStop = async (newStopId: string, newRouteId: string) => {
         console.log('Đang lưu trạm dừng mới:', newStopId, 'cho tuyến:', newRouteId);
         try {
-            // 2. SỬA LẠI: Dùng api.put (không có /api/)
             await api.put(`/students/${student.student_id}/stop`, { 
                 stopId: newStopId,
                 routeId: newRouteId 
@@ -49,8 +41,6 @@ const StudentInfoCard = ({ student, assignment }: any) => {
 
                 <p>Tên: <span className='font-semibold'>{student.full_name}</span></p>
 
-                {/* 3. === SỬA Ở ĐÂY ===
-                    Kiểm tra 'assignment' và dùng các biến mới */}
                 {assignment ? (
                     <>
                         <p>Xe buýt số: <span className='font-semibold'>{bus?.bus_number || 'N/A'}</span></p>
