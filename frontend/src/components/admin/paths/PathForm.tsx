@@ -31,6 +31,8 @@ const PathForm = ({ routes, drivers, buses }: any) => {
     const [selectedDriver, setSelectedDriver] = useState<any>(null);
     const [selectedBus, setSelectedBus] = useState<any>(null);
 
+    routes = routes.filter((item: any) => item.route_type === 'MORNING');
+
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
         defaultValues: {

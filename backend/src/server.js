@@ -9,6 +9,7 @@ const RouteRoute = require('./route/RouteRoute')
 const StudentEventRoute = require('./route/StudentEventRoute')
 const RouteAssignmentRoute = require('./route/RouteAssignmentRoute')
 const BusRoute = require('./route/BusRoute')
+const BusStopRoute = require('./route/BusStopRoute')
 const RouteStopRoute = require('./route/RouteStopRoute')
 
 const app = express()
@@ -35,6 +36,7 @@ app.use('/api/student_events', StudentEventRoute)
 app.use('/api/route_assignment', RouteAssignmentRoute)
 app.use('/api/buses', BusRoute)
 app.use('/api/route_stops', RouteStopRoute)
+app.use('/api/bus_stops', BusStopRoute)
 
 app.get('/', (req, res) => {
     res.send('Welcome to my app')
