@@ -113,10 +113,10 @@ const createBuses = async () => {
 };
 
 // ==========================================================
-// 5. CREATE ROUTES + ROUTE_STOPS (UPSET đúng composite key)
+// 5. CREATE ROUTES + ROUTE_STOPS
 // ==========================================================
 const createRoutesAndAssignRouteStops = async () => {
-    console.log("🚍 Seeding routes and route_stops...");
+    console.log("Seeding routes and route_stops...");
 
     for (const routeEntry of routesData) {
         const { route, stops } = routeEntry;
@@ -156,7 +156,7 @@ const createRoutesAndAssignRouteStops = async () => {
         }
     }
 
-    console.log("🎉 All routes and route_stops seeded successfully!");
+    console.log("All routes and route_stops seeded successfully!");
 };
 
 // ==========================================================

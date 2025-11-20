@@ -39,7 +39,7 @@ const getStudentById = async (req, res) => {
             return
         }
 
-        const student = await studentService.getStudentById(parseInt(id, 10))
+        const student = await studentService.getStudentById(Number(id))
         res.status(200).json(student)
     }
     catch (error) {
@@ -92,20 +92,18 @@ const updateStudentStops = async (req, res, next) => {
             }
 
             const studentId = parseInt(req.params.studentId, 10);
-            
-            // === SỬA TẠI ĐÂY: Lấy thêm routeId từ body ===
+
             const { stopId, routeId } = req.body; 
 
-            if (!stopId || !routeId) { // Kiểm tra cả 2
+            if (!stopId || !routeId) {
                 throw new Error('Stop ID and Route ID are required');
             }
 
-            // === SỬA TẠI ĐÂY: Truyền đủ 4 tham số ===
             const updatedStudent = await studentService.updateStudentStops(
                 parentId,
                 studentId,
-                parseInt(routeId, 10), // Tham số 3: Route ID
-                parseInt(stopId, 10)   // Tham số 4: Stop ID
+                parseInt(routeId, 10),
+                parseInt(stopId, 10)
             );
             
             res.status(200).json(updatedStudent);
@@ -116,14 +114,13 @@ const updateStudentStops = async (req, res, next) => {
 
 const getStudentAssignment = async (req, res, next) => {
     try {
-        const studentId = parseInt(req.params.id, 10); // Lấy id từ URL
+        const studentId = parseInt(req.params.id, 10);
         if (isNaN(studentId)) {
             throw new Error('Invalid Student ID');
         }
         
         const assignmentData = await studentService.getStudentAssignment(studentId);
-        
-        // Trả về null (không phải lỗi) nếu không tìm thấy
+
         res.status(200).json(assignmentData); 
     } catch (error) {
         next(error);

@@ -1,4 +1,3 @@
-// components/parent/StudentInfoCard.tsx (ĐÃ SỬA)
 'use client'
 
 import { useState } from 'react'
@@ -17,19 +16,22 @@ const StudentInfoCard = ({ student, assignment }: any) => {
 
     const destinationStop = route?.route_stops[route.route_stops.length - 1]?.stop;
 
-
     const handleSaveBusStop = async (newStopId: string, newRouteId: string) => {
-        console.log('Đang lưu trạm dừng mới:', newStopId, 'cho tuyến:', newRouteId);
         try {
             await api.put(`/students/${student.student_id}/stop`, { 
                 stopId: newStopId,
                 routeId: newRouteId 
             });
 
-            console.log('Lưu thành công!');
+            await api.put(`student_events/stop_student`, {
+                student_id: student.student_id,
+                event_type: 'PICK UP'
+            })
+
             setIsModalOpen(false);
             router.refresh();
-        } catch (error) {
+        }
+        catch (error) {
             console.error('Lỗi khi lưu trạm dừng:', error);
         }
     };

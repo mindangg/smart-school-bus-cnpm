@@ -12,9 +12,6 @@ router.get('/direction', routeController.getRouteDirection)
 router.get('/direction_full', routeController.getRouteDirectionFull)
 
 router.get('/:id', routeController.getRouteById)
-// router.get('/', routeController.getAllSchedules)
-
-// router.get('/:id',routeController.getRouteDetails)
 
 router.get(
     '/:routeId/stops',

@@ -1,5 +1,4 @@
 const { PrismaClient } = require('@prisma/client')
-const { studentGetSelect } = require('../dto/Student')
 const prisma = new PrismaClient()
 
 const createStudent = async (data) => {

@@ -89,11 +89,34 @@ const updateStudentEvent = async (
     })
 }
 
-const deleteStudentEvent = (event_id) => {
+const deleteStudentEvent = async (event_id) => {
     return prisma.student_events.delete({
         where: {event_id}
     })
 }
+
+const createPickupStudentEvent = async (data) => {
+    const existing = await prisma.student_events.findFirst({
+        where: { student_id: data.student_id }
+    });
+
+    if (existing) {
+        return prisma.student_events.update({
+            where: { event_id: existing.event_id },
+            data: {
+                event_type: data.event_type,
+            }
+        });
+    } else {
+        return prisma.student_events.create({
+            data: {
+                student_id: data.student_id,
+                event_type: data.event_type,
+            }
+        });
+    }
+};
+
 
 module.exports = {
     getStudentEvents,
@@ -101,5 +124,6 @@ module.exports = {
     getStudentEventById,
     createStudentEvent,
     deleteStudentEvent,
-    updateStudentEvent
+    updateStudentEvent,
+    createPickupStudentEvent
 }

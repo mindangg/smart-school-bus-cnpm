@@ -5,6 +5,7 @@ import mapboxgl from 'mapbox-gl'
 import api from '@/lib/axios'
 import Map, {Layer, Marker, NavigationControl, Source} from 'react-map-gl'
 import {ArrowRight, Bus, BusFront, MapPin} from 'lucide-react'
+import StudentPopup from "@/components/driver/StudentPopup";
 
 const DriverTrackingMap = ({pathRoute, bus}: any) => {
     const mapRef = useRef<any>(null)
@@ -15,6 +16,10 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
     const [distance, setDistance] = useState<number>(0)
     const [duration, setDuration] = useState<number>(0)
     const [busPos, setBusPos] = useState<[number, number] | null>(null)
+
+    const [open, setOpen] = useState<boolean>(false)
+    const [students, setStudents] = useState<any[]>([])
+    const [studentPickup, setStudentPickup] = useState<any>(null)
 
     const start = {
         lng: pathRoute?.route_stops[0]?.stop?.longitude,
@@ -153,6 +158,7 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
             map.off("moveend", animateBus);
         };
     }, [route, isMapLoaded, distance, duration]);
+
     if (!pathRoute || !pathRoute.route_stops || pathRoute.route_stops.length < 2) {
         return (
             <div className='bg-white rounded-lg shadow-lg p-6'>
@@ -164,6 +170,14 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                 </div>
             </div>
         )
+    }
+
+    const getStudentsAtRouteStop = async (routeStopId: number, pickup: any) => {
+        const res = await api.get(`route_stop_student/${routeStopId}`)
+        const list = res.data.map((item: any) => item.student)
+        setStudents(list)
+        setStudentPickup(pickup)
+        setOpen(true)
     }
 
     return (
@@ -221,6 +235,7 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                             longitude={stop.stop.longitude}
                             latitude={stop.stop.latitude}
                             anchor='bottom'
+                            onClick={() => getStudentsAtRouteStop(stop.route_stop_id, stop.stop.address)}
                         >
                             <div className='flex flex-col items-center'>
                                 <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
@@ -230,7 +245,7 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                                 </div>
                                 {
                                     index == 0 ? <MapPin size={32} className='text-green-500 fill-green-400'  /> :
-                                    index == 6 ? <MapPin size={32} className='text-red-500 fill-red-400'  /> :
+                                    index == pathRoute.length - 1 ? <MapPin size={32} className='text-red-500 fill-red-400'  /> :
                                     <BusFront size={25} className='text-blue-500 fill-blue-400' />
                                 }
                             </div>
@@ -279,6 +294,8 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                     </div>
                 </div>
             )}
+            {open && <StudentPopup students={students} studentPickup={studentPickup} setOpen={setOpen} />}
+
         </div>
     )
 }

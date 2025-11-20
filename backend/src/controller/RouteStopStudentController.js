@@ -1,9 +1,14 @@
-const { findStopsByRoute } = require("../service/RouteStopService");
-const studentService = require("../service/StudentService");
+const routeStopStudentService = require("../service/RouteStopStudentService");
 
 const getStudentsAtRouteStop = async (req, res) => {
     try {
-        const students = await studentService.getStudents()
+        const { id } = req.params;
+        if (!id) {
+            res.status(400).json({ message: 'ID is required' })
+            return
+        }
+
+        const students = await routeStopStudentService.getStudentsAtRouteStop(Number(id));
         res.status(200).json(students)
     }
     catch (error) {
