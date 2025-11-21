@@ -1,4 +1,3 @@
-// components/parent/BusStopSelectionModal.js
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -24,39 +23,17 @@ import api from '@/lib/axios'
 const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
     const [isLoading, setIsLoading] = useState(false);
 
-    // Dữ liệu cho 2 bước
-    const [routes, setRoutes] = useState([]); // Dữ liệu Bước 1
-    const [selectedRoute, setSelectedRoute] = useState(undefined); // Bước 1: Tuyến đã chọn
-    const [stops, setStops] = useState([]); // Dữ liệu Bước 2
-    const [selectedStop, setSelectedStop] = useState(undefined); // Bước 2: Trạm đã chọn
+    const [routes, setRoutes] = useState([]);
+    const [selectedRoute, setSelectedRoute] = useState(undefined);
+    const [stops, setStops] = useState([]);
+    const [selectedStop, setSelectedStop] = useState(undefined);
 
-
-    // const fetchApi = async (url) => {
-    //     const token = localStorage.getItem('authToken'); // (hoặc nơi bạn lưu token)
-
-    //     const res = await fetch(url, {
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             ...(token && { 'Authorization': `Bearer ${token}` }),
-    //         }
-    //     });
-
-    //     if (!res.ok) {
-    //         const errorBody = await res.text();
-    //         console.error(`API Error: ${res.status} ${res.statusText}`, errorBody);
-    //         throw new Error(`Failed to fetch data. Status: ${res.status}`);
-    //     }
-
-    //     return res.json();
-    // };
-
-    // BƯỚC 1: Tải tất cả Tuyến đường đang hoạt động
     useEffect(() => {
         const fetchRoutes = async () => {
             try {
-                // 3. SỬA LẠI: Gọi bằng api.get (không có /api/)
                 const res = await api.get('/routes');
-                setRoutes(res.data || []);
+                setRoutes(res.data);
+                console.log(res.data);
             } catch (error) {
                 console.error("Lỗi tải tuyến đường:", error);
                 setRoutes([]);
@@ -65,11 +42,10 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
         fetchRoutes();
     }, []);
 
-    // BƯỚC 2: Tải Trạm dừng khi Tuyến đường thay đổi
     useEffect(() => {
         if (!selectedRoute) {
             setStops([]);
-            setSelectedStop(undefined); // <-- THÊM DÒNG NÀY
+            setSelectedStop(undefined); 
             return;
         }
 
@@ -77,7 +53,6 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
         
         const fetchStops = async () => {
             try {
-                // 4. SỬA LẠI: Gọi bằng api.get (không có /api/)
                 const res = await api.get(`/routes/${selectedRoute}/stops`);
                 setStops(res.data || []);
             } catch (error) {
@@ -90,14 +65,13 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
 
 
     const handleSubmit = async () => {
-        if (!selectedStop || !selectedRoute) { // Đảm bảo đã chọn cả hai
+        if (!selectedStop || !selectedRoute) {
             alert("Vui lòng chọn đầy đủ tuyến đường và điểm đón.");
             return;
         }
         
         setIsLoading(true);
         try {
-            // SỬA Ở ĐÂY: Truyền cả 2 ID
             await onSave(selectedStop, selectedRoute); 
         } catch (error) {
             console.error(error);
@@ -108,7 +82,7 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
 
     return (
         <Dialog open={true} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Thay đổi điểm đón</DialogTitle>
                     <DialogDescription>
@@ -117,8 +91,6 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
-
-                    {/* BƯỚC 1: Chọn Tuyến đường */}
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="route" className="text-right">1. Tuyến đường</Label>
                         <Select onValueChange={setSelectedRoute} value={selectedRoute}>
@@ -128,14 +100,16 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
                             <SelectContent id="route">
                                 {routes.map(r => (
                                     <SelectItem key={r.route_id} value={String(r.route_id)}>
-                                        {r.name || `Tuyến ${r.route_id} (${r.route_type})`}
+                                        {`Tuyến ${r.route_stops[0]?.stop?.address} -> ${
+                                            r.route_stops[r.route_stops.length - 1]?.stop?.address
+                                        }`}
                                     </SelectItem>
                                 ))}
+
                             </SelectContent>
                         </Select>
                     </div>
 
-                    {/* BƯỚC 2: Chọn Điểm đón */}
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="stop" className="text-right">2. Điểm đón</Label>
                         <Select onValueChange={setSelectedStop} value={selectedStop} disabled={!selectedRoute || stops.length === 0}>

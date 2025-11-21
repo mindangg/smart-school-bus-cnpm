@@ -37,11 +37,20 @@ const deleteStudentEvent = async (id) => {
     return studentEventRepository.deleteStudentEvent(id)
 }
 
+const createPickupStudentEvent = async (data) => {
+    const studentEvent = await studentEventRepository.createPickupStudentEvent(data)
+    if (!studentEvent)
+        throw new Error('No student event')
+
+    return studentEvent
+}
+
 module.exports = {
     getStudentEvents,
     getStudentEventsByStudent,
     getStudentEventById,
     createStudentEvent,
     deleteStudentEvent,
-    updateStudentEvent
+    updateStudentEvent,
+    createPickupStudentEvent
 }

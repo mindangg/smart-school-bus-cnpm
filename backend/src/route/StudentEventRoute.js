@@ -17,6 +17,8 @@ router.post('/', studentEventController.createStudentEvent)
 
 router.delete('/:id', studentEventController.deleteStudentEvent)
 
+router.put('/stop_student', studentEventController.createPickupStudentEvent)
+
 router.put('/:id', studentEventController.updateStudentEvent)
 
 module.exports = router

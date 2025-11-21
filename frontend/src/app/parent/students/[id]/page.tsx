@@ -31,13 +31,10 @@ const page = async ({ params }: any) => {
             </section>
 
             <section className='w-1/4 mr-10 flex flex-col gap-7'>
-
                 <StudentInfoCard
                     student={student}
                     assignment={assignmentData}
                 />
-
-                {/* Phần thông báo giữ nguyên */}
                 <div className='flex flex-col items-center gap-3 bg-white border border-gray-200 shadow-md rounded-xl pt-5'>
                     <div>
                         <div className='flex items-center gap-3 mb-2'>

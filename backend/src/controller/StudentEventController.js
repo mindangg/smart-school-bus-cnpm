@@ -122,11 +122,24 @@ const updateStudentStops = async (req, res, next) => {
         }
 }
 
+const createPickupStudentEvent = async (req, res) => {
+    try {
+        const data = req.body
+
+        const studentEvent = await studentEventService.createPickupStudentEvent(data)
+        res.status(200).json(studentEvent)
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 module.exports = {
     getStudentEvents,
     getStudentEventsByStudent,
     getStudentEventById,
     createStudentEvent,
     deleteStudentEvent,
-    updateStudentEvent
+    updateStudentEvent,
+    createPickupStudentEvent
 }

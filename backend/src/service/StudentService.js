@@ -43,8 +43,6 @@ const deleteStudent = async (id) => {
 }
 
 const updateStudentStops = async (parentId, studentId, newRouteId, newStopId) => {
-    
-    // 1. Xác thực phụ huynh (Giữ nguyên)
     const student = await studentRepository.getStudentById(studentId);
     if (!student) {
         throw new Error('Student not found');
@@ -53,24 +51,17 @@ const updateStudentStops = async (parentId, studentId, newRouteId, newStopId) =>
         throw new Error('Unauthorized');
     }
 
-    // 2. Tìm bản ghi 'route_stop' (Giữ nguyên)
     const routeStop = await routeStopRepository.findRouteStop(newRouteId, newStopId);
 
     if (!routeStop) {
-        // ĐÂY LÀ LỖI BẠN ĐANG GẶP (Dòng 62)
         throw new Error('This stop is not valid or not active on the selected route.');
     }
 
     const newRouteStopId = routeStop.route_stop_id;
-
-    // 3. === SỬA Ở ĐÂY ===
-    // Giao logic "upsert" cho Repository mới
-    // KHÔNG CÒN GỌI 'prisma' Ở ĐÂY NỮA
     const updatedAssignment = await routeStopStudentRepository.upsertAssignment(
         studentId, 
         newRouteStopId
     );
-    // ====================
 
     return updatedAssignment;
  }

@@ -7,12 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/**
- * ===================== USERS =====================
- */
 model users {
   user_id      Int       @id @default(autoincrement())
-  email        String    @unique @db.VarChar(255)
+  email        String    @unique(map: "email") @db.VarChar(255)
   password     String    @db.VarChar(255)
   full_name    String?   @db.VarChar(255)
   phone_number String?   @db.VarChar(20)
@@ -27,25 +24,18 @@ model users {
   students          students[]
 }
 
-/**
- * ===================== BUSES =====================
- */
 model buses {
-  bus_id                Int       @id @default(autoincrement())
-  bus_number            String    @unique @db.VarChar(50)
-  license_plate         String    @unique @db.VarChar(50)
+  bus_id                Int                 @id @default(autoincrement())
+  bus_number            String              @unique(map: "bus_number") @db.VarChar(50)
+  license_plate         String              @unique(map: "license_plate") @db.VarChar(50)
   capacity              Int?
-  model                 String?   @db.VarChar(100)
+  model                 String?             @db.VarChar(100)
   year                  Int?
-  status                String?   @db.VarChar(20)
-  last_maintenance_date DateTime? @db.Date
-
-  route_assignments route_assignments[]
+  status                String?             @db.VarChar(20)
+  last_maintenance_date DateTime?           @db.Date
+  route_assignments     route_assignments[]
 }
 
-/**
- * ===================== BUS STOPS =====================
- */
 model bus_stops {
   stop_id   Int      @id @default(autoincrement())
   latitude  Decimal? @db.Decimal(11, 8)
@@ -56,9 +46,6 @@ model bus_stops {
   route_stops route_stops[]
 }
 
-/**
- * ===================== ROUTES =====================
- */
 model routes {
   route_id       Int       @id @default(autoincrement())
   route_type     String?   @db.VarChar(20)
@@ -72,9 +59,6 @@ model routes {
   route_stops       route_stops[]
 }
 
-/**
- * ===================== ROUTE ASSIGNMENTS =====================
- */
 model route_assignments {
   assignment_id Int       @id @default(autoincrement())
   route_id      Int
@@ -96,9 +80,6 @@ model route_assignments {
   @@index([route_id])
 }
 
-/**
- * ===================== ROUTE STOPS =====================
- */
 model route_stops {
   route_stop_id Int @id @default(autoincrement())
   route_id      Int
@@ -113,11 +94,9 @@ model route_stops {
 
   @@unique([route_id, stop_id])
   @@unique([route_id, stop_order])
+  @@map("route_stops")
 }
 
-/**
- * ===================== STUDENTS =====================
- */
 model students {
   student_id        Int       @id @default(autoincrement())
   parent_id         Int?
@@ -134,45 +113,32 @@ model students {
   @@index([parent_id])
 }
 
-/**
- * ===================== STUDENT EVENTS =====================
- */
 model student_events {
-  event_id            Int      @id @default(autoincrement())
+  event_id            Int                @id @default(autoincrement())
   student_id          Int
   route_assignment_id Int?
-  event_type          String   @db.VarChar(20)
-  event_time          DateTime @db.Timestamp(0)
-  notes               String?  @db.Text
+  event_type          String             @db.VarChar(20)
+  event_time          DateTime           @default(now()) @db.Timestamp(0)
+  notes               String?            @db.Text
+  notifications       notifications[]
+  students            students           @relation(fields: [student_id], references: [student_id], onDelete: Cascade, onUpdate: NoAction, map: "student_events_ibfk_1")
+  route_assignments   route_assignments? @relation(fields: [route_assignment_id], references: [assignment_id], onUpdate: NoAction, map: "student_events_ibfk_2")
 
-  students students @relation(fields: [student_id], references: [student_id], onDelete: Cascade)
-
-  route_assignments route_assignments? @relation(fields: [route_assignment_id], references: [assignment_id], onDelete: Cascade)
-
-  notifications notifications[]
-
-  @@index([route_assignment_id])
-  @@index([student_id])
+  @@index([route_assignment_id], map: "idx_student_events_assignment_id")
+  @@index([student_id], map: "idx_student_events_student_id")
 }
 
-/**
- * ===================== ROUTE STOP STUDENTS =====================
- */
 model route_stop_students {
   id            Int @id @default(autoincrement())
   route_stop_id Int
   student_id    Int
 
   route_stop route_stops @relation(fields: [route_stop_id], references: [route_stop_id], onDelete: Cascade)
-
-  student students @relation(fields: [student_id], references: [student_id], onDelete: Cascade)
+  student    students    @relation(fields: [student_id], references: [student_id], onDelete: Cascade)
 
   @@unique([route_stop_id, student_id])
 }
 
-/**
- * ===================== NOTIFICATIONS =====================
- */
 model notifications {
   notification_id   Int       @id @default(autoincrement())
   user_id           Int
@@ -183,10 +149,9 @@ model notifications {
   is_read           Boolean?  @default(false)
   created_at        DateTime? @default(now()) @db.Timestamp(0)
 
-  users users @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  users          users           @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "notifications_ibfk_1")
+  student_events student_events? @relation(fields: [event_id], references: [event_id], onUpdate: NoAction, map: "notifications_ibfk_2")
 
-  student_events student_events? @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
-
-  @@index([event_id])
-  @@index([user_id])
+  @@index([event_id], map: "idx_notifications_event_id")
+  @@index([user_id], map: "idx_notifications_user_id")
 }
