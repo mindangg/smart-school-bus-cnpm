@@ -1,6 +1,6 @@
-const { PrismaClient } = require('@prisma/client')
+const {PrismaClient} = require('@prisma/client')
 const prisma = new PrismaClient()
-const { routeAssignmentGetSelect } = require('../dto/RouteAssignment')
+const {routeAssignmentGetSelect} = require('../dto/RouteAssignment')
 
 const getAllRouteAssignments = async () => {
     return prisma.route_assignments.findMany({
@@ -10,33 +10,63 @@ const getAllRouteAssignments = async () => {
 
 const getRouteAssignmentById = async (assignment_id) => {
     return prisma.route_assignments.findUnique({
-        where: { assignment_id },
-        include: routeAssignmentGetSelect
+        where: {assignment_id},
+        include: {
+            users: {
+                select: {
+                    user_id: true,
+                    full_name: true,
+                    phone_number: true
+                }
+            },
+
+            buses: {
+                select: {
+                    bus_id: true,
+                    bus_number: true,
+                }
+            },
+
+            routes: {
+                select: {
+                    route_id: true,
+                    route_type: true,
+                    start_time: true,
+
+                    route_stops: {
+                        orderBy: { stop_order: "asc" },
+                        include: {
+                            stop: true
+                        }
+                    }
+                }
+            }
+        }
     })
 }
 
 const getRouteAssignmentByDriver = async (driver_id) => {
     return prisma.route_assignments.findMany({
-        where: { driver_id },
+        where: {driver_id},
         include: routeAssignmentGetSelect
     })
 }
 
 const getRouteAssignmentByRouteId = async (route_id) => {
     return prisma.route_assignments.findMany({
-        where: { route_id },
+        where: {route_id},
     })
 }
 
 const getRouteAssignmentByDriverId = async (driver_id) => {
     return prisma.route_assignments.findMany({
-        where: { driver_id },
+        where: {driver_id},
     })
 }
 
 const getRouteAssignmentByBusId = async (bus_id) => {
     return prisma.route_assignments.findMany({
-        where: { bus_id },
+        where: {bus_id},
     })
 }
 
@@ -48,7 +78,7 @@ const findRouteDetailsById = async (routeId) => {
         },
         include: {
             route_assignments: {
-                where: { is_active: true }, // Chỉ lấy xe đang được phân công chạy
+                where: {is_active: true}, // Chỉ lấy xe đang được phân công chạy
                 include: {
                     buses: true // Lấy thông tin xe từ bảng assignment
                 }
@@ -68,30 +98,49 @@ const findRouteDetailsById = async (routeId) => {
 const findAllAssignments = async () => {
     return prisma.route_assignments.findMany({
         include: {
-            routes: {
-                select: {
-                    route_type: true,
-                    start_time: true
-                }
-            },
             users: {
                 select: {
-                    full_name: true
+                    user_id: true,
+                    full_name: true,
+                    phone_number: true
                 }
             },
+
             buses: {
                 select: {
-                    bus_number: true
+                    bus_id: true,
+                    bus_number: true,
+                }
+            },
+
+            routes: {
+                select: {
+                    route_id: true,
+                    route_type: true,
+                    start_time: true,
+
+                    route_stops: {
+                        orderBy: { stop_order: "asc" },
+                        include: {
+                            stop: true
+                        }
+                    }
                 }
             }
-        },
+        }
     });
-};
+}
+
 
 const createRouteAssignment = async (data) => {
-    console.log(data)
     return prisma.route_assignments.create({
         data
+    });
+}
+
+const deleteRouteAssignment = async (assignment_id) => {
+    return prisma.route_assignments.delete({
+        where: {assignment_id}
     });
 }
 
@@ -104,5 +153,6 @@ module.exports = {
     getRouteAssignmentByRouteId,
     getRouteAssignmentByDriverId,
     getRouteAssignmentByBusId,
-    createRouteAssignment
+    createRouteAssignment,
+    deleteRouteAssignment
 }

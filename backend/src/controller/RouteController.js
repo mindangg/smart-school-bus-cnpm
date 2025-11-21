@@ -1,7 +1,5 @@
 const routeService = require('../service/RouteService')
-const axios = require('axios')
-const userService = require("../service/UserService")
-const studentService = require("../service/StudentService")
+
 
 // const getRouteDetails = async (req, res) => {
 //     try{
@@ -36,9 +34,9 @@ const studentService = require("../service/StudentService")
 const getRoutes = async (req, res) => {
     const {isAvailable} = req.query
     try {
-        if (isAvailable) {
-            const allRoutes = await routeService.getAvailableRoutes()
-            res.status(200).json(allRoutes)
+        if (isAvailable === 'true') {
+            const availableRoutes = await routeService.getAvailableRoutes()
+            res.status(200).json(availableRoutes)
             return
         }
         const routes = await routeService.getRoutes()
@@ -150,6 +148,37 @@ const getRouteDirectionFull = async (req, res) => {
     }
 }
 
+const createRoute = async (req, res) => {
+    try {
+        const { start_time, stops, create_return_route, return_start_time } = req.body
+        if (!start_time || !stops || !Array.isArray(stops) || stops.length === 0) {
+            return res.status(400).json({ message: 'Invalid input data' })
+        }
+        if (stops.length < 2) {
+            return res.status(400).json({ message: 'A route must have at least two stops' })
+        }
+        const newRoute = await routeService.createRoute(start_time, stops, create_return_route, return_start_time)
+        res.status(201).json(newRoute)
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+
+}
+
+const deleteRoute = async (req, res) => {
+    try {
+        const { id } = req.params
+
+        if (!id) {
+            return res.status(400).json({ message: 'ID is required' })
+        }
+
+        await routeService.deleteRoute(Number(id))
+        res.status(204).send()
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
 
 module.exports = {
     // getRouteDetails,
@@ -157,6 +186,8 @@ module.exports = {
     getRoutes,
     getRouteById,
     getRouteDirection,
-    getRouteDirectionFull
+    getRouteDirectionFull,
+    createRoute,
+    deleteRoute,
 }
 

@@ -79,12 +79,26 @@ const createRouteAssignment = async (req, res) => {
     }
 }
 
+const deleteRouteAssignment = async (req, res) => {
+    try {
+        const { id } = req.params
+        if (!id) {
+            return res.status(400).json({ message: 'ID is required' })
+        }
+        await routeAssignmentService.deleteRouteAssignment(Number(id))
+        res.status(204).send()
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 module.exports = {
     getRouteAssignments,
     getRouteAssignmentById,
     getRouteAssignmentByDriver,
     getAllSchedules,
     getRouteDetails,
-    createRouteAssignment
+    createRouteAssignment,
+    deleteRouteAssignment
 }
 

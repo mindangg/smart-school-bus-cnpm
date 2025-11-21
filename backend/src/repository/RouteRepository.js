@@ -86,6 +86,35 @@ const getRouteById = async (route_id) => {
     })
 }
 
+const createRoute = async (start_time, type, generated_from) => {
+    return prisma.routes.create({
+        data: {
+            route_type: type,
+            start_time,
+            is_active: true,
+            generated_from: generated_from,
+        },
+    });
+}
+
+const getReturnRoute = async (route_id) => {
+    return prisma.routes.findFirst({
+        where: {
+            generated_from: route_id,
+        },
+    });
+}
+
+const deleteRoute = async (routeId) => {
+    return prisma.routes.deleteMany({
+        where: {
+            OR: [
+                { route_id: routeId },
+                { generated_from: routeId }
+            ]
+        }
+    });
+}
 
 module.exports = {
     // findRouteDetailsById,
@@ -93,5 +122,7 @@ module.exports = {
     getAllRoutes,
     getRouteById,
     getAllMorningRoutes,
-
+    createRoute,
+    getReturnRoute,
+    deleteRoute,
 }

@@ -1,5 +1,5 @@
 const routeAssignmentRepository = require('../repository/RouteAssignmentRepository');
-const axios = require('axios');
+const routeService = require('./RouteService');
 
 const getRouteAssignments = async () => {
     return routeAssignmentRepository.getAllRouteAssignments();
@@ -7,6 +7,7 @@ const getRouteAssignments = async () => {
 
 const getRouteAssignmentById = async (id) => {
     const route = await routeAssignmentRepository.getRouteAssignmentById(id)
+    console.log(route)
     if (!route)
         throw new Error('No route')
 
@@ -107,21 +108,24 @@ const getRouteById = async (routeId) => {
 };
 
 const getAllSchedules = async () => {
-    const assignments = await routeAssignmentRepository.findAllAssignments();
-
-    return assignments.map(a => ({
-        assignment_id: a.assignment_id,
-        route_id: a.route_id, 
-        bus_number: a.buses.bus_number,
-        route_name: a.routes.route_type === 'MORNING' ? 'Tuyến Sáng' : 'Tuyến Chiều',
-        driver_name: a.users.full_name,
-        start_time: a.routes.start_time,
-        status: a.is_active ? 'Sắp chạy' : 'Hoàn thành', 
-    }));
+    return routeAssignmentRepository.findAllAssignments();
 }
 
 const createRouteAssignment = async (data) => {
-    return routeAssignmentRepository.createRouteAssignment(data);
+    const route_id = data.route_id;
+    await routeAssignmentRepository.createRouteAssignment(data);
+    const returnRoute = await routeService.getReturnRoute(route_id)
+    if (returnRoute) {
+        const returnData = {
+            ...data,
+            route_id: returnRoute.route_id,
+        }
+        await routeAssignmentRepository.createRouteAssignment(returnData);
+    }
+}
+
+const deleteRouteAssignment = async (id) => {
+    return routeAssignmentRepository.deleteRouteAssignment(id);
 }
 
 module.exports = {
@@ -133,5 +137,6 @@ module.exports = {
     getRouteAssignmentByRouteId,
     getRouteAssignmentByDriverId,
     getRouteAssignmentByBusId,
-    createRouteAssignment
+    createRouteAssignment,
+    deleteRouteAssignment,
 }

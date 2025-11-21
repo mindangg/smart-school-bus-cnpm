@@ -24,7 +24,7 @@ const isStopOnActiveRoute = async (stopId) => {
     const count = await prisma.route_stops.count({
             where: {
                 stop_id: stopId,
-                route: { // Kiểm tra lồng, đảm bảo tuyến của trạm này active
+                route: {
                     is_active: true
                 }
             }
@@ -37,16 +37,29 @@ const findRouteStop = async (routeId, stopId) => {
         where: {
             route_id: routeId,
             stop_id: stopId,
-            route: { is_active: true }, // Đảm bảo tuyến vẫn active
-            stop: { is_active: true }   // Đảm bảo trạm vẫn active
+            route: { is_active: true },
+            stop: { is_active: true }
         },
         select: {
-            route_stop_id: true // Chỉ cần ID của nó
+            route_stop_id: true
         }
     });
 }
+
+const createRouteStopsForRoute = async (routeId, stops) => {
+    return prisma.route_stops.createMany({
+        data: stops.map((stop) => ({
+            route_id: routeId,
+            stop_id: stop.stop_id,
+            stop_order: stop.stop_order
+        })),
+        skipDuplicates: true,
+    });
+}
+
 module.exports = {
     findStopsByRouteOrdered,
     isStopOnActiveRoute,
-    findRouteStop
+    findRouteStop,
+    createRouteStopsForRoute,
 }

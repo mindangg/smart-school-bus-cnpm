@@ -5,14 +5,7 @@ import { useRouter } from 'next/navigation';
 import PathCard from "@/components/admin/paths/PathCard";
 import PathForm from "@/components/admin/paths/PathForm";
 import { Button } from '@/components/ui/button';
-
-interface BusStop {
-    stop_id: number;
-    latitude: number;
-    longitude: number;
-    address: string;
-    is_active: boolean;
-}
+import api from "@/lib/axios";
 
 interface Route {
     route_id: number;
@@ -22,40 +15,41 @@ interface Route {
     created_at: string;
     updated_at: string;
     generated_from: number;
-    route_stops?: any[];
-}
-
-interface Driver {
-    driver_id: number;
-    name: string;
-    // ... other driver fields
-}
-
-interface Bus {
-    bus_id: number;
-    license_plate: string;
-    // ... other bus fields
+    route_stops: any[];
 }
 
 interface PathsPageProps {
     routes: Route[];
-    drivers: Driver[];
-    buses: Bus[];
+    drivers: any[];
+    buses: any[];
+    allRoutes: Route[];
 }
 
-const PathsPage = ({ routes, drivers, buses }: PathsPageProps) => {
+const PathsPage = ({ routes, drivers, buses, allRoutes }: PathsPageProps) => {
     const router = useRouter();
     const [routesData, setRoutesData] = useState<Route[]>(routes);
+    const [allRoutesData, setAllRoutesData] = useState<Route[]>(allRoutes);
 
     const handleRouteAdded = async () => {
         try {
-            const response = await fetch('/api/admin/routes');
-            const newRoutes = await response.json();
+            const response = await api.get('routes?isAvailable=true');
+            const newRoutes = await response.data
             setRoutesData(newRoutes);
         } catch (error) {
             console.error('Error refreshing routes:', error);
         }
     };
+
+    const onDeleteRoute = async () => {
+        console.log('Route deleted, refreshing routes...');
+        try {
+            const response = await api.get('routes');
+            const newRoutes = await response.data
+            setAllRoutesData(newRoutes);
+        } catch (error) {
+            console.error('Error refreshing routes:', error);
+        }
+    }
 
     const handleAddRoute = () => {
         router.push('/admin/paths/add');
@@ -91,8 +85,8 @@ const PathsPage = ({ routes, drivers, buses }: PathsPageProps) => {
                         <span>Hành Động</span>
                     </div>
                     <div className="overflow-y-auto max-h-[500px]">
-                        {routesData.map((route: Route) => (
-                            <PathCard key={route.route_id} route={route} onRouteUpdated={handleRouteAdded}/>
+                        {allRoutesData.map((route: Route) => (
+                            <PathCard key={route.route_id} route={route} onDeleteRoute={onDeleteRoute}/>
                         ))}
                     </div>
                 </div>

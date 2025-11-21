@@ -125,16 +125,16 @@ const createRoutesAndAssignRouteStops = async () => {
             where: { route_id: route.route_id },
             update: {
                 route_type: route.route_type,
-                bus_id: route.bus_id,
                 start_time: route.start_time,
                 is_active: true,
+                generated_from: route.generated_from,
             },
             create: {
                 route_id: route.route_id,
                 route_type: route.route_type,
-                bus_id: route.bus_id,
                 start_time: route.start_time,
                 is_active: true,
+                generated_from: route.generated_from,
             },
         });
 
@@ -165,21 +165,18 @@ const createRoutesAndAssignRouteStops = async () => {
 const createRouteAssignments = async () => {
     console.log("Creating route assignments...");
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     const assignments = [];
 
-    for (const routeEntry of routesData) {
+    for (let i = 0; i < 5; i++) {
+        const routeEntry = routesData[i];
         const route = routeEntry.route;
-        let busId = 1
-        const driverId = busId + 5;
+        let busId = i + 1
+        const driverId = i + 1;
 
         assignments.push({
             route_id: route.route_id,
             driver_id: driverId,
             bus_id: busId,
-            assignment_date: today,
             is_active: true,
         });
         busId += 1;

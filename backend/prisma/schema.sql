@@ -82,7 +82,6 @@ CREATE TABLE route_stops (
      route_id INT NOT NULL,
      stop_id INT NOT NULL,
      stop_order INT NOT NULL,
-     stop_type VARCHAR(20),
 
      UNIQUE (route_id, stop_id),
      UNIQUE (route_id, stop_order),
