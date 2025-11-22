@@ -169,7 +169,7 @@ const PathForm = ({ routes, drivers, buses }: any) => {
                                         <SelectContent>
                                             {buses.map((bus: any) => (
                                                 <SelectItem key={bus.bus_id} value={String(bus.bus_id)}>
-                                                    {bus.bus_number} - {bus.license_plate}
+                                                    {bus.bus_number}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

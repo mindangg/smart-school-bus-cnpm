@@ -1,4 +1,4 @@
-GET http://localhost:4000/api/route_assignment
+GET http://localhost:4000/api/buses
 Content-Type: application/json
 
 {

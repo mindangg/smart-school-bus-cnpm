@@ -77,6 +77,10 @@ const getStudentAssignment = async (studentId) => {
     return assignment;
 }
 
+const getTotalStudents = async () => {
+    return studentRepository.getTotalStudents();
+}
+
 module.exports = {
     getStudents,
     getStudentsByParent,
@@ -85,5 +89,6 @@ module.exports = {
     deleteStudent,
     updateStudent,
     updateStudentStops,
-    getStudentAssignment
+    getStudentAssignment,
+    getTotalStudents
 }

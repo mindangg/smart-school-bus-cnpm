@@ -25,15 +25,12 @@ model users {
 }
 
 model buses {
-  bus_id                Int                 @id @default(autoincrement())
-  bus_number            String              @unique(map: "bus_number") @db.VarChar(50)
-  license_plate         String              @unique(map: "license_plate") @db.VarChar(50)
-  capacity              Int?
-  model                 String?             @db.VarChar(100)
-  year                  Int?
-  status                String?             @db.VarChar(20)
-  last_maintenance_date DateTime?           @db.Date
-  route_assignments     route_assignments[]
+  bus_id            Int                 @id @default(autoincrement())
+  bus_number        String              @unique(map: "bus_number") @db.VarChar(50)
+  capacity          Int?
+  model             String?             @db.VarChar(100)
+  status            String?             @db.VarChar(20)
+  route_assignments route_assignments[]
 }
 
 model bus_stops {

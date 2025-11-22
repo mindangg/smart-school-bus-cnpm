@@ -13,7 +13,22 @@ const getAvailableBuses = async () => {
     return allBuses.filter(bus => !assignedBusIds.has(bus.bus_id))
 }
 
+const getTotalBuses = async () => {
+    return busRepository.getTotalBuses();
+}
+
+const createBus = async (bus) => {
+    return busRepository.createBus(bus);
+}
+
+const deleteBus = async (busId) => {
+    return busRepository.deleteBus(busId);
+}
+
 module.exports = {
     getAllBuses,
-    getAvailableBuses
+    getAvailableBuses,
+    getTotalBuses,
+    createBus,
+    deleteBus
 };

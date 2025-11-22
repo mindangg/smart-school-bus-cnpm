@@ -116,6 +116,10 @@ const deleteRoute = async (routeId) => {
     });
 }
 
+const getTotalRoutes = async () => {
+    return prisma.routes.count();
+}
+
 module.exports = {
     // findRouteDetailsById,
     // findAllAssignments,
@@ -125,4 +129,5 @@ module.exports = {
     createRoute,
     getReturnRoute,
     deleteRoute,
+    getTotalRoutes
 }

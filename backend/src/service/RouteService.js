@@ -116,6 +116,10 @@ const deleteRoute = async (routeId) => {
     return routeRepository.deleteRoute(routeId);
 }
 
+const getTotalRoutes = async () => {
+    return routeRepository.getTotalRoutes();
+}
+
 module.exports = {
     // getRouteById1,
     // getAllSchedules,
@@ -125,4 +129,5 @@ module.exports = {
     createRoute,
     getReturnRoute,
     deleteRoute,
+    getTotalRoutes,
 }

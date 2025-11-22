@@ -47,6 +47,12 @@ const deleteUserById =(user_id) => {
     return prisma.users.delete({where: {user_id}});
 }
 
+const countUsersByRole = async (role) => {
+    return prisma.users.count({
+        where: { role }
+    });
+}
+
 module.exports = {
     getUserByEmail,
     signupUser,
@@ -55,5 +61,6 @@ module.exports = {
     getUserById,
     createUser,
     updateUserById,
-    deleteUserById
+    deleteUserById,
+    countUsersByRole
 }

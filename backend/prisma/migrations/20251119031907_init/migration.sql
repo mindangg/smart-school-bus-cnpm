@@ -21,14 +21,10 @@ CREATE TABLE `buses`
 (
     `bus_id`                INTEGER     NOT NULL AUTO_INCREMENT,
     `bus_number`            VARCHAR(50) NOT NULL,
-    `license_plate`         VARCHAR(50) NOT NULL,
     `capacity`              INTEGER,
     `model`                 VARCHAR(100),
-    `year`                  INTEGER,
     `status`                VARCHAR(20),
-    `last_maintenance_date` DATE,
     UNIQUE KEY `bus_number` (`bus_number`),
-    UNIQUE KEY `license_plate` (`license_plate`),
     PRIMARY KEY (`bus_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
