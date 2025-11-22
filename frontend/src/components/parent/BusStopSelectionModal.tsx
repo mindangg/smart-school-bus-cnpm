@@ -31,7 +31,7 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
     useEffect(() => {
         const fetchRoutes = async () => {
             try {
-                const res = await api.get('/routes');
+                const res = await api.get('/routes?type=assigned');
                 setRoutes(res.data);
                 console.log(res.data);
             } catch (error) {
