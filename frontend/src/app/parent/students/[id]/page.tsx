@@ -4,7 +4,7 @@ import LiveTrackingMap from "@/components/parent/LiveTrackingMap";
 import StudentInfoCard from '@/components/parent/StudentInfoCard'; 
 
 const page = async ({ params }: any) => {
-    const { id } = params
+    const { id } = await params
     const api = await createServerApi()
 
     const res = await api.get(`students/${id}`)
