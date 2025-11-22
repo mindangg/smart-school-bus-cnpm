@@ -27,6 +27,7 @@ const page = async ({ params }: any) => {
                 <div className="relative w-full h-full">
                     <LiveTrackingMap 
                         pathRoute={assignmentData?.route_stop?.route} 
+                        assignedStop={assignmentData?.route_stop?.stop}
                     />
                 </div>
             </section>
