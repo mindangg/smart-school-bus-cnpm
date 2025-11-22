@@ -166,7 +166,6 @@ const RouteDetailsDisplay = ({ selectedRoute, selectedDriver, selectedBus }: Rou
                     .addTo(map.current!);
             });
 
-            // Thêm route line thực tế
             map.current.addSource('route', {
                 type: 'geojson',
                 data: {
@@ -216,8 +215,7 @@ const RouteDetailsDisplay = ({ selectedRoute, selectedDriver, selectedBus }: Rou
                 const [lon1, lat1] = coordinates[i-1];
                 const [lon2, lat2] = coordinates[i];
 
-                // Tính khoảng cách Haversine (đơn giản)
-                const R = 6371; // Bán kính Trái đất tính bằng km
+                const R = 6371;
                 const dLat = (lat2 - lat1) * Math.PI / 180;
                 const dLon = (lon2 - lon1) * Math.PI / 180;
                 const a =
@@ -230,7 +228,7 @@ const RouteDetailsDisplay = ({ selectedRoute, selectedDriver, selectedBus }: Rou
 
             return {
                 distance: totalDistance,
-                duration: totalDistance * 2.5 // Ước tính thời gian (phút)
+                duration: totalDistance * 2.5
             };
         } catch (error) {
             return null;

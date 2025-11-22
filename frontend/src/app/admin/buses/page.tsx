@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import {Plus, Trash2} from 'lucide-react'
+import {Plus} from 'lucide-react'
 import {createServerApi} from "@/lib/axiosServer"
 import DeleteButton from "@/components/admin/buses/DeleteButton";
 
@@ -13,8 +13,6 @@ const BusesPage = async () => {
     } catch (error) {
         console.error("Error fetching buses:", error)
     }
-
-    console.log(buses)
 
     return (
         <div className="p-6">

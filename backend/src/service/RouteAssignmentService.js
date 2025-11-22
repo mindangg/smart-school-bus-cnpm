@@ -77,7 +77,6 @@ const getRouteById = async (routeId) => {
         })),
     };
 
-    // Phần Mapbox giữ nguyên
     if(formattedResponse.stops && formattedResponse.stops.length >= 2){
         try{
             const coordinates = formattedResponse.stops.map(stop => `${stop.longitude},${stop.latitude}`).join(';');

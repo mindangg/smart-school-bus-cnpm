@@ -1,5 +1,5 @@
 const routeService = require('../service/RouteService')
-
+const axios = require('axios')
 
 // const getRouteDetails = async (req, res) => {
 //     try{
@@ -31,14 +31,37 @@ const routeService = require('../service/RouteService')
 //     }
 // }
 
+// const getRoutes = async (req, res) => {
+//     const {isAvailable} = req.query
+//     try {
+//         if (isAvailable === 'true') {
+//             const availableRoutes = await routeService.getAvailableRoutes()
+//             res.status(200).json(availableRoutes)
+//             return
+//         }
+//         const routes = await routeService.getRoutes()
+//         res.status(200).json(routes)
+//     }
+//     catch (error) {
+//         res.status(500).json({message: error.message})
+//     }
+// }
+
 const getRoutes = async (req, res) => {
-    const {isAvailable} = req.query
+    const { isAvailable, type } = req.query 
     try {
         if (isAvailable === 'true') {
             const availableRoutes = await routeService.getAvailableRoutes()
             res.status(200).json(availableRoutes)
             return
         }
+
+        if (type === 'assigned') {
+            const assignedRoutes = await routeService.getRoutesForStudentRegistration();
+            res.status(200).json(assignedRoutes);
+            return;
+        }
+
         const routes = await routeService.getRoutes()
         res.status(200).json(routes)
     }
@@ -85,7 +108,7 @@ const getRouteDirection = async (req, res) => {
             params: {
                 geometries: "geojson",
                 access_token: process.env.MAPBOX_ACCESS_TOKEN,
-            },
+            }
         })
 
         res.json(response.data)
@@ -140,7 +163,7 @@ const getRouteDirectionFull = async (req, res) => {
         })
 
 
-        // res.json(response.data)
+        res.json(response.data)
     }
     catch (error) {
         console.error("Mapbox Directions API error:", error.response?.data || error.message)

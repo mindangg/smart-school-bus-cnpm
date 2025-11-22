@@ -27,7 +27,6 @@ const createBus = async (req, res) => {
 
 const deleteBus = async (req, res) => {
     const busId = req.params.id;
-    console.log('deleteBus', busId);
     if (busId === undefined) {
         return res.status(400).json({ message: 'Bus ID is required' });
     }

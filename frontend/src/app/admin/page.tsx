@@ -6,7 +6,6 @@ const page = async () => {
     const api =await createServerApi();
     const res = await api.get("admin/dashboard");
     const data = res.data;
-    console.log(data);
 
     const controlItems = [
         { title: 'Phụ Huynh', icon: <User />, href: 'admin/parents', count: data.totalParents },

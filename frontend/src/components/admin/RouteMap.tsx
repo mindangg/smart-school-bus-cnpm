@@ -26,8 +26,6 @@ interface RouteStop {
 interface RouteMapProps {
     routeStops: RouteStop[];
     routeType: string;
-    busNumber: string;
-    driverName: string;
 }
 
 const RouteMap = ({ routeStops, routeType }: RouteMapProps) => {
@@ -73,7 +71,6 @@ const RouteMap = ({ routeStops, routeType }: RouteMapProps) => {
                 map.current.remove();
                 map.current = null;
             }
-            // Xóa tất cả markers
             markersRef.current.forEach(marker => marker.remove());
             markersRef.current = [];
         };

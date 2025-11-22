@@ -2,7 +2,7 @@
 
 import {useState} from 'react'
 import {useRouter} from 'next/navigation'
-import {ArrowLeft, Save} from 'lucide-react'
+import {Save} from 'lucide-react'
 import Link from 'next/link'
 import {Button} from "@/components/ui/button";
 import api from "@/lib/axios";

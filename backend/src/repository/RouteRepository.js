@@ -120,6 +120,37 @@ const getTotalRoutes = async () => {
     return prisma.routes.count();
 }
 
+const getAssignedRoutes = async () => {
+    return prisma.routes.findMany({
+        where: {
+            is_active: true,
+            route_type: 'MORNING',
+            route_assignments: {
+                some: {
+                    is_active: true
+                }
+            }
+        },
+        include: {
+            route_stops: {
+                include: {
+                    stop: true
+                },
+                orderBy: {
+                    stop_order: 'asc'
+                }
+            },
+
+            route_assignments: {
+                where: { is_active: true },
+                include: {
+                    buses: true
+                }
+            }
+        }
+    });
+}
+
 module.exports = {
     // findRouteDetailsById,
     // findAllAssignments,
@@ -129,5 +160,6 @@ module.exports = {
     createRoute,
     getReturnRoute,
     deleteRoute,
+    getAssignedRoutes,
     getTotalRoutes
 }

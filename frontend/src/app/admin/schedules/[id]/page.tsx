@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, Bus, User, Calendar } from "lucide-react";
+import {useEffect, useState} from "react";
+import {useParams, useRouter} from "next/navigation";
+import {Badge} from "@/components/ui/badge";
+import {Card, CardContent} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
+import {ArrowLeft, MapPin, Bus, User, Calendar} from "lucide-react";
 import RouteMap from "@/components/admin/RouteMap";
 import api from "@/lib/axios";
+import DriverTrackingMap from "@/components/driver/DriverTrackingMap";
 
 interface Stop {
     stop_id: number;
@@ -81,7 +82,7 @@ const ScheduleDetailPage = () => {
 
     const getRouteEndpoints = (routeStops: RouteStop[]) => {
         if (!routeStops || routeStops.length === 0) {
-            return { start: 'N/A', end: 'N/A' };
+            return {start: 'N/A', end: 'N/A'};
         }
 
         const startStop = routeStops[0].stop;
@@ -115,11 +116,10 @@ const ScheduleDetailPage = () => {
         }
     };
 
-    // Hàm lấy trạng thái hoạt động
     const getStatusInfo = (isActive: boolean) => {
         return isActive
-            ? { text: 'Đang hoạt động', color: 'bg-green-100 text-green-800' }
-            : { text: 'Ngừng hoạt động', color: 'bg-red-100 text-red-800' };
+            ? {text: 'Đang hoạt động', color: 'bg-green-100 text-green-800'}
+            : {text: 'Ngừng hoạt động', color: 'bg-red-100 text-red-800'};
     };
 
     if (isLoading) {
@@ -181,7 +181,7 @@ const ScheduleDetailPage = () => {
                         <Card>
                             <CardContent className="p-6">
                                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                    <Calendar className="h-5 w-5" />
+                                    <Calendar className="h-5 w-5"/>
                                     Thông Tin Tổng Quan
                                 </h2>
                                 <div className="space-y-4">
@@ -210,7 +210,7 @@ const ScheduleDetailPage = () => {
                         <Card>
                             <CardContent className="p-6">
                                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                    <Bus className="h-5 w-5" />
+                                    <Bus className="h-5 w-5"/>
                                     Thông Tin Xe Buýt
                                 </h2>
                                 <div className="space-y-3">
@@ -229,7 +229,7 @@ const ScheduleDetailPage = () => {
                         <Card>
                             <CardContent className="p-6">
                                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                    <User className="h-5 w-5" />
+                                    <User className="h-5 w-5"/>
                                     Thông Tin Tài Xế
                                 </h2>
                                 <div className="space-y-3">
@@ -252,7 +252,7 @@ const ScheduleDetailPage = () => {
                         <Card>
                             <CardContent className="p-6">
                                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                    <MapPin className="h-5 w-5" />
+                                    <MapPin className="h-5 w-5"/>
                                     Lộ Trình
                                 </h2>
                                 <div className="space-y-4">
@@ -281,14 +281,11 @@ const ScheduleDetailPage = () => {
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-lg font-semibold">Bản Đồ Tuyến Đường</h2>
                                 </div>
-                                <div className="h-[500px] w-full bg-gray-100 rounded-lg border border-gray-300 overflow-hidden">
-                                    <RouteMap
-                                        routeStops={schedule.routes.route_stops}
-                                        routeType={schedule.routes.route_type}
-                                        busNumber={schedule.buses.bus_number}
-                                        driverName={schedule.users.full_name}
-                                    />
-                                </div>
+                                {/*<RouteMap*/}
+                                {/*    routeStops={schedule.routes.route_stops}*/}
+                                {/*    routeType={schedule.routes.route_type}*/}
+                                {/*/>*/}
+                                <DriverTrackingMap pathRoute={schedule.routes} bus={schedule.buses.bus_number}/>
                             </CardContent>
                         </Card>
 
@@ -341,7 +338,8 @@ const ScheduleDetailPage = () => {
                                                                 </Badge>
                                                             )}
                                                             {index === schedule.routes.route_stops.length - 1 && (
-                                                                <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+                                                                <Badge
+                                                                    className="bg-red-100 text-red-800 hover:bg-red-100">
                                                                     Điểm cuối
                                                                 </Badge>
                                                             )}

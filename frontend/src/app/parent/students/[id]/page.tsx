@@ -5,7 +5,7 @@ import StudentInfoCard from '@/components/parent/StudentInfoCard';
 import NotificationList from '@/components/parent/NotificationList';
 
 const page = async ({ params }: any) => {
-    const { id } = params
+    const { id } = await params
     const api = await createServerApi()
 
     const res = await api.get(`students/${id}`)
@@ -27,6 +27,7 @@ const page = async ({ params }: any) => {
                 <div className="relative w-full h-full">
                     <LiveTrackingMap 
                         pathRoute={assignmentData?.route_stop?.route} 
+                        assignedStop={assignmentData?.route_stop?.stop}
                     />
                 </div>
             </section>

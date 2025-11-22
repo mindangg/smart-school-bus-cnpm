@@ -116,6 +116,10 @@ const deleteRoute = async (routeId) => {
     return routeRepository.deleteRoute(routeId);
 }
 
+const getRoutesForStudentRegistration = async () => {
+    return routeRepository.getAssignedRoutes();
+}
+
 const getTotalRoutes = async () => {
     return routeRepository.getTotalRoutes();
 }
@@ -130,4 +134,5 @@ module.exports = {
     getReturnRoute,
     deleteRoute,
     getTotalRoutes,
+    getRoutesForStudentRegistration
 }
