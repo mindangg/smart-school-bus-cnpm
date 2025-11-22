@@ -1,82 +1,36 @@
-const StudentService = require('../service/StudentService')
+const notificationService = require('../service/NotificationService');
 
-const createStudent = async (req, res) => {
+const getMyNotifications = async (req, res) => {
     try {
-        const data = req.body
-        const student = await StudentService.createStudent(data)
-        res.status(201).json(student)
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-}
+        // ƯU TIÊN 1: Lấy từ token (khi đã đăng nhập thật)
+        // ƯU TIÊN 2: Fallback để test nhanh bằng query (rất tiện demo Postman)
+        const userId = req.user_id || req.query.user_id || req.query.userId;
 
-const getStudents = async (_req, res) => {
-    try {
-        const student = await StudentService.getStudents()
-        res.status(200).json(student)
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-}
-
-const getStudentById = async (req, res) => {
-    try {
-        const { id } = req.params
-
-        if (!id) {
-            res.status(400).json({ message: 'ID is required' })
-            return
+        if (!userId) {
+            return res.status(401).json({
+                message: "Unauthorized – Vui lòng đăng nhập hoặc dùng ?user_id để test"
+            });
         }
 
-        const student = await StudentService.getStudentById(parseInt(id, 10))
-        res.status(200).json(student)
+        const notifications = await notificationService.getNotificationsByUserId(Number(userId));
+        res.status(200).json(notifications);
+    } catch (error) {
+        console.error("Error fetching notifications:", error);
+        res.status(500).json({ message: error.message || "Lỗi server" });
     }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-}
+};
 
-const updateStudent = async (req, res) => {
+const markNotificationAsRead = async (req, res) => {
     try {
-        const { id } = req.params
-        const data = req.body
-
-        if (!id) {
-            res.status(400).json({ message: 'ID is required' })
-            return
-        }
-
-        const student = await StudentService.updateStudent(Number(id), data)
-        res.status(200).json(student)
+        const { notificationId } = req.params;
+        const notification = await notificationService.markAsRead(Number(notificationId));
+        res.status(200).json(notification);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-}
-
-const deleteStudent = async (req, res) => {
-    try {
-        const { id } = req.params
-
-        if (!id) {
-            res.status(400).json({ message: 'ID is required' })
-            return
-        }
-
-        await StudentService.deleteStudent(Number(id))
-        res.status(200)
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-}
+};
 
 module.exports = {
-    getStudents,
-    getStudentById,
-    createStudent,
-    deleteStudent,
-    updateStudent
-}
+    getMyNotifications,
+    markNotificationAsRead
+};
