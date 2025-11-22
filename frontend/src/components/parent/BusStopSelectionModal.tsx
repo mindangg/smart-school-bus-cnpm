@@ -20,20 +20,19 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import api from '@/lib/axios'
 
-const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
+const BusStopSelectionModal = ({ studentId, onClose, onSave }: any) => {
     const [isLoading, setIsLoading] = useState(false);
 
-    const [routes, setRoutes] = useState([]);
-    const [selectedRoute, setSelectedRoute] = useState(undefined);
-    const [stops, setStops] = useState([]);
-    const [selectedStop, setSelectedStop] = useState(undefined);
+    const [routes, setRoutes] = useState<any[]>([]);
+    const [selectedRoute, setSelectedRoute] = useState<string | undefined>(undefined);
+    const [stops, setStops] = useState<any[]>([]);
+    const [selectedStop, setSelectedStop] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         const fetchRoutes = async () => {
             try {
                 const res = await api.get('/routes?type=assigned');
                 setRoutes(res.data);
-                console.log(res.data);
             } catch (error) {
                 console.error("Lỗi tải tuyến đường:", error);
                 setRoutes([]);
@@ -82,7 +81,7 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
 
     return (
         <Dialog open={true} onOpenChange={onClose}>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[550px]"> 
                 <DialogHeader>
                     <DialogTitle>Thay đổi điểm đón</DialogTitle>
                     <DialogDescription>
@@ -92,34 +91,48 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
 
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="route" className="text-right">1. Tuyến đường</Label>
+                        <Label htmlFor="route" className="text-right font-semibold">1. Tuyến đường</Label>
+                        
+                        
                         <Select onValueChange={setSelectedRoute} value={selectedRoute}>
-                            <SelectTrigger className="col-span-3">
-                                <SelectValue placeholder="Chọn tuyến đường" />
+                            <SelectTrigger className="col-span-3 w-full">
+                                <span className="truncate text-left w-full block">
+                                    <SelectValue placeholder="Chọn tuyến đường" />
+                                </span>
                             </SelectTrigger>
-                            <SelectContent id="route">
+                            
+                            
+                            <SelectContent id="route" className="max-w-[400px]">
                                 {routes.map(r => (
                                     <SelectItem key={r.route_id} value={String(r.route_id)}>
-                                        {`Tuyến ${r.route_stops[0]?.stop?.address} -> ${
-                                            r.route_stops[r.route_stops.length - 1]?.stop?.address
-                                        }`}
+                                        <div className="truncate max-w-[350px]">
+                                            {`Tuyến ${r.route_stops[0]?.stop?.address} -> ${
+                                                r.route_stops[r.route_stops.length - 1]?.stop?.address
+                                            }`}
+                                        </div>
                                     </SelectItem>
                                 ))}
-
                             </SelectContent>
                         </Select>
                     </div>
 
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="stop" className="text-right">2. Điểm đón</Label>
+                        <Label htmlFor="stop" className="text-right font-semibold">2. Điểm đón</Label>
+                        
+                        
                         <Select onValueChange={setSelectedStop} value={selectedStop} disabled={!selectedRoute || stops.length === 0}>
-                            <SelectTrigger className="col-span-3">
-                                <SelectValue placeholder="Chọn điểm đón cụ thể" />
+                            <SelectTrigger className="col-span-3 w-full">
+                                <span className="truncate text-left w-full block">
+                                    <SelectValue placeholder="Chọn điểm đón cụ thể" />
+                                </span>
                             </SelectTrigger>
-                            <SelectContent id="stop">
+                            
+                            <SelectContent id="stop" className="max-w-[400px]">
                                 {stops.map(s => (
                                     <SelectItem key={s.stop_id} value={String(s.stop_id)}>
-                                        {s.address} (Thứ tự: {s.stop_order})
+                                        <div className="truncate max-w-[350px]">
+                                            {s.address} (Thứ tự: {s.stop_order})
+                                        </div>
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -130,7 +143,7 @@ const BusStopSelectionModal = ({ studentId, onClose, onSave }) => {
 
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose} disabled={isLoading}>Hủy</Button>
-                    <Button onClick={handleSubmit} disabled={!selectedStop || isLoading}>
+                    <Button onClick={handleSubmit} disabled={!selectedStop || isLoading} className="bg-blue-600 hover:bg-blue-700 text-white">
                         {isLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
                     </Button>
                 </DialogFooter>
