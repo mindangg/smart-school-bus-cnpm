@@ -171,7 +171,7 @@ const createRouteAssignments = async () => {
         const routeEntry = routesData[i];
         const route = routeEntry.route;
         let busId = i + 1
-        const driverId = i + 1;
+        const driverId = i + 6;
 
         assignments.push({
             route_id: route.route_id,
