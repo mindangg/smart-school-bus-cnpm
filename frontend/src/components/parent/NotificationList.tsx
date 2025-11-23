@@ -24,14 +24,33 @@ export default function NotificationList({ studentId }: NotificationListProps) {
     const [prevCount, setPrevCount] = useState(0)
     const [isOpenModal, setIsOpenModal] = useState(false)
 
+    // Hàm format ngày đẹp cho người Việt
+    const formatDateTime = (dateString: string) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const isToday = date.toDateString() === now.toDateString();
+        const isYesterday = new Date(date.setDate(date.getDate() - 1)).toDateString() === new Date().toDateString();
+
+        const time = date.toLocaleTimeString('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        if (isToday) return `Hôm nay, ${time}`;
+        if (isYesterday) return `Hôm qua, ${time}`;
+
+        return date.toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        }) + `, ${time}`;
+    };
+
     const fetchNotifications = async () => {
         try {
-            // GỌI API CHUẨN AUTH – KHÔNG CẦN student_id NỮA!
-            // Backend sẽ tự lấy user_id từ token
             const res = await api.get('/notifications')
             const newNotis: Notification[] = res.data
 
-            // Hiệu ứng toast khi có thông báo mới
             if (newNotis.length > prevCount && prevCount !== 0) {
                 const latest = newNotis[0]
                 if (!latest.is_read) {
@@ -46,16 +65,15 @@ export default function NotificationList({ studentId }: NotificationListProps) {
             setNotifications(newNotis)
             setPrevCount(newNotis.length)
         } catch (err: any) {
-            // Nếu lỗi 401 → vẫn cho test bằng query (rất tiện)
             if (err.response?.status === 401) {
-                console.log("Chưa login → thử lấy bằng student_id (test mode)")
+                console.log("Chưa login → dùng fallback test mode")
                 try {
                     const res = await api.get('notifications', {
-                        params: { user_id: studentId } // fallback cho demo
+                        params: { user_id: studentId }
                     })
                     setNotifications(res.data)
                 } catch (fallbackErr) {
-                    console.error("Cả 2 cách đều lỗi:", fallbackErr)
+                    console.error("Lỗi cả 2 cách:", fallbackErr)
                 }
             }
         }
@@ -63,7 +81,7 @@ export default function NotificationList({ studentId }: NotificationListProps) {
 
     const handleMarkAsRead = async (id: number) => {
         try {
-            await api.patch(`/notifications/${id}/read`) // PATCH đúng route
+            await api.patch(`/notifications/${id}/read`)
             setNotifications(prev => prev.map(n =>
                 n.notification_id === id ? { ...n, is_read: true } : n
             ))
@@ -75,10 +93,8 @@ export default function NotificationList({ studentId }: NotificationListProps) {
 
     const handleMarkAllRead = async () => {
         try {
-            // Backend chưa có route này → tạm dùng vòng lặp
             const unreadIds = notifications.filter(n => !n.is_read).map(n => n.notification_id)
             await Promise.all(unreadIds.map(id => api.patch(`/notifications/${id}/read`)))
-
             setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
             toast.success("Đã đánh dấu đọc tất cả thông báo")
         } catch (error) {
@@ -120,10 +136,7 @@ export default function NotificationList({ studentId }: NotificationListProps) {
                 <div className='flex items-center justify-between mt-2'>
                     <div className='flex items-center gap-1 text-[10px] text-gray-400'>
                         <Clock size={10} />
-                        <span>{new Date(item.created_at).toLocaleTimeString('vi-VN', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })}</span>
+                        <span>{formatDateTime(item.created_at)}</span>
                     </div>
 
                     {!item.is_read && (
