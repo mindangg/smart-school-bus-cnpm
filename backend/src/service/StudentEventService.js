@@ -67,13 +67,15 @@ const createPickupStudentEvent = async (data) => {
     const titles = {
         'PICKED UP': 'Con bạn đã được đón lên xe',
         'DROPPED OFF': 'Con bạn đã đến trường an toàn',
-        'ABSENT': 'Con bạn vắng mặt tại điểm đón'
+        'ABSENT': 'Con bạn vắng mặt tại điểm đón',
+        'PICK UP': 'Con bạn đã được đón lên xe'  // Optional fix: thêm nếu bạn dùng "PICK UP" trong test
     }
 
     const messages = {
         'PICKED UP': `${student.full_name} đã lên xe buýt lúc ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`,
         'DROPPED OFF': `${student.full_name} đã đến trường an toàn! Chúc bé một ngày học vui vẻ`,
-        'ABSENT': `${student.full_name} không có mặt tại điểm đón hôm nay. Tài xế đã chờ 2 phút và tiếp tục hành trình.`
+        'ABSENT': `${student.full_name} không có mặt tại điểm đón hôm nay. Tài xế đã chờ 2 phút và tiếp tục hành trình.`,
+        'PICK UP': `${student.full_name} đã lên xe buýt lúc ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`  // Optional fix: thêm nếu cần
     }
 
     await notificationService.createNotification({

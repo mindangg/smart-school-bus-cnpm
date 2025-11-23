@@ -100,11 +100,14 @@ const createPickupStudentEvent = async (data) => {
         where: { student_id: data.student_id }
     });
 
+    const currentTime = new Date();  // Fix: lấy thời gian hiện tại cho event_time (NOT NULL)
+
     if (existing) {
         return prisma.student_events.update({
             where: { event_id: existing.event_id },
             data: {
                 event_type: data.event_type,
+                event_time: currentTime,  // Fix: update event_time để ghi thời gian status mới
             }
         });
     } else {
@@ -112,6 +115,7 @@ const createPickupStudentEvent = async (data) => {
             data: {
                 student_id: data.student_id,
                 event_type: data.event_type,
+                event_time: currentTime,  // Fix: cung cấp event_time
             }
         });
     }

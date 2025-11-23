@@ -83,43 +83,11 @@ const deleteStudentEvent = async (req, res) => {
         }
 
         await studentEventService.deleteStudentEvent(Number(id))
-        res.status(200)
+        res.status(200).json({ message: 'Deleted successfully' })  // Fix: thêm response body cho rõ ràng
     }
     catch (error) {
         res.status(500).json({ message: error.message })
     }
-}
-
-const updateStudentStops = async (req, res, next) => {
-    try {
-            // SỬA LỖI GỐC: Đọc req.user_id trực tiếp
-            const parentId = req.user_id; 
-            
-            if (!parentId) {
-                throw new Error('Authentication error: User ID not found.');
-            }
-
-            const studentId = parseInt(req.params.studentId, 10);
-            
-            // SỬA Ở ĐÂY: Nhận cả 2 ID từ body
-            const { stopId, routeId } = req.body; 
-
-            if (!stopId || !routeId) {
-                throw new Error('Stop ID and Route ID are required');
-            }
-
-            // Chúng ta sẽ sửa hàm service ở bước 3
-            const updatedAssignment = await studentService.updateStudentStops(
-                parentId,
-                studentId,
-                parseInt(routeId, 10),
-                parseInt(stopId, 10)
-            );
-            
-            res.status(200).json(updatedAssignment);
-        } catch (error) {
-            next(error); // Chuyển lỗi cho error handler
-        }
 }
 
 const createPickupStudentEvent = async (req, res) => {
@@ -133,6 +101,7 @@ const createPickupStudentEvent = async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 }
+
 
 module.exports = {
     getStudentEvents,

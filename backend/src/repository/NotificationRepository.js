@@ -5,8 +5,8 @@ const createNotification = async (data) => {
     return prisma.notifications.create({
         data,
         include: {
-            event: true,
-            user: {
+            student_events: true,
+            users: {  // Fix: đổi từ 'user' thành 'users'
                 select: { full_name: true, email: true }
             }
         }
