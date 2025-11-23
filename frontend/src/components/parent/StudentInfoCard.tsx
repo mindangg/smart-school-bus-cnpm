@@ -18,26 +18,17 @@ const StudentInfoCard = ({ student, assignment }: any) => {
 
     const handleSaveBusStop = async (newStopId: string, newRouteId: string) => {
         try {
-            // ĐÚNG: Gọi API đã có sẵn, chỉ đổi điểm đón
             await api.put(`/students/${student.student_id}/stop`, {
                 stopId: newStopId,
                 routeId: newRouteId
             });
 
-            // XÓA HOÀN TOÀN 4 DÒNG SAU ĐI – ĐÂY LÀ THỦ PHẠM!
-            // await api.put(`student_events/stop_student`, {
-            //     student_id: student.student_id,
-            //     event_type: 'PICK UP'
-            // })
 
             setIsModalOpen(false);
             router.refresh();
 
-            // Thêm toast cho đẹp
-            // toast.success("Đã thay đổi điểm đón thành công!");
         } catch (error) {
             console.error('Lỗi khi lưu trạm dừng:', error);
-            // toast.error("Không thể thay đổi điểm đón");
         }
     };
 

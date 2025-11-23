@@ -8,6 +8,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import api from "@/lib/axios";
+import {toast} from "sonner";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || 'your-mapbox-token';
 
@@ -28,12 +29,14 @@ interface NewRouteData {
     start_time: string;
     stops: RouteStop[];
     create_return_route: boolean;
+    return_start_time?: string;
 }
 
 const AddRoutePage = () => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [startTime, setStartTime] = useState('07:00');
+    const [returnStartTime, setReturnStartTime] = useState('16:00');
     const [createReturnRoute, setCreateReturnRoute] = useState(false);
     const [selectedStops, setSelectedStops] = useState<RouteStop[]>([]);
     const [busStops, setBusStops] = useState<BusStop[]>([]);
@@ -87,6 +90,19 @@ const AddRoutePage = () => {
             }
         }
     }, [selectedStops, mapLoaded]);
+
+    useEffect(() => {
+        if (createReturnRoute) {
+            const calculateReturnTime = (time: string) => {
+                const [hours, minutes] = time.split(':').map(Number);
+                let newHours = hours + 8;
+                if (newHours >= 24) newHours -= 24;
+                return `${newHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            };
+
+            setReturnStartTime(calculateReturnTime(startTime));
+        }
+    }, [createReturnRoute, startTime]);
 
     const updateRoute = async () => {
         if (!map.current || selectedStops.length < 2) return;
@@ -166,7 +182,7 @@ const AddRoutePage = () => {
 
         const el = document.createElement('div');
         el.className = 'custom-marker';
-        el.style.backgroundColor =  '#3b82f6';
+        el.style.backgroundColor = '#3b82f6';
         el.style.width = '30px';
         el.style.height = '30px';
         el.style.borderRadius = '50%';
@@ -215,7 +231,12 @@ const AddRoutePage = () => {
 
     const handleSubmit = async () => {
         if (selectedStops.length < 2) {
-            alert('Vui lòng chọn ít nhất 2 trạm dừng');
+            toast.error('Vui lòng chọn ít nhất 2 trạm dừng cho tuyến đường');
+            return;
+        }
+
+        if (createReturnRoute && !returnStartTime) {
+            toast.error('Vui lòng chọn giờ khởi hành cho tuyến về');
             return;
         }
 
@@ -224,12 +245,13 @@ const AddRoutePage = () => {
             const routeData: NewRouteData = {
                 start_time: startTime,
                 stops: selectedStops,
-                create_return_route: createReturnRoute
+                create_return_route: createReturnRoute,
+                ...(createReturnRoute && { return_start_time: returnStartTime })
             };
 
-            console.log(routeData);
+            console.log('Route data:', routeData);
 
-            // await api.post('/routes', routeData);
+            await api.post('routes', routeData);
 
             router.push('/admin/paths');
             router.refresh();
@@ -246,8 +268,12 @@ const AddRoutePage = () => {
         router.push('/admin/paths');
     };
 
+    const handleCreateReturnRouteChange = (checked: boolean) => {
+        setCreateReturnRoute(checked);
+    };
+
     return (
-        <main className="container mx-auto p-6">
+        <main className="container mx-auto p-6 pb-30">
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-3xl font-bold">Thêm Tuyến Đường Mới</h1>
@@ -264,9 +290,8 @@ const AddRoutePage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
                 <div className="lg:col-span-1 flex flex-col gap-4">
                     <div className="space-y-4">
-
                         <div>
-                            <label className="block text-sm font-medium mb-2">Giờ khởi hành</label>
+                            <label className="block text-sm font-medium mb-2">Giờ khởi hành (tuyến đi)</label>
                             <input
                                 type="time"
                                 value={startTime}
@@ -279,9 +304,24 @@ const AddRoutePage = () => {
                             <label className="text-sm font-medium">Tạo tuyến về</label>
                             <Switch
                                 checked={createReturnRoute}
-                                onCheckedChange={setCreateReturnRoute}
+                                onCheckedChange={handleCreateReturnRouteChange}
                             />
                         </div>
+
+                        {createReturnRoute && (
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Giờ khởi hành (tuyến về)</label>
+                                <input
+                                    type="time"
+                                    value={returnStartTime}
+                                    onChange={(e) => setReturnStartTime(e.target.value)}
+                                    className="w-full p-2 border rounded-md"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Thời gian khởi hành cho tuyến đường về
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex-1">
@@ -296,6 +336,9 @@ const AddRoutePage = () => {
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2">
                                                     <span className="font-medium">#{stop.stop_order}</span>
+                                                    <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">
+                                                        Trạm
+                                                    </span>
                                                 </div>
                                                 <p className="text-sm text-gray-600 truncate">{busStop?.address}</p>
                                             </div>

@@ -1,41 +1,46 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import {Bus, BusFront, MapPin, User} from 'lucide-react'
+import { Bus, BusFront, MapPin, User } from 'lucide-react'
 import Map, { Layer, Marker, NavigationControl, Source } from 'react-map-gl'
 import api from "@/lib/axios";
 import mapboxgl from "mapbox-gl";
 
-const LiveTrackingMap = ({ pathRoute, assignedStop }: any) => {
+// Interface cho props để code rõ ràng hơn
+interface LiveTrackingMapProps {
+    pathRoute: any;
+    assignedStop: any;
+}
+
+const LiveTrackingMap = ({ pathRoute, assignedStop }: LiveTrackingMapProps) => {
     const mapRef = useRef<any>(null)
     const [isMapLoaded, setIsMapLoaded] = useState(false)
-    const [route, setRoute] = useState<any>(null)
-
-    const [steps, setSteps] = useState<any[]>([])
+    const [routeGeometry, setRouteGeometry] = useState<any>(null)
+    
+    // State cho animation xe bus
     const [distance, setDistance] = useState<number>(0)
     const [duration, setDuration] = useState<number>(0)
     const [busPos, setBusPos] = useState<[number, number] | null>(null)
 
-    const start = {
-        lng: pathRoute?.route_stops[0]?.stop?.longitude,
-        lat: pathRoute?.route_stops[0]?.stop?.latitude
-    }
-    const end = {
-        lng: pathRoute?.route_stops[6]?.stop?.longitude,
-        lat: pathRoute?.route_stops[6]?.stop?.latitude
-    }
+    // Lấy thông tin các điểm quan trọng
+    const routeStops = pathRoute?.route_stops || [];
+    const startStop = routeStops.length > 0 ? routeStops[0].stop : null;
+    const schoolStop = routeStops.length > 0 ? routeStops[routeStops.length - 1].stop : null;
 
+    // 1. Fetch Route Geometry từ Mapbox API
     useEffect(() => {
         const fetchFullRoute = async () => {
+            if (!pathRoute || routeStops.length < 2) return;
+
             try {
                 const coordinates: [number, number][] = []
                 let totalDistance = 0
                 let totalDuration = 0
-                const allSteps: any[] = []
-
-                for (let i = 0; i < pathRoute.route_stops.length - 1; i++) {
-                    const current = pathRoute.route_stops[i].stop
-                    const next = pathRoute.route_stops[i + 1].stop
+                
+                // Gọi API lấy đường đi nối các điểm dừng lại với nhau
+                for (let i = 0; i < routeStops.length - 1; i++) {
+                    const current = routeStops[i].stop
+                    const next = routeStops[i + 1].stop
 
                     const res = await api.get('routes/direction_full', {
                         params: {
@@ -44,7 +49,7 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: any) => {
                         },
                     })
 
-                    const { geometry, steps, distance, duration } = res.data
+                    const { geometry, distance, duration } = res.data
 
                     if (geometry?.coordinates?.length > 0) {
                         coordinates.push(...geometry.coordinates)
@@ -52,10 +57,6 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: any) => {
 
                     totalDistance += distance || 0
                     totalDuration += duration || 0
-
-                    if (Array.isArray(steps)) {
-                        allSteps.push(...steps)
-                    }
                 }
 
                 const fullGeometry = {
@@ -63,11 +64,11 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: any) => {
                     coordinates,
                 }
 
-                setRoute(fullGeometry)
-                setSteps(allSteps)
+                setRouteGeometry(fullGeometry)
                 setDistance(totalDistance)
                 setDuration(totalDuration)
 
+                // Fit map để nhìn thấy toàn bộ tuyến đường
                 if (mapRef.current && coordinates.length > 0) {
                     const bounds = new mapboxgl.LngLatBounds()
                     coordinates.forEach(([lng, lat]) => bounds.extend([lng, lat]))
@@ -78,36 +79,29 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: any) => {
             }
         }
 
-        if (pathRoute?.route_stops?.length > 1) {
-            fetchFullRoute()
-        }
+        fetchFullRoute()
     }, [pathRoute])
 
+    // 2. Animation xe bus chạy mô phỏng (Giữ nguyên logic cũ của bạn)
     useEffect(() => {
-        if (!route || !mapRef.current || !isMapLoaded)
-            return;
+        if (!routeGeometry || !mapRef.current || !isMapLoaded) return;
 
-        // const desiredSimTime = 120;
-        const desiredSimTime = duration / 30;
-
+        const desiredSimTime = duration / 30; // Tăng tốc độ mô phỏng
         const map = mapRef.current.getMap();
         let animationFrameId: number;
         let progress = 0;
 
-        const coordinates = route.coordinates;
+        const coordinates = routeGeometry.coordinates;
         if (!coordinates || coordinates.length < 2) return;
 
-        const simulatedSpeed = distance / desiredSimTime; // m/s
+        const simulatedSpeed = distance / desiredSimTime; 
 
-        // Tính khoảng cách thực (mét)
         const getDistance = (lng1: number, lat1: number, lng2: number, lat2: number) => {
             const R = 6371000;
             const toRad = (deg: number) => (deg * Math.PI) / 180;
             const dLat = toRad(lat2 - lat1);
             const dLng = toRad(lng2 - lng1);
-            const a =
-                Math.sin(dLat / 2) ** 2 +
-                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             return R * c;
         };
@@ -117,7 +111,6 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: any) => {
 
         const animateBus = (timestamp: number) => {
             if (!lastTimestamp) lastTimestamp = timestamp;
-
             const deltaTime = (timestamp - lastTimestamp) / 1000;
             lastTimestamp = timestamp;
 
@@ -131,8 +124,10 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: any) => {
             if (progress >= 1) {
                 progress = 0;
                 segmentIndex++;
-                if (segmentIndex >= coordinates.length - 1)
-                    return;
+                if (segmentIndex >= coordinates.length - 1) {
+                    segmentIndex = 0; // Loop lại hoặc dừng tùy ý
+                     // return; 
+                }
             }
 
             const lng = lng1 + (lng2 - lng1) * progress;
@@ -147,28 +142,25 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: any) => {
         });
 
         return () => {
-            if (animationFrameId)
-                cancelAnimationFrame(animationFrameId);
-
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
             map.off("moveend", animateBus);
         };
-    }, [route, isMapLoaded, distance, duration]);
+    }, [routeGeometry, isMapLoaded, distance, duration]);
 
-    if (!pathRoute || !pathRoute.route_stops || pathRoute.route_stops.length < 2) {
+    // 3. Render UI
+    if (!pathRoute || routeStops.length < 2) {
         return (
             <div className='bg-white rounded-lg shadow-lg p-6'>
-                <div className='relative w-full h-[450px] bg-gray-200 rounded-md overflow-hidden
-                                flex items-center justify-center'>
-                    <p className='text-gray-700 font-semibold'>
-                        Không có dữ liệu theo dõi tuyến đường.
-                    </p>
+                <div className='relative w-full h-[450px] bg-gray-200 rounded-md flex items-center justify-center'>
+                    <p className='text-gray-500'>Đang tải dữ liệu bản đồ...</p>
                 </div>
             </div>
         )
     }
 
-    const userStop = assignedStop || pathRoute.route_stops[0].stop;
-    const schoolStop = pathRoute.route_stops[pathRoute.route_stops.length - 1].stop;
+    // Fallback điểm trung tâm map nếu chưa load xong
+    const initialLng = assignedStop ? Number(assignedStop.longitude) : Number(startStop?.longitude || 105.8);
+    const initialLat = assignedStop ? Number(assignedStop.latitude) : Number(startStop?.latitude || 21.0);
 
     return (
         <div className='bg-white rounded-lg shadow-lg p-6'>
@@ -177,9 +169,9 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: any) => {
                     ref={mapRef}
                     mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
                     initialViewState={{
-                        longitude: Number(userStop.longitude),
-                        latitude: Number(userStop.latitude),
-                        zoom: 14
+                        longitude: initialLng,
+                        latitude: initialLat,
+                        zoom: 13
                     }}
                     style={{ width: '100%', height: '100%' }}   
                     mapStyle='mapbox://styles/mapbox/streets-v11'
@@ -187,62 +179,82 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: any) => {
                 >
                     <NavigationControl position='top-right' />
 
-                    {route && (
-                        <Source id='route' type='geojson' data={{ type: 'Feature', properties: {}, geometry: route }}>
-                            <Layer id='route-line' type='line' paint={{ 'line-color': '#007AFF', 'line-width': 5 }} />
+                    {/* Vẽ đường đi (Route Line) */}
+                    {routeGeometry && (
+                        <Source id='route' type='geojson' data={{ type: 'Feature', properties: {}, geometry: routeGeometry }}>
+                            <Layer 
+                                id='route-line' 
+                                type='line' 
+                                layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+                                paint={{ 'line-color': '#3b82f6', 'line-width': 5, 'line-opacity': 0.8 }} 
+                            />
                         </Source>
                     )}
 
+                    {/* Marker Xe Bus mô phỏng */}
                     {busPos && (
-                        <Marker longitude={busPos[0]} latitude={busPos[1]} anchor='bottom'>
-                            <div className='flex flex-col items-center'>
-                                <Bus size={32} className='text-yellow-500 fill-yellow-400' />
+                        <Marker longitude={busPos[0]} latitude={busPos[1]} anchor='center'>
+                            <div className='relative bg-white rounded-full p-1 shadow-md border border-yellow-500 z-20'>
+                                <Bus size={24} className='text-yellow-600' />
                             </div>
                         </Marker>
                     )}
 
-                    {/*<Marker longitude={Number(userStop.longitude)} latitude={Number(userStop.latitude)} anchor='bottom'>*/}
-                    {/*    <div className='flex flex-col items-center'>*/}
-                    {/*        <div className='bg-white p-2 rounded-lg shadow-md mb-1 max-w-[150px] text-center'>*/}
-                    {/*            <p className='text-xs font-bold text-green-700'>Điểm đón của bạn</p>*/}
-                    {/*            <p className='text-xs text-gray-600 truncate'>{userStop.address}</p>*/}
-                    {/*        </div>*/}
-                    {/*        <MapPin size={32} className='text-green-500 fill-green-400' />*/}
-                    {/*    </div>*/}
-                    {/*</Marker>*/}
+                    {/* Render danh sách các trạm dừng */}
+                    {routeStops.map((stopItem: any, index: number) => {
+                        const stop = stopItem.stop;
+                        const isAssigned = assignedStop && stop.stop_id === assignedStop.stop_id;
+                        const isStart = index === 0;
+                        const isSchool = index === routeStops.length - 1;
 
-                    {/*<Marker longitude={Number(schoolStop.longitude)} latitude={Number(schoolStop.latitude)} anchor='bottom'>*/}
-                    {/*    <div className='flex flex-col items-center'>*/}
-                    {/*        <div className='bg-white p-2 rounded-lg shadow-md mb-1 max-w-[150px] text-center'>*/}
-                    {/*            <p className='text-xs font-bold text-red-700'>Trường học (Đích)</p>*/}
-                    {/*            <p className='text-xs text-gray-600 truncate'>{schoolStop.address}</p>*/}
-                    {/*        </div>*/}
-                    {/*        <MapPin size={32} className='text-red-500 fill-red-400' />*/}
-                    {/*    </div>*/}
-                    {/*</Marker>*/}
+                        return (
+                            <Marker
+                                key={index}
+                                longitude={Number(stop.longitude)}
+                                latitude={Number(stop.latitude)}
+                                anchor='bottom'
+                            >
+                                {/* Điều chỉnh z-index để điểm quan trọng nổi lên trên */}
+                                <div className={`flex flex-col items-center group cursor-pointer ${isAssigned || isSchool ? 'z-30' : 'z-10'}`}>
+                                    
+                                    {/* Tooltip hiển thị khi hover hoặc luôn hiện nếu là điểm Assigned */}
+                                    <div className={`absolute bottom-9 px-2 py-1 rounded shadow-md whitespace-nowrap mb-1 transition-all
+                                        ${isAssigned ? 'bg-blue-600 text-white opacity-100' : 'bg-white text-gray-800 opacity-0 group-hover:opacity-100'}
+                                    `}>
+                                        <p className='text-xs font-bold'>
+                                            {isAssigned ? "Điểm đón của con" : isSchool ? "Trường học" : stop.address}
+                                        </p>
+                                    </div>
 
-                    {pathRoute.route_stops.map((stop: any, index: number) => (
-                        <Marker
-                            key={index}
-                            longitude={stop.stop.longitude}
-                            latitude={stop.stop.latitude}
-                            anchor='bottom'
-                        >
-                            <div className='flex flex-col items-center'>
-                                <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
-                                    {/*<p className='text-sm font-bold text-red-700'>(Đích)</p>*/}
-                                    <p className='text-sm font-semibold text-gray-900'>
-                                        {index + 1}. {stop.stop.address}
-                                    </p>
+                                    {/* Logic hiển thị ICON */}
+                                    {isAssigned ? (
+                                        // ICON: ĐIỂM ĐÓN (Nổi bật nhất)
+                                        <div className="relative flex items-center justify-center">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                            <div className="relative bg-blue-500 text-white p-2 rounded-full border-2 border-white shadow-xl transform hover:scale-110 transition-transform">
+                                                <User size={24} />
+                                            </div>
+                                        </div>
+                                    ) : isSchool ? (
+                                        // ICON: TRƯỜNG HỌC (Điểm cuối)
+                                        <div className="bg-red-500 text-white p-1.5 rounded-full border-2 border-white shadow-lg">
+                                            <MapPin size={28} fill="currentColor" />
+                                        </div>
+                                    ) : isStart ? (
+                                        // ICON: ĐIỂM XUẤT PHÁT
+                                        <div className="bg-green-500 text-white p-1.5 rounded-full border-2 border-white shadow-lg">
+                                            <MapPin size={24} />
+                                        </div>
+                                    ) : (
+                                        // ICON: TRẠM TRUNG GIAN (Nhỏ gọn)
+                                        <div className="bg-white text-gray-500 p-1 rounded-full border border-gray-300 shadow-sm hover:bg-gray-50">
+                                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                                        </div>
+                                    )}
                                 </div>
-                                {
-                                    index == 0 ? <MapPin size={32} className='text-green-500 fill-green-400'  /> :
-                                    index == 6 ? <MapPin size={32} className='text-red-500 fill-red-400'  /> :
-                                    <BusFront size={25} className='text-blue-500 fill-blue-400' />
-                                }
-                            </div>
-                        </Marker>
-                    ))}
+                            </Marker>
+                        )
+                    })}
                 </Map>
             </div>
         </div>

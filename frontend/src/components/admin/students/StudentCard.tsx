@@ -44,8 +44,6 @@ const StudentCard = ({ student, handleDelete }: any) => {
                 <DropdownMenu>
                 <DropdownMenuTrigger><Ellipsis /></DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuLabel>Hành Động</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => setOpen(true)}>Chỉnh Sửa</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setOpenAlert(true)}>Xóa</DropdownMenuItem>
                     </DropdownMenuContent>

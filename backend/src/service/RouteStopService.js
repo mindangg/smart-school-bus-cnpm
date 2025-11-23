@@ -1,14 +1,19 @@
-const { findStopsByRouteOrdered } = require("../repository/RouteStopRepository");
+const routeStopRepository = require('../repository/RouteStopRepository');
 
 const findStopsByRoute = async (routeId) => {
-    const routeStops = await findStopsByRouteOrdered(routeId);
+    const routeStops = await routeStopRepository.findStopsByRouteOrdered(routeId);
         
-        // Map lại để trả về dữ liệu trạm dừng gọn gàng
         return routeStops.map(rs => ({
-            ...rs.stop, // Thông tin trạm (id, address, lat, lng)
+            ...rs.stop,
             stop_order: rs.stop_order
         }));
 }
+
+const createRouteStopsForRoute = async (routeId, stops) => {
+    routeStopRepository.createRouteStopsForRoute(routeId, stops);
+}
+
 module.exports = {
-    findStopsByRoute
+    findStopsByRoute,
+    createRouteStopsForRoute,
 }

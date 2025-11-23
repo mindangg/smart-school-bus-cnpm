@@ -1,5 +1,5 @@
 const routeAssignmentRepository = require('../repository/RouteAssignmentRepository');
-const axios = require('axios');
+const routeService = require('./RouteService');
 
 const getRouteAssignments = async () => {
     return routeAssignmentRepository.getAllRouteAssignments();
@@ -7,6 +7,7 @@ const getRouteAssignments = async () => {
 
 const getRouteAssignmentById = async (id) => {
     const route = await routeAssignmentRepository.getRouteAssignmentById(id)
+    console.log(route)
     if (!route)
         throw new Error('No route')
 
@@ -53,8 +54,6 @@ const getRouteById = async (routeId) => {
         return null;
     }
 
-    // SỬA: Lấy thông tin xe từ mảng route_assignments
-    // Lấy phần tử đầu tiên tìm thấy (nếu có)
     const currentAssignment = route.route_assignments && route.route_assignments.length > 0 
         ? route.route_assignments[0] 
         : null;
@@ -65,13 +64,10 @@ const getRouteById = async (routeId) => {
         route_id: route.route_id,
         route_type: route.route_type,
         start_time: route.start_time,
-        // SỬA: Map dữ liệu từ biến currentBus mới lấy được
-        bus: currentBus ? { 
+        bus: currentBus ? {
             bus_id: currentBus.bus_id,
             bus_number: currentBus.bus_number,
-            license_plate: currentBus.license_plate,
         } : null,
-        // Phần stops giữ nguyên
         stops: route.route_stops.map(routeStop => ({
             stop_id: routeStop.stop.stop_id,
             address: routeStop.stop.address,
@@ -81,12 +77,10 @@ const getRouteById = async (routeId) => {
         })),
     };
 
-    // Phần Mapbox giữ nguyên
     if(formattedResponse.stops && formattedResponse.stops.length >= 2){
         try{
             const coordinates = formattedResponse.stops.map(stop => `${stop.longitude},${stop.latitude}`).join(';');
-            // Lưu ý: process.env.MAPBOX_ACCESS_TOKEN phải được cấu hình trong .env
-            const accessToken = process.env.MAPBOX_ACCESS_TOKEN; 
+            const accessToken = process.env.MAPBOX_ACCESS_TOKEN;
             const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?geometries=geojson&access_token=${accessToken}`;
 
             const mapboxResponse = await axios.get(url);
@@ -107,21 +101,24 @@ const getRouteById = async (routeId) => {
 };
 
 const getAllSchedules = async () => {
-    const assignments = await routeAssignmentRepository.findAllAssignments();
-
-    return assignments.map(a => ({
-        assignment_id: a.assignment_id,
-        route_id: a.route_id, 
-        bus_number: a.buses.bus_number,
-        route_name: a.routes.route_type === 'MORNING' ? 'Tuyến Sáng' : 'Tuyến Chiều',
-        driver_name: a.users.full_name,
-        start_time: a.routes.start_time,
-        status: a.is_active ? 'Sắp chạy' : 'Hoàn thành', 
-    }));
+    return routeAssignmentRepository.findAllAssignments();
 }
 
 const createRouteAssignment = async (data) => {
-    return routeAssignmentRepository.createRouteAssignment(data);
+    const route_id = data.route_id;
+    await routeAssignmentRepository.createRouteAssignment(data);
+    const returnRoute = await routeService.getReturnRoute(route_id)
+    if (returnRoute) {
+        const returnData = {
+            ...data,
+            route_id: returnRoute.route_id,
+        }
+        await routeAssignmentRepository.createRouteAssignment(returnData);
+    }
+}
+
+const deleteRouteAssignment = async (id) => {
+    return routeAssignmentRepository.deleteRouteAssignment(id);
 }
 
 module.exports = {
@@ -133,5 +130,6 @@ module.exports = {
     getRouteAssignmentByRouteId,
     getRouteAssignmentByDriverId,
     getRouteAssignmentByBusId,
-    createRouteAssignment
+    createRouteAssignment,
+    deleteRouteAssignment,
 }

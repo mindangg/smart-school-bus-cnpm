@@ -139,6 +139,14 @@ const deleteUser = async (id) => {
     await UserRepository.deleteUserById(id)
 }
 
+const getTotalDrivers = async () => {
+    return UserRepository.countUsersByRole('DRIVER');
+}
+
+const getTotalParents = async () => {
+    return UserRepository.countUsersByRole('PARENT');
+}
+
 module.exports = {
     getAvailableDrivers,
     signupUser,
@@ -148,5 +156,7 @@ module.exports = {
     getUserById,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getTotalDrivers,
+    getTotalParents
 }

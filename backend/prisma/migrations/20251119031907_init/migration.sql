@@ -1,179 +1,191 @@
--- CreateTable
-CREATE TABLE `users` (
-    `user_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `email` VARCHAR(255) NOT NULL,
-    `password` VARCHAR(255) NOT NULL,
-    `full_name` VARCHAR(255) NULL,
-    `phone_number` VARCHAR(20) NULL,
-    `address` VARCHAR(255) NULL,
-    `role` VARCHAR(20) NOT NULL,
-    `is_active` BOOLEAN NULL DEFAULT true,
-    `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
-    `updated_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
-
-    UNIQUE INDEX `email`(`email`),
+-- CreateTable: users
+CREATE TABLE `users`
+(
+    `user_id`      INTEGER      NOT NULL AUTO_INCREMENT,
+    `email`        VARCHAR(255) NOT NULL,
+    `password`     VARCHAR(255) NOT NULL,
+    `full_name`    VARCHAR(255),
+    `phone_number` VARCHAR(20),
+    `address`      VARCHAR(255),
+    `role`         VARCHAR(20)  NOT NULL,
+    `is_active`    BOOLEAN      DEFAULT true,
+    `created_at`   TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP(0),
+    `updated_at`   TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP(0),
+    UNIQUE KEY `email` (`email`),
     PRIMARY KEY (`user_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
--- CreateTable
-CREATE TABLE `buses` (
-    `bus_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `bus_number` VARCHAR(50) NOT NULL,
-    `license_plate` VARCHAR(50) NOT NULL,
-    `capacity` INTEGER NULL,
-    `model` VARCHAR(100) NULL,
-    `year` INTEGER NULL,
-    `status` VARCHAR(20) NULL,
-    `last_maintenance_date` DATE NULL,
-
-    UNIQUE INDEX `bus_number`(`bus_number`),
-    UNIQUE INDEX `license_plate`(`license_plate`),
+-- CreateTable: buses
+CREATE TABLE `buses`
+(
+    `bus_id`                INTEGER     NOT NULL AUTO_INCREMENT,
+    `bus_number`            VARCHAR(50) NOT NULL,
+    `capacity`              INTEGER,
+    `model`                 VARCHAR(100),
+    `status`                VARCHAR(20),
+    UNIQUE KEY `bus_number` (`bus_number`),
     PRIMARY KEY (`bus_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
--- CreateTable
-CREATE TABLE `bus_stops` (
-    `stop_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `latitude` DECIMAL(11, 8) NULL,
-    `longitude` DECIMAL(11, 8) NULL,
-    `address` VARCHAR(255) NULL,
-    `is_active` BOOLEAN NULL DEFAULT true,
-
+-- CreateTable: bus_stops
+CREATE TABLE `bus_stops`
+(
+    `stop_id`   INTEGER NOT NULL AUTO_INCREMENT,
+    `latitude`  DECIMAL(11, 8),
+    `longitude` DECIMAL(11, 8),
+    `address`   VARCHAR(255),
+    `is_active` BOOLEAN DEFAULT true,
     PRIMARY KEY (`stop_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
--- CreateTable
-CREATE TABLE `routes` (
-    `route_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `route_type` VARCHAR(20) NULL,
-    `start_time` VARCHAR(8) NULL,
-    `is_active` BOOLEAN NULL DEFAULT true,
-    `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
-    `updated_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
-    `generated_from` INTEGER DEFAULT NULL,
-
+-- CreateTable: routes
+CREATE TABLE `routes`
+(
+    `route_id`       INTEGER NOT NULL AUTO_INCREMENT,
+    `route_type`     VARCHAR(20),
+    `start_time`     VARCHAR(8),
+    `is_active`      BOOLEAN      DEFAULT true,
+    `created_at`     TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP(0),
+    `updated_at`     TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP(0),
+    `generated_from` INTEGER      DEFAULT -1,
     PRIMARY KEY (`route_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
--- CreateTable
-CREATE TABLE `route_assignments` (
+-- CreateTable: route_assignments
+CREATE TABLE `route_assignments`
+(
     `assignment_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `route_id` INTEGER NOT NULL,
-    `driver_id` INTEGER NOT NULL,
-    `bus_id` INTEGER NOT NULL,
-    `assignment_date` DATETIME(3) NOT NULL,
-    `is_active` BOOLEAN NULL DEFAULT true,
-    `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
-
-    INDEX `idx_route_assignments_bus_id`(`bus_id`),
-    INDEX `idx_route_assignments_driver_id`(`driver_id`),
-    INDEX `idx_route_assignments_route_id`(`route_id`),
+    `route_id`      INTEGER NOT NULL,
+    `driver_id`     INTEGER NOT NULL,
+    `bus_id`        INTEGER NOT NULL,
+    `is_active`     BOOLEAN      DEFAULT true,
+    `created_at`    TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP(0),
+    KEY `idx_route_assignments_route_id` (`route_id`),
+    KEY `idx_route_assignments_driver_id` (`driver_id`),
+    KEY `idx_route_assignments_bus_id` (`bus_id`),
     PRIMARY KEY (`assignment_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
--- CreateTable
-CREATE TABLE `route_stops` (
+-- CreateTable: route_stops
+CREATE TABLE `route_stops`
+(
     `route_stop_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `route_id` INTEGER NOT NULL,
-    `stop_id` INTEGER NOT NULL,
-    `stop_order` INTEGER NOT NULL,
-    `stop_type` VARCHAR(20) NULL,
-
-    UNIQUE INDEX `route_stops_route_id_stop_id_key`(`route_id`, `stop_id`),
-    UNIQUE INDEX `route_stops_route_id_stop_order_key`(`route_id`, `stop_order`),
+    `route_id`      INTEGER NOT NULL,
+    `stop_id`       INTEGER NOT NULL,
+    `stop_order`    INTEGER NOT NULL,
+    UNIQUE KEY `route_id_stop_id` (`route_id`, `stop_id`),
+    UNIQUE KEY `route_id_stop_order` (`route_id`, `stop_order`),
     PRIMARY KEY (`route_stop_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
--- CreateTable
-CREATE TABLE `students` (
-    `student_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `parent_id` INTEGER NULL,
-    `full_name` VARCHAR(255) NOT NULL,
-    `profile_photo_url` VARCHAR(255) NULL,
-    `is_active` BOOLEAN NULL DEFAULT true,
-    `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
-    `stop_id` INTEGER NULL,
-
-    INDEX `idx_students_parent_id`(`parent_id`),
-    INDEX `idx_students_stop_id`(`stop_id`),
+-- CreateTable: students
+CREATE TABLE `students`
+(
+    `student_id`        INTEGER      NOT NULL AUTO_INCREMENT,
+    `parent_id`         INTEGER,
+    `full_name`         VARCHAR(255) NOT NULL,
+    `profile_photo_url` VARCHAR(255),
+    `is_active`         BOOLEAN      DEFAULT true,
+    `created_at`        TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP(0),
+    KEY `idx_students_parent_id` (`parent_id`),
     PRIMARY KEY (`student_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
--- CreateTable
-CREATE TABLE `student_events` (
-    `event_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `student_id` INTEGER NOT NULL,
-    `route_assignment_id` INTEGER NULL,
-    `event_type` VARCHAR(20) NOT NULL,
-    `event_time` TIMESTAMP(0) NOT NULL,
-    `notes` TEXT NULL,
-
-    INDEX `idx_student_events_assignment_id`(`route_assignment_id`),
-    INDEX `idx_student_events_student_id`(`student_id`),
+-- CreateTable: student_events
+CREATE TABLE `student_events`
+(
+    `event_id`            INTEGER      NOT NULL AUTO_INCREMENT,
+    `student_id`          INTEGER      NOT NULL,
+    `route_assignment_id` INTEGER,
+    `event_type`          VARCHAR(20)  NOT NULL,
+    `event_time`          TIMESTAMP(0) NOT NULL,
+    `notes`               TEXT,
+    KEY `idx_student_events_student_id` (`student_id`),
+    KEY `idx_student_events_assignment_id` (`route_assignment_id`),
     PRIMARY KEY (`event_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
--- CreateTable
-CREATE TABLE `route_stop_students` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+-- CreateTable: route_stop_students
+CREATE TABLE `route_stop_students`
+(
+    `id`            INTEGER NOT NULL AUTO_INCREMENT,
     `route_stop_id` INTEGER NOT NULL,
-    `student_id` INTEGER NOT NULL,
-
-    UNIQUE INDEX `route_stop_students_route_stop_id_student_id_key`(`route_stop_id`, `student_id`),
+    `student_id`    INTEGER NOT NULL,
+    UNIQUE KEY `route_stop_id_student_id` (`route_stop_id`, `student_id`),
     PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
--- CreateTable
-CREATE TABLE `notifications` (
-    `notification_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
-    `notification_type` VARCHAR(20) NULL,
-    `title` VARCHAR(255) NOT NULL,
-    `message` TEXT NULL,
-    `event_id` INTEGER NULL,
-    `is_read` BOOLEAN NULL DEFAULT false,
-    `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
-
-    INDEX `idx_notifications_event_id`(`event_id`),
-    INDEX `idx_notifications_user_id`(`user_id`),
+-- CreateTable: notifications
+CREATE TABLE `notifications`
+(
+    `notification_id`   INTEGER      NOT NULL AUTO_INCREMENT,
+    `user_id`           INTEGER      NOT NULL,
+    `notification_type` VARCHAR(20),
+    `title`             VARCHAR(255) NOT NULL,
+    `message`           TEXT,
+    `event_id`          INTEGER,
+    `is_read`           BOOLEAN      DEFAULT false,
+    `created_at`        TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP(0),
+    KEY `idx_notifications_user_id` (`user_id`),
+    KEY `idx_notifications_event_id` (`event_id`),
     PRIMARY KEY (`notification_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
--- AddForeignKey
-ALTER TABLE `route_assignments` ADD CONSTRAINT `route_assignments_ibfk_1` FOREIGN KEY (`route_id`) REFERENCES `routes`(`route_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+-- Foreign Keys
+ALTER TABLE `route_assignments`
+    ADD CONSTRAINT `fk_ra_route`
+        FOREIGN KEY (`route_id`) REFERENCES `routes` (`route_id`)
+            ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_ra_driver`
+        FOREIGN KEY (`driver_id`) REFERENCES `users` (`user_id`)
+            ON DELETE RESTRICT ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_ra_bus`
+        FOREIGN KEY (`bus_id`) REFERENCES `buses` (`bus_id`)
+            ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- AddForeignKey
-ALTER TABLE `route_assignments` ADD CONSTRAINT `route_assignments_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `route_stops`
+    ADD CONSTRAINT `fk_rs_route`
+        FOREIGN KEY (`route_id`) REFERENCES `routes` (`route_id`)
+            ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_rs_stop`
+        FOREIGN KEY (`stop_id`) REFERENCES `bus_stops` (`stop_id`)
+            ON DELETE CASCADE ON UPDATE CASCADE;
 
--- AddForeignKey
-ALTER TABLE `route_assignments` ADD CONSTRAINT `route_assignments_ibfk_3` FOREIGN KEY (`bus_id`) REFERENCES `buses`(`bus_id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
+ALTER TABLE `students`
+    ADD CONSTRAINT `fk_students_parent`
+        FOREIGN KEY (`parent_id`) REFERENCES `users` (`user_id`)
+            ON DELETE SET NULL ON UPDATE CASCADE;
 
--- AddForeignKey
-ALTER TABLE `route_stops` ADD CONSTRAINT `route_stops_route_id_fkey` FOREIGN KEY (`route_id`) REFERENCES `routes`(`route_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `student_events`
+    ADD CONSTRAINT `fk_se_student`
+        FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`)
+            ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_se_assignment`
+        FOREIGN KEY (`route_assignment_id`) REFERENCES `route_assignments` (`assignment_id`)
+            ON DELETE CASCADE ON UPDATE CASCADE;
 
--- AddForeignKey
-ALTER TABLE `route_stops` ADD CONSTRAINT `route_stops_stop_id_fkey` FOREIGN KEY (`stop_id`) REFERENCES `bus_stops`(`stop_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `route_stop_students`
+    ADD CONSTRAINT `fk_rss_stop`
+        FOREIGN KEY (`route_stop_id`) REFERENCES `route_stops` (`route_stop_id`)
+            ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_rss_student`
+        FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`)
+            ON DELETE CASCADE ON UPDATE CASCADE;
 
--- AddForeignKey
-ALTER TABLE `students` ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `users`(`user_id`) ON DELETE SET NULL ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `students` ADD CONSTRAINT `students_ibfk_2` FOREIGN KEY (`stop_id`) REFERENCES `bus_stops`(`stop_id`) ON DELETE SET NULL ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `student_events` ADD CONSTRAINT `student_events_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students`(`student_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `student_events` ADD CONSTRAINT `student_events_ibfk_2` FOREIGN KEY (`route_assignment_id`) REFERENCES `route_assignments`(`assignment_id`) ON DELETE SET NULL ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `route_stop_students` ADD CONSTRAINT `route_stop_students_route_stop_id_fkey` FOREIGN KEY (`route_stop_id`) REFERENCES `route_stops`(`route_stop_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `route_stop_students` ADD CONSTRAINT `route_stop_students_student_id_fkey` FOREIGN KEY (`student_id`) REFERENCES `students`(`student_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `notifications` ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `notifications` ADD CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `student_events`(`event_id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `notifications`
+    ADD CONSTRAINT `fk_notif_user`
+        FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+            ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_notif_event`
+        FOREIGN KEY (`event_id`) REFERENCES `student_events` (`event_id`)
+            ON DELETE CASCADE ON UPDATE CASCADE;

@@ -85,6 +85,10 @@ const getStudentAssignmentDetails = async (studentId) => {
     });
 }
 
+const getTotalStudents = async () => {
+    return prisma.students.count();
+}
+
 
 module.exports = {
     getStudents,
@@ -93,5 +97,6 @@ module.exports = {
     createStudent,
     deleteStudent,
     updateStudent,
-    getStudentAssignmentDetails
+    getStudentAssignmentDetails,
+    getTotalStudents
 }

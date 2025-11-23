@@ -2,8 +2,6 @@ const notificationService = require('../service/NotificationService');
 
 const getMyNotifications = async (req, res) => {
     try {
-        // ƯU TIÊN 1: Lấy từ token (khi đã đăng nhập thật)
-        // ƯU TIÊN 2: Fallback để test nhanh bằng query (rất tiện demo Postman)
         const userId = req.user_id || req.query.user_id || req.query.userId;
 
         if (!userId) {

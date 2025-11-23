@@ -1,4 +1,4 @@
-'use client'; // Thêm vào vì nó tương tác (DropdownMenu)
+'use client';
 
 import {
   DropdownMenu,
@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
 
-// Định nghĩa lại kiểu Schedule (tốt nhất là import từ file dùng chung)
 interface Schedule {
     assignment_id: number;
     route_id: number;
@@ -21,7 +20,6 @@ interface Schedule {
     status: string;
 }
 
-// Định nghĩa props cho component
 interface ScheduleCardProps {
     schedule: Schedule;
     onViewDetails: (routeId: number) => void;
@@ -43,7 +41,6 @@ const ScheduleCard = ({ schedule, onViewDetails }: ScheduleCardProps) => {
                     <DropdownMenuContent>
                         <DropdownMenuLabel>Hành Động</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        {/* Gọi hàm onViewDetails với route_id */}
                         <DropdownMenuItem onClick={() => onViewDetails(schedule.route_id)}>
                             Xem Chi Tiết
                         </DropdownMenuItem>

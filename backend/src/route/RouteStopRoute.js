@@ -4,6 +4,7 @@ const routeStopController = require("../controller/RouteStopController");
 const { requireAuth } = require('../middleware/requireAuth');
 const studentController = require("../controller/StudentController");
 
+router.use(requireAuth)
 // This route is used by the frontend to get stops for a selected route
 // router.get(
 //     '/:routeId/stops',

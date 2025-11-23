@@ -166,7 +166,6 @@ const RouteDetailsDisplay = ({ selectedRoute, selectedDriver, selectedBus }: Rou
                     .addTo(map.current!);
             });
 
-            // Thêm route line thực tế
             map.current.addSource('route', {
                 type: 'geojson',
                 data: {
@@ -216,8 +215,7 @@ const RouteDetailsDisplay = ({ selectedRoute, selectedDriver, selectedBus }: Rou
                 const [lon1, lat1] = coordinates[i-1];
                 const [lon2, lat2] = coordinates[i];
 
-                // Tính khoảng cách Haversine (đơn giản)
-                const R = 6371; // Bán kính Trái đất tính bằng km
+                const R = 6371;
                 const dLat = (lat2 - lat1) * Math.PI / 180;
                 const dLon = (lon2 - lon1) * Math.PI / 180;
                 const a =
@@ -230,7 +228,7 @@ const RouteDetailsDisplay = ({ selectedRoute, selectedDriver, selectedBus }: Rou
 
             return {
                 distance: totalDistance,
-                duration: totalDistance * 2.5 // Ước tính thời gian (phút)
+                duration: totalDistance * 2.5
             };
         } catch (error) {
             return null;
@@ -381,16 +379,6 @@ const RouteDetailsDisplay = ({ selectedRoute, selectedDriver, selectedBus }: Rou
                             Thông tin xe buýt
                         </h3>
                         <div className="space-y-3">
-                            <div className="flex items-center gap-3">
-                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-3xl">
-                                    🚌
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-lg">{selectedBus.bus_number}</p>
-                                    <p className="text-sm text-gray-500">{selectedBus.license_plate}</p>
-                                </div>
-                            </div>
-
                             <div className="border-t pt-3 space-y-2">
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">🏷️ ID:</span>
@@ -404,12 +392,6 @@ const RouteDetailsDisplay = ({ selectedRoute, selectedDriver, selectedBus }: Rou
                                     <span className="text-gray-600">👥 Sức chứa:</span>
                                     <span className="font-medium">{selectedBus.capacity} chỗ</span>
                                 </div>
-                                {selectedBus.year && (
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">📅 Năm sản xuất:</span>
-                                        <span className="font-medium">{selectedBus.year}</span>
-                                    </div>
-                                )}
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">📊 Trạng thái:</span>
                                     <span className={`px-2 py-1 rounded text-sm ${
@@ -420,14 +402,6 @@ const RouteDetailsDisplay = ({ selectedRoute, selectedDriver, selectedBus }: Rou
                                         {selectedBus.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
                                     </span>
                                 </div>
-                                {selectedBus.last_maintenance_date && (
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">🔧 Bảo trì lần cuối:</span>
-                                        <span className="font-medium">
-                                            {new Date(selectedBus.last_maintenance_date).toLocaleDateString('vi-VN')}
-                                        </span>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>

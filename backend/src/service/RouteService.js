@@ -1,8 +1,6 @@
 const routeRepository = require('../repository/RouteRepository');
-const routeAssignmentService = require('./RouteAssignmentService');
-const axios = require('axios');
-const UserRepository = require("../repository/UserRepository");
-const studentRepository = require("../repository/StudentRepository");
+const routeStopService = require('./RouteStopService');
+const routeAssignmentRepository = require('../repository/RouteAssignmentRepository');
 
 // const getRouteById1 = async (routeId) => {
 //     const route = await routeRepository.findRouteDetailsById(routeId);
@@ -83,7 +81,7 @@ const getRouteById = async (id) => {
 
 const getAvailableRoutes = async () => {
     const allRoutes = await routeRepository.getAllRoutes();
-    const allAssignments = await routeAssignmentService.getRouteAssignments();
+    const allAssignments = await routeAssignmentRepository.getAllRouteAssignments();
 
     const assignedRouteIds = new Set(
         allAssignments
@@ -96,10 +94,45 @@ const getAvailableRoutes = async () => {
     );
 }
 
+const createRoute = async (start_time, stops, create_return_route, return_start_time) => {
+    const createdRoute = await routeRepository.createRoute(start_time, 'MORNING', null);
+    await routeStopService.createRouteStopsForRoute(createdRoute.route_id, stops);
+
+    if (create_return_route) {
+        const createdReverseRoute = await routeRepository.createRoute(return_start_time, 'AFTERNOON', createdRoute.route_id);
+        const reversedStops = [...stops].reverse().map((stop, index) => ({
+            stop_id: stop.stop_id,
+            stop_order: index + 1,
+        }));
+        await routeStopService.createRouteStopsForRoute(createdReverseRoute.route_id, reversedStops);
+    }
+}
+
+const getReturnRoute = async (route_id) => {
+    return routeRepository.getReturnRoute(route_id);
+}
+
+const deleteRoute = async (routeId) => {
+    return routeRepository.deleteRoute(routeId);
+}
+
+const getRoutesForStudentRegistration = async () => {
+    return routeRepository.getAssignedRoutes();
+}
+
+const getTotalRoutes = async () => {
+    return routeRepository.getTotalRoutes();
+}
+
 module.exports = {
     // getRouteById1,
     // getAllSchedules,
     getAvailableRoutes,
     getRoutes,
-    getRouteById
+    getRouteById,
+    createRoute,
+    getReturnRoute,
+    deleteRoute,
+    getTotalRoutes,
+    getRoutesForStudentRegistration
 }

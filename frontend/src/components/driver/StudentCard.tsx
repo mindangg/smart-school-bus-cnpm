@@ -20,7 +20,6 @@ const StudentCard = ({ student, studentPickup }: any) => {
     const router = useRouter();
 
     const handleUpdateEvent = async (event: string) => {
-        // setOpenAlert(true)
 
         await api.put(`student_events/stop_student`, {
             student_id: student.student_id,

@@ -25,15 +25,12 @@ model users {
 }
 
 model buses {
-  bus_id                Int                 @id @default(autoincrement())
-  bus_number            String              @unique(map: "bus_number") @db.VarChar(50)
-  license_plate         String              @unique(map: "license_plate") @db.VarChar(50)
-  capacity              Int?
-  model                 String?             @db.VarChar(100)
-  year                  Int?
-  status                String?             @db.VarChar(20)
-  last_maintenance_date DateTime?           @db.Date
-  route_assignments     route_assignments[]
+  bus_id            Int                 @id @default(autoincrement())
+  bus_number        String              @unique(map: "bus_number") @db.VarChar(50)
+  capacity          Int?
+  model             String?             @db.VarChar(100)
+  status            String?             @db.VarChar(20)
+  route_assignments route_assignments[]
 }
 
 model bus_stops {
@@ -43,7 +40,6 @@ model bus_stops {
   address   String?  @db.VarChar(255)
   is_active Boolean? @default(true)
 
-  students    students[]
   route_stops route_stops[]
 }
 
@@ -54,41 +50,42 @@ model routes {
   is_active      Boolean?  @default(true)
   created_at     DateTime? @default(now()) @db.Timestamp(0)
   updated_at     DateTime? @default(now()) @db.Timestamp(0)
-  generated_from Int?      @default(-1) @db.Int
+  generated_from Int?      @default(-1)
 
   route_assignments route_assignments[]
   route_stops       route_stops[]
 }
 
 model route_assignments {
-  assignment_id   Int       @id @default(autoincrement())
-  route_id        Int
-  driver_id       Int
-  bus_id          Int
-  assignment_date DateTime
-  is_active       Boolean?  @default(true)
-  created_at      DateTime? @default(now()) @db.Timestamp(0)
+  assignment_id Int       @id @default(autoincrement())
+  route_id      Int
+  driver_id     Int
+  bus_id        Int
+  is_active     Boolean?  @default(true)
+  created_at    DateTime? @default(now()) @db.Timestamp(0)
 
-  routes routes @relation(fields: [route_id], references: [route_id], onDelete: Cascade, onUpdate: NoAction, map: "route_assignments_ibfk_1")
-  users  users  @relation(fields: [driver_id], references: [user_id], onUpdate: NoAction, map: "route_assignments_ibfk_2")
-  buses  buses  @relation(fields: [bus_id], references: [bus_id], onUpdate: NoAction, map: "route_assignments_ibfk_3")
+  routes routes @relation(fields: [route_id], references: [route_id], onDelete: Cascade)
+
+  users users @relation(fields: [driver_id], references: [user_id], onUpdate: NoAction)
+
+  buses buses @relation(fields: [bus_id], references: [bus_id], onUpdate: NoAction)
 
   student_events student_events[]
 
-  @@index([bus_id], map: "idx_route_assignments_bus_id")
-  @@index([driver_id], map: "idx_route_assignments_driver_id")
-  @@index([route_id], map: "idx_route_assignments_route_id")
+  @@index([bus_id])
+  @@index([driver_id])
+  @@index([route_id])
 }
 
 model route_stops {
-  route_stop_id Int     @id @default(autoincrement())
+  route_stop_id Int @id @default(autoincrement())
   route_id      Int
   stop_id       Int
   stop_order    Int
-  stop_type     String? @db.VarChar(20)
 
-  route routes    @relation(fields: [route_id], references: [route_id], onDelete: Cascade)
-  stop  bus_stops @relation(fields: [stop_id], references: [stop_id], onDelete: Cascade)
+  route routes @relation(fields: [route_id], references: [route_id], onDelete: Cascade)
+
+  stop bus_stops @relation(fields: [stop_id], references: [stop_id], onDelete: Cascade)
 
   students route_stop_students[]
 
@@ -104,15 +101,13 @@ model students {
   profile_photo_url String?   @db.VarChar(255)
   is_active         Boolean?  @default(true)
   created_at        DateTime? @default(now()) @db.Timestamp(0)
-  stop_id           Int?
 
-  users          users?                @relation(fields: [parent_id], references: [user_id], onUpdate: NoAction, map: "students_ibfk_1")
-  bus_stops      bus_stops?            @relation(fields: [stop_id], references: [stop_id], onUpdate: NoAction, map: "students_ibfk_2")
+  users users? @relation(fields: [parent_id], references: [user_id], onUpdate: NoAction)
+
   route_stops    route_stop_students[]
   student_events student_events[]
 
-  @@index([parent_id], map: "idx_students_parent_id")
-  @@index([stop_id], map: "idx_students_stop_id")
+  @@index([parent_id])
 }
 
 model student_events {

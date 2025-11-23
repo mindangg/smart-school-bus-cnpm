@@ -13,6 +13,7 @@ const BusStopRoute = require('./route/BusStopRoute')
 const RouteStopRoute = require('./route/RouteStopRoute')
 const RouteStopStudentRoute = require('./route/RouteStopStudentRoute')
 const NotificationRoute = require('./route/NotificationRoute')
+const AdminRoute = require('./route/AdminRoute')
 
 const app = express()
 
@@ -41,6 +42,7 @@ app.use('/api/route_stops', RouteStopRoute)
 app.use('/api/bus_stops', BusStopRoute)
 app.use('/api/route_stop_student', RouteStopStudentRoute)
 app.use('/api/notifications', NotificationRoute)
+app.use('/api/admin', AdminRoute)
 
 app.get('/', (req, res) => {
     res.send('Welcome to my app')

@@ -26,8 +26,8 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
         lat: pathRoute?.route_stops[0]?.stop?.latitude
     }
     const end = {
-        lng: pathRoute?.route_stops[6]?.stop?.longitude,
-        lat: pathRoute?.route_stops[6]?.stop?.latitude
+        lng: pathRoute?.route_stops[pathRoute.route_stops.length - 1]?.stop?.longitude,
+        lat: pathRoute?.route_stops[pathRoute.route_stops.length - 1]?.stop?.latitude
     }
 
     useEffect(() => {
@@ -104,7 +104,6 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
 
         const simulatedSpeed = distance / desiredSimTime; // m/s
 
-        // Tính khoảng cách thực (mét)
         const getDistance = (lng1: number, lat1: number, lng2: number, lat2: number) => {
             const R = 6371000;
             const toRad = (deg: number) => (deg * Math.PI) / 180;
@@ -123,7 +122,7 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
         const animateBus = (timestamp: number) => {
             if (!lastTimestamp) lastTimestamp = timestamp;
 
-            const deltaTime = (timestamp - lastTimestamp) / 1000;
+            const deltaTime = (timestamp - lastTimestamp) / 10000;
             lastTimestamp = timestamp;
 
             const [lng1, lat1] = coordinates[segmentIndex];

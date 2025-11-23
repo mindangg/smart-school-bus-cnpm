@@ -42,12 +42,9 @@ CREATE TABLE buses
 (
     bus_id                INT PRIMARY KEY AUTO_INCREMENT,
     bus_number            varchar(50) UNIQUE NOT NULL,
-    license_plate         varchar(50) UNIQUE NOT NULL,
     capacity              INT,
     model                 varchar(100),
-    year                  INT,
-    status                varchar(20),
-    last_maintenance_date date
+    status                varchar(20)
 );
 
 CREATE TABLE routes
@@ -82,7 +79,6 @@ CREATE TABLE route_stops (
      route_id INT NOT NULL,
      stop_id INT NOT NULL,
      stop_order INT NOT NULL,
-     stop_type VARCHAR(20),
 
      UNIQUE (route_id, stop_id),
      UNIQUE (route_id, stop_order),

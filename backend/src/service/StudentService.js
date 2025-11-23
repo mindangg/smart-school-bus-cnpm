@@ -3,7 +3,7 @@ const routeStopRepository = require('../repository/RouteStopRepository')
 const busStopRepository = require('../repository/BusStopRepository')
 
 const routeStopStudentRepository = require('../repository/RouteStopStudentRepository')
-
+const routeRepository = require('../repository/RouteRepository')
 
 const createStudent = async (data) => {
     const student = await studentRepository.createStudent(data)
@@ -44,37 +44,59 @@ const deleteStudent = async (id) => {
 
 const updateStudentStops = async (parentId, studentId, newRouteId, newStopId) => {
     const student = await studentRepository.getStudentById(studentId);
-    if (!student) {
-        throw new Error('Student not found');
-    }
-    if (student.parent_id !== parentId) {
-        throw new Error('Unauthorized');
-    }
+    if (!student) throw new Error('Student not found');
+    if (student.parent_id !== parentId) throw new Error('Unauthorized');
 
-    const routeStop = await routeStopRepository.findRouteStop(newRouteId, newStopId);
-
-    if (!routeStop) {
-        throw new Error('This stop is not valid or not active on the selected route.');
+    
+    const selectedRouteStop = await routeStopRepository.findRouteStop(newRouteId, newStopId);
+    if (!selectedRouteStop) {
+        throw new Error('This stop is not valid on the selected route.');
     }
 
-    const newRouteStopId = routeStop.route_stop_id;
-    const updatedAssignment = await routeStopStudentRepository.upsertAssignment(
+    const mainAssignment = await routeStopStudentRepository.upsertAssignment(
         studentId, 
-        newRouteStopId
+        selectedRouteStop.route_stop_id
     );
 
-    return updatedAssignment;
+    try {
+        const returnRoute = await routeRepository.getReturnRoute(newRouteId);
+
+        if (returnRoute) {
+            
+            const returnRouteStop = await routeStopRepository.findRouteStop(
+                returnRoute.route_id, 
+                newStopId
+            );
+
+            if (returnRouteStop) {
+                await routeStopStudentRepository.upsertAssignment(
+                    studentId,
+                    returnRouteStop.route_stop_id
+                );
+                console.log(`Đã tự động đăng ký tuyến về (Route ${returnRoute.route_id}) cho học sinh ${studentId}`);
+            }
+        }
+    } catch (error) {
+        console.error("Lỗi khi tự động đăng ký tuyến về:", error.message);
+    }
+
+    return mainAssignment;
  }
+
+  
 
 const getStudentAssignment = async (studentId) => {
     const assignment = await studentRepository.getStudentAssignmentDetails(studentId);
     
     if (!assignment) {
-        return null; // Trả về null nếu học sinh chưa đăng ký
+        return null; 
     }
     
-    // Trả về toàn bộ dữ liệu (frontend sẽ tự xử lý)
     return assignment;
+}
+
+const getTotalStudents = async () => {
+    return studentRepository.getTotalStudents();
 }
 
 module.exports = {
@@ -85,5 +107,6 @@ module.exports = {
     deleteStudent,
     updateStudent,
     updateStudentStops,
-    getStudentAssignment
+    getStudentAssignment,
+    getTotalStudents
 }
