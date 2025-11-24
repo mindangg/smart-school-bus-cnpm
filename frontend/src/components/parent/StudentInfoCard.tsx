@@ -23,6 +23,10 @@ const StudentInfoCard = ({ student, assignment }: any) => {
                 routeId: newRouteId
             });
 
+            await api.put(`student_events/stop_student`, {
+                student_id: student.student_id,
+                event_type: 'PICK UP'
+            })
 
             setIsModalOpen(false);
             router.refresh();

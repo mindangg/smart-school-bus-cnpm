@@ -21,13 +21,11 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
     const [students, setStudents] = useState<any[]>([])
     const [studentPickup, setStudentPickup] = useState<any>(null)
 
+    const [segmentEndIndices, setSegmentEndIndices] = useState<number[]>([]);
+
     const start = {
         lng: pathRoute?.route_stops[0]?.stop?.longitude,
         lat: pathRoute?.route_stops[0]?.stop?.latitude
-    }
-    const end = {
-        lng: pathRoute?.route_stops[pathRoute.route_stops.length - 1]?.stop?.longitude,
-        lat: pathRoute?.route_stops[pathRoute.route_stops.length - 1]?.stop?.latitude
     }
 
     useEffect(() => {
@@ -38,30 +36,37 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                 let totalDuration = 0
                 const allSteps: any[] = []
 
+                // const segmentEndIndices: number[] = [];
+
                 for (let i = 0; i < pathRoute.route_stops.length - 1; i++) {
-                    const current = pathRoute.route_stops[i].stop
-                    const next = pathRoute.route_stops[i + 1].stop
+                    const current = pathRoute.route_stops[i].stop;
+                    const next = pathRoute.route_stops[i + 1].stop;
 
                     const res = await api.get('routes/direction_full', {
                         params: {
                             start: `${current.longitude},${current.latitude}`,
                             end: `${next.longitude},${next.latitude}`,
                         },
-                    })
+                    });
 
-                    const { geometry, steps, distance, duration } = res.data
+                    const { geometry, steps, distance, duration } = res.data;
 
                     if (geometry?.coordinates?.length > 0) {
-                        coordinates.push(...geometry.coordinates)
+                        coordinates.push(...geometry.coordinates);
+
+                        // Store the index where this segment ends
+                        segmentEndIndices.push(coordinates.length - 1);
                     }
 
-                    totalDistance += distance || 0
-                    totalDuration += duration || 0
+                    totalDistance += distance || 0;
+                    totalDuration += duration || 0;
 
                     if (Array.isArray(steps)) {
-                        allSteps.push(...steps)
+                        allSteps.push(...steps);
                     }
                 }
+
+                setSegmentEndIndices(segmentEndIndices);
 
                 const fullGeometry = {
                     type: 'LineString',
@@ -92,17 +97,19 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
         if (!route || !mapRef.current || !isMapLoaded)
             return;
 
-        // const desiredSimTime = 120;
         const desiredSimTime = duration / 30;
-
         const map = mapRef.current.getMap();
         let animationFrameId: number;
         let progress = 0;
 
+        let isWaiting = false;
+        let waitTimeout: any = null;
+        let currentStopIndex = 0;
+
         const coordinates = route.coordinates;
         if (!coordinates || coordinates.length < 2) return;
 
-        const simulatedSpeed = distance / desiredSimTime; // m/s
+        const simulatedSpeed = distance / desiredSimTime;
 
         const getDistance = (lng1: number, lat1: number, lng2: number, lat2: number) => {
             const R = 6371000;
@@ -118,12 +125,18 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
 
         let segmentIndex = 0;
         let lastTimestamp = 0;
+        let lastLogTime = 0;
 
         const animateBus = (timestamp: number) => {
             if (!lastTimestamp) lastTimestamp = timestamp;
 
-            const deltaTime = (timestamp - lastTimestamp) / 10000;
+            const deltaTime = (timestamp - lastTimestamp) / 1000;
             lastTimestamp = timestamp;
+
+            if (isWaiting) {
+                animationFrameId = requestAnimationFrame(animateBus);
+                return;
+            }
 
             const [lng1, lat1] = coordinates[segmentIndex];
             const [lng2, lat2] = coordinates[segmentIndex + 1];
@@ -135,20 +148,45 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
             if (progress >= 1) {
                 progress = 0;
                 segmentIndex++;
-                if (segmentIndex >= coordinates.length - 1)
+
+                // ORDER-BASED STOP CHECK
+                if (
+                    currentStopIndex < segmentEndIndices.length &&
+                    segmentIndex >= segmentEndIndices[currentStopIndex]
+                ) {
+                    // Bus has reached the next official stop
+                    isWaiting = true;
+
+                    waitTimeout = setTimeout(() => {
+                        isWaiting = false;
+                    }, 2000);
+
+                    currentStopIndex++; // Move to next stop
+                }
+
+                if (segmentIndex >= coordinates.length - 1) {
                     return;
+                }
             }
 
             const lng = lng1 + (lng2 - lng1) * progress;
             const lat = lat1 + (lat2 - lat1) * progress;
+
             setBusPos([lng, lat]);
 
             animationFrameId = requestAnimationFrame(animateBus);
         };
 
         map.once("moveend", () => {
-            animationFrameId = requestAnimationFrame(animateBus);
+            if (coordinates.length > 0) {
+                setBusPos(coordinates[0]);
+            }
+
+            setTimeout(() => {
+                animationFrameId = requestAnimationFrame(animateBus);
+            }, 2000);
         });
+
 
         return () => {
             if (animationFrameId)
@@ -188,6 +226,7 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                     initialViewState={{
                         longitude: start.lng,
                         latitude: start.lat,
+                        zoom: 12
                     }}
                     style={{ width: '100%', height: '100%' }}
                     mapStyle='mapbox://styles/mapbox/streets-v11'
@@ -223,7 +262,9 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                                         {bus}
                                     </p>
                                 </div>
-                                <Bus size={32} className='text-yellow-500 fill-yellow-400' />
+                                <div className='relative bg-white rounded-full p-1 shadow-md border border-yellow-500 z-20'>
+                                    <Bus size={24} className='text-yellow-600' />
+                                </div>
                             </div>
                         </Marker>
                     )}
@@ -238,15 +279,30 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                         >
                             <div className='flex flex-col items-center'>
                                 <div className='bg-white p-2 rounded-lg shadow-md mb-1'>
-                                    <p className='text-sm font-semibold text-gray-900'>
+                                    <p className='text-xs font-semibold text-gray-900'>
                                         {index + 1}. {stop.stop.address}
                                     </p>
                                 </div>
                                 {
-                                    index == 0 ? <MapPin size={32} className='text-green-500 fill-green-400'  /> :
-                                    index == pathRoute.length - 1 ? <MapPin size={32} className='text-red-500 fill-red-400'  /> :
-                                    <BusFront size={25} className='text-blue-500 fill-blue-400' />
+                                    index === 0 ? (
+                                        <div className="relative flex items-center justify-center">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                            <div className="relative bg-green-500 text-white p-2 rounded-full border-2 border-white shadow-xl transform hover:scale-110 transition-transform">
+                                                <MapPin size={20} />
+                                            </div>
+                                        </div>
+                                    ) : index === pathRoute.route_stops.length - 1 ? (
+                                        <div className="relative flex items-center justify-center">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                            <div className="relative bg-red-500 text-white p-2 rounded-full border-2 border-white shadow-xl transform hover:scale-110 transition-transform">
+                                                <MapPin size={20} />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <BusFront size={24} className='text-blue-500 fill-blue-400' />
+                                    )
                                 }
+
                             </div>
                         </Marker>
                     ))}

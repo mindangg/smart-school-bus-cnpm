@@ -26,7 +26,7 @@ const StudentPopup = ({students, studentPickup, setOpen}: any) => {
                         </div>
 
                         {students.map((student: any) => (
-                            <StudentCard key={student.student_id} student={student} studentPickup={studentPickup} />
+                            <StudentCard key={student.student_id} student={student} studentPickup={studentPickup} setOpen={setOpen} />
                         ))}
                     </div>
                 </div>
