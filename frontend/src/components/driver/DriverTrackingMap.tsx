@@ -93,14 +93,81 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
         }
     }, [pathRoute])
 
+    const getBusStartProgress = (startTimeStr: string, durationSeconds: number) => {
+        const [startHour, startMinute] = startTimeStr.split(':').map(Number);
+        const now = new Date();
+        now.setHours(6, 15, 0, 0); // test
+
+        const startTime = new Date();
+        startTime.setHours(startHour, startMinute, 0, 0);
+
+        const elapsed = (now.getTime() - startTime.getTime()) / 1000;
+        let progress = elapsed / durationSeconds;
+
+        if (progress < 0) progress = 0;   // bus hasn't started
+        if (progress > 1) progress = 1;   // bus already finished
+        return progress;
+    };
+
+    const getPositionFromProgress = (coordinates: [number, number][], progress: number) => {
+        if (!coordinates || coordinates.length < 2) return coordinates[0];
+
+        const totalDistance = coordinates.reduce((acc, curr, idx) => {
+            if (idx === 0) return 0;
+            const [lng1, lat1] = coordinates[idx - 1];
+            const [lng2, lat2] = curr;
+            const R = 6371000;
+            const toRad = (deg: number) => (deg * Math.PI) / 180;
+            const dLat = toRad(lat2 - lat1);
+            const dLng = toRad(lng2 - lng1);
+            const a =
+                Math.sin(dLat / 2) ** 2 +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return acc + R * c;
+        }, 0);
+
+        const targetDistance = totalDistance * progress;
+
+        let traveled = 0;
+        for (let i = 1; i < coordinates.length; i++) {
+            const [lng1, lat1] = coordinates[i - 1];
+            const [lng2, lat2] = coordinates[i];
+            const R = 6371000;
+            const toRad = (deg: number) => (deg * Math.PI) / 180;
+            const dLat = toRad(lat2 - lat1);
+            const dLng = toRad(lng2 - lng1);
+            const segmentDistance = 2 * R * Math.atan2(Math.sqrt(Math.sin(dLat / 2) ** 2 +
+                    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2),
+                Math.sqrt(1 - (Math.sin(dLat / 2) ** 2 +
+                    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2))
+            );
+
+            if (traveled + segmentDistance >= targetDistance) {
+                const remaining = targetDistance - traveled;
+                const fraction = remaining / segmentDistance;
+                const lng = lng1 + (lng2 - lng1) * fraction;
+                const lat = lat1 + (lat2 - lat1) * fraction;
+                return [lng, lat] as [number, number];
+            }
+
+            traveled += segmentDistance;
+        }
+
+        return coordinates[coordinates.length - 1];
+    };
+
     useEffect(() => {
         if (!route || !mapRef.current || !isMapLoaded)
             return;
 
+        let progress = getBusStartProgress(pathRoute.start_time, duration);
+        const initialPos = getPositionFromProgress(route.coordinates, progress);
+        setBusPos(initialPos);
+
         const desiredSimTime = duration / 30;
         const map = mapRef.current.getMap();
         let animationFrameId: number;
-        let progress = 0;
 
         let isWaiting = false;
         let waitTimeout: any = null;
@@ -123,13 +190,11 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
             return R * c;
         };
 
-        let segmentIndex = 0;
         let lastTimestamp = 0;
         let lastLogTime = 0;
 
         const animateBus = (timestamp: number) => {
             if (!lastTimestamp) lastTimestamp = timestamp;
-
             const deltaTime = (timestamp - lastTimestamp) / 1000;
             lastTimestamp = timestamp;
 
@@ -138,55 +203,64 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                 return;
             }
 
-            const [lng1, lat1] = coordinates[segmentIndex];
-            const [lng2, lat2] = coordinates[segmentIndex + 1];
-
-            const segmentLength = getDistance(lng1, lat1, lng2, lat2);
-            const travelFraction = (simulatedSpeed * deltaTime) / segmentLength;
-            progress += travelFraction;
+            // update progress along the total route
+            progress += (simulatedSpeed * deltaTime) / distance; // progress: 0 → 1
 
             if (progress >= 1) {
-                progress = 0;
-                segmentIndex++;
-
-                // ORDER-BASED STOP CHECK
-                if (
-                    currentStopIndex < segmentEndIndices.length &&
-                    segmentIndex >= segmentEndIndices[currentStopIndex]
-                ) {
-                    // Bus has reached the next official stop
-                    isWaiting = true;
-
-                    waitTimeout = setTimeout(() => {
-                        isWaiting = false;
-                    }, 2000);
-
-                    currentStopIndex++; // Move to next stop
-                }
-
-                if (segmentIndex >= coordinates.length - 1) {
-                    return;
-                }
+                progress = 1; // bus reached the end
+                setBusPos(coordinates[coordinates.length - 1]);
+                return;
             }
 
-            const lng = lng1 + (lng2 - lng1) * progress;
-            const lat = lat1 + (lat2 - lat1) * progress;
+            // find the current segment and local fraction
+            let traveled = 0;
+            let segmentIndex = 0;
+            let segmentFraction = 0;
+            for (let i = 1; i < coordinates.length; i++) {
+                const segDist = getDistance(
+                    coordinates[i - 1][0],
+                    coordinates[i - 1][1],
+                    coordinates[i][0],
+                    coordinates[i][1]
+                );
+                if ((traveled + segDist) / distance >= progress) {
+                    segmentIndex = i - 1;
+                    segmentFraction = (progress * distance - traveled) / segDist;
+                    break;
+                }
+                traveled += segDist;
+            }
 
+            const [lng1, lat1] = coordinates[segmentIndex];
+            const [lng2, lat2] = coordinates[segmentIndex + 1];
+            const lng = lng1 + (lng2 - lng1) * segmentFraction;
+            const lat = lat1 + (lat2 - lat1) * segmentFraction;
             setBusPos([lng, lat]);
+
+            // check if reached a stop
+            if (currentStopIndex < segmentEndIndices.length &&
+                segmentIndex >= segmentEndIndices[currentStopIndex]) {
+                isWaiting = true;
+                waitTimeout = setTimeout(() => {
+                    isWaiting = false;
+                }, 1200);
+                currentStopIndex++;
+            }
 
             animationFrameId = requestAnimationFrame(animateBus);
         };
 
         map.once("moveend", () => {
-            if (coordinates.length > 0) {
-                setBusPos(coordinates[0]);
-            }
+            // if (coordinates.length > 0) {
+            //     setBusPos(coordinates[0]);
+            // }
+            //
+            // setTimeout(() => {
+            //     animationFrameId = requestAnimationFrame(animateBus);
+            // }, 2000);
 
-            setTimeout(() => {
-                animationFrameId = requestAnimationFrame(animateBus);
-            }, 2000);
+            animationFrameId = requestAnimationFrame(animateBus);
         });
-
 
         return () => {
             if (animationFrameId)
@@ -195,6 +269,13 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
             map.off("moveend", animateBus);
         };
     }, [route, isMapLoaded, distance, duration]);
+
+    useEffect(() => {
+        if (!busPos) return;
+        setInterval(() => {
+            console.log('Bus position:', busPos);
+        }, 1000);
+    }, [busPos]);
 
     if (!pathRoute || !pathRoute.route_stops || pathRoute.route_stops.length < 2) {
         return (
