@@ -13,6 +13,8 @@ const formattedDate = `${weekday}, ngày ${day} tháng ${month} năm ${year}`
 const PathPage = async ({route_assignment} : any) => {
     const api = await createServerApi()
 
+    console.log(route_assignment)
+
     const fetchTotalDuration = async (route: any) => {
         const requests = route.route_stops.slice(0, -1).map((stop: any, i: number) => {
             const current = stop.stop;
@@ -102,7 +104,7 @@ const PathPage = async ({route_assignment} : any) => {
             </section>
             <section className='bg-white p-4 border border-gray-100 shadow-xs rounded-xl cursor-pointer'>
                 <h2 className='text-md font-bold mb-2'>Vị Trí Xe Buýt Thời Gian Thực</h2>
-                <DriverTrackingMap pathRoute={route} bus={route_assignment[0]?.buses?.bus_number}/>
+                <DriverTrackingMap pathRoute={route} bus={route_assignment[0]?.buses?.bus_number} assignmentId={route_assignment[0].assignment_id} driverId={route_assignment[0].driver_id}/>
             </section>
 
         </main>

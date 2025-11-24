@@ -1,7 +1,10 @@
+// backend/src/server.js (Updated)
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
+const http = require('http')
+const BusLocationServer = require('./websocket/BusLocationServer')
 
 const UserRoute = require('./route/UserRoute')
 const StudentRoute = require('./route/StudentRoute')
@@ -16,6 +19,11 @@ const NotificationRoute = require('./route/NotificationRoute')
 const AdminRoute = require('./route/AdminRoute')
 
 const app = express()
+const server = http.createServer(app)
+
+const busLocationServer = new BusLocationServer(server)
+
+app.set('busLocationServer', busLocationServer)
 
 app.use((req, res, next) => {
     console.log(req.path, req.method)
@@ -29,8 +37,6 @@ app.use(cors({
 }))
 
 app.use(express.json())
-
-// routes
 
 app.use('/api/users', UserRoute)
 app.use('/api/students', StudentRoute)
@@ -48,6 +54,18 @@ app.get('/', (req, res) => {
     res.send('Welcome to my app')
 })
 
-app.listen(process.env.PORT, () => {
+app.get('/api/bus-location/:assignment_id', (req, res) => {
+    const { assignment_id } = req.params
+    const location = busLocationServer.getCurrentLocation(parseInt(assignment_id))
+
+    if (location) {
+        res.json(location)
+    } else {
+        res.status(404).json({ message: 'Location not found' })
+    }
+})
+
+server.listen(process.env.PORT, () => {
     console.log(`Server running at http://localhost:${process.env.PORT}`)
+    console.log(`WebSocket server running at ws://localhost:${process.env.PORT}/ws/bus-location`)
 })

@@ -9,6 +9,7 @@ import {ArrowLeft, MapPin, Bus, User, Calendar} from "lucide-react";
 import RouteMap from "@/components/admin/RouteMap";
 import api from "@/lib/axios";
 import DriverTrackingMap from "@/components/driver/DriverTrackingMap";
+import LiveTrackingMap from "@/components/parent/LiveTrackingMap";
 
 interface Stop {
     stop_id: number;
@@ -285,7 +286,6 @@ const ScheduleDetailPage = () => {
                                 {/*    routeStops={schedule.routes.route_stops}*/}
                                 {/*    routeType={schedule.routes.route_type}*/}
                                 {/*/>*/}
-                                <DriverTrackingMap pathRoute={schedule.routes} bus={schedule.buses.bus_number}/>
                             </CardContent>
                         </Card>
 
