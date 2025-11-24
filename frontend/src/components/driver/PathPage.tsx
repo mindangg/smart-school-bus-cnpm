@@ -13,8 +13,6 @@ const formattedDate = `${weekday}, ngày ${day} tháng ${month} năm ${year}`
 const PathPage = async ({route_assignment} : any) => {
     const api = await createServerApi()
 
-    console.log(route_assignment)
-
     const fetchTotalDuration = async (route: any) => {
         const requests = route.route_stops.slice(0, -1).map((stop: any, i: number) => {
             const current = stop.stop;

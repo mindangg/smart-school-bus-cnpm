@@ -4,9 +4,9 @@ import React, {useEffect, useRef, useState} from 'react'
 import mapboxgl from 'mapbox-gl'
 import api from '@/lib/axios'
 import Map, {Layer, Marker, NavigationControl, Source} from 'react-map-gl'
-import {ArrowRight, Bus, BusFront, MapPin, Wifi, WifiOff, Navigation, Cpu} from 'lucide-react'
+import {ArrowRight, Bus, BusFront, Cpu, MapPin, Navigation, Wifi, WifiOff} from 'lucide-react'
 import StudentPopup from "@/components/driver/StudentPopup"
-import { useBusLocationDriver } from '@/hooks/useBusLocation'
+import {useBusLocationDriver} from '@/hooks/useBusLocation'
 
 interface DriverTrackingMapProps {
     pathRoute: any;
@@ -43,6 +43,9 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
     const gpsWatchIdRef = useRef<number>()
     const animationFrameRef = useRef<number>()
 
+    const ALMOST_THERE_DISTANCE = 1000; // meters
+    const almostThereLoggedRef = useRef(false);
+
     const start = {
         lng: pathRoute?.route_stops[0]?.stop?.longitude,
         lat: pathRoute?.route_stops[0]?.stop?.latitude
@@ -55,24 +58,28 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
                 let totalDistance = 0
                 let totalDuration = 0
                 const allSteps: any[] = []
+
+                const segmentEndIndices: number[] = [];
                 const tempSegmentEndIndices: number[] = []
 
                 for (let i = 0; i < pathRoute.route_stops.length - 1; i++) {
-                    const current = pathRoute.route_stops[i].stop
-                    const next = pathRoute.route_stops[i + 1].stop
+                    const current = pathRoute.route_stops[i].stop;
+                    const next = pathRoute.route_stops[i + 1].stop;
 
                     const res = await api.get('routes/direction_full', {
                         params: {
                             start: `${current.longitude},${current.latitude}`,
                             end: `${next.longitude},${next.latitude}`,
                         },
-                    })
+                    });
 
-                    const { geometry, steps, distance, duration } = res.data
+                    const { geometry, steps, distance, duration } = res.data;
 
                     if (geometry?.coordinates?.length > 0) {
                         coordinates.push(...geometry.coordinates)
                         tempSegmentEndIndices.push(coordinates.length - 1)
+
+                        segmentEndIndices.push(coordinates.length - 1);
                     }
 
                     totalDistance += distance || 0
@@ -112,8 +119,7 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
 
     const getBusStartProgress = (startTimeStr: string, durationSeconds: number) => {
 
-        // const [startHour, startMinute] = startTimeStr.split(':').map(Number)
-        const [startHour, startMinute] = [0, 0] //set gio di cho nhanh de test
+        const [startHour, startMinute] = startTimeStr.split(':').map(Number)
         const now = new Date()
 
         const startTime = new Date()
@@ -295,6 +301,33 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
                 }
             }
 
+            // Calculate how much distance bus has traveled
+            let traveledDistance = 0;
+            for (let i = 1; i < coordinates.length; i++) {
+                const segDist = getDistance(
+                    coordinates[i - 1][0],
+                    coordinates[i - 1][1],
+                    coordinates[i][0],
+                    coordinates[i][1]
+                );
+
+                if ((traveledDistance + segDist) / distance >= progress) {
+                    traveledDistance += (progress * distance - traveledDistance);
+                    break;
+                }
+                traveledDistance += segDist;
+            }
+
+            // Calculate remaining distance
+            const remainingDistance = distance - traveledDistance;
+
+            // Trigger once when bus is almost there
+            if (!almostThereLoggedRef.current && remainingDistance <= ALMOST_THERE_DISTANCE) {
+                console.log("Almost there!");
+                almostThereLoggedRef.current = true;
+            }
+
+            // check if reached a stop
             if (currentStopIndex < segmentEndIndices.length &&
                 segmentIndex >= segmentEndIndices[currentStopIndex]) {
                 isWaiting = true
@@ -382,8 +415,7 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
     const getRemainingTime = () => {
         if (!pathRoute?.start_time) return ''
 
-        // const [startHour, startMinute] = pathRoute.start_time.split(':').map(Number)
-        const [startHour, startMinute] = [0, 0] //set gio di cho nhanh de test
+        const [startHour, startMinute] = pathRoute.start_time.split(':').map(Number)
         const startTime = new Date()
         startTime.setHours(startHour, startMinute, 0, 0)
 
@@ -601,6 +633,22 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
             {steps?.length > 0 && (
                 <div className='mt-6 border-t pt-4 flex flex-col gap-2'>
                     <h3 className='text-lg font-semibold'>Hướng dẫn lộ trình</h3>
+                    <p className=''>
+                        Khoảng cách: {(distance / 1000).toFixed(2)} km
+                    </p>
+                    {(() => {
+                        const totalMinutes = Math.round(duration / 60);
+                        const hours = Math.floor(totalMinutes / 60);
+                        const minutes = totalMinutes % 60;
+                        return (
+                            <p>
+                                Thời gian ước tính{" "}
+                                {hours > 0
+                                    ? `${hours} giờ ${minutes > 0 ? `${minutes} phút` : ""}`
+                                    : `${minutes} phút`}
+                            </p>
+                        );
+                    })()}
                     <div className='max-h-[200px] overflow-y-auto space-y-2'>
                         {steps.map((step, i) => (
                             <div
@@ -615,6 +663,7 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
                 </div>
             )}
             {open && <StudentPopup students={students} studentPickup={studentPickup} setOpen={setOpen} />}
+
         </div>
     )
 }

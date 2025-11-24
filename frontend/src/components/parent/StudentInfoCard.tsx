@@ -45,7 +45,6 @@ const StudentInfoCard = ({ student, assignment }: any) => {
 
                 {assignment ? (
                     <>
-                        <p>Xe buýt số: <span className='font-semibold'>{bus?.bus_number || 'N/A'}</span></p>
                         <p>Địa điểm đón: <span className='font-semibold'>{studentStop?.address || 'N/A'}</span></p>
                         <p>Địa điểm đi: <span className='font-semibold'>{destinationStop?.address || 'N/A'}</span></p>
                     </>

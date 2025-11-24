@@ -11,11 +11,8 @@ const page = async ({ params }: any) => {
     const res = await api.get(`students/${id}`)
     const student = res.data
 
-    console.log(student)
-
     const res1 = await api.get(`students/${id}/assignment`)
     const assignmentData = res1.data
-    console.log(assignmentData)
 
     return (
         <main className='flex gap-7 w-full'>
@@ -31,7 +28,7 @@ const page = async ({ params }: any) => {
                     <LiveTrackingMap 
                         pathRoute={assignmentData?.route_stop?.route} 
                         assignedStop={assignmentData?.route_stop?.stop}
-                        assignmentId={assignmentData.route_stop.route.route_assignments[0].assignment_id}
+                        assignmentId={assignmentData?.route_stop.route?.route_assignments[0].assignment_id}
                         parentId={student.parent_id}
                     />
                 </div>

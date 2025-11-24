@@ -1,1 +1,1 @@
-GET http://localhost:4000/api/route_assignment/driver
+GET http://localhost:4000/api/students/1/assignment

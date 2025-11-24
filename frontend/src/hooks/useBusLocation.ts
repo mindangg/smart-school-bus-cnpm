@@ -47,7 +47,6 @@ export const useBusLocationDriver = ({
                 setIsConnected(true);
                 reconnectAttemptsRef.current = 0;
 
-                // Đăng ký driver với tracking mode
                 ws.send(JSON.stringify({
                     type: 'driver:register',
                     payload: {
@@ -80,7 +79,6 @@ export const useBusLocationDriver = ({
                 setIsConnected(false);
                 wsRef.current = null;
 
-                // Thử kết nối lại
                 if (enabled && reconnectAttemptsRef.current < maxReconnectAttempts) {
                     const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 10000);
                     reconnectAttemptsRef.current++;
@@ -147,7 +145,6 @@ export const useBusLocationDriver = ({
     return { isConnected, sendLocation, trackingMode, updateTrackingMode };
 };
 
-// Hook cho Parent - nhận vị trí
 export const useBusLocationParent = ({
                                          assignment_id,
                                          parent_id,
@@ -174,7 +171,6 @@ export const useBusLocationParent = ({
                 setIsConnected(true);
                 reconnectAttemptsRef.current = 0;
 
-                // Subscribe to bus location
                 ws.send(JSON.stringify({
                     type: 'parent:subscribe',
                     payload: {
@@ -210,7 +206,6 @@ export const useBusLocationParent = ({
                 setIsConnected(false);
                 wsRef.current = null;
 
-                // Thử kết nối lại
                 if (enabled && reconnectAttemptsRef.current < maxReconnectAttempts) {
                     const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 10000);
                     reconnectAttemptsRef.current++;
@@ -235,7 +230,6 @@ export const useBusLocationParent = ({
         }
 
         return () => {
-            // Unsubscribe trước khi đóng
             if (wsRef.current?.readyState === WebSocket.OPEN) {
                 wsRef.current.send(JSON.stringify({
                     type: 'parent:unsubscribe',

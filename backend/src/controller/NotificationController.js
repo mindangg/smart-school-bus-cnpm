@@ -1,5 +1,15 @@
 const notificationService = require('../service/NotificationService');
 
+const createNotification = async (req, res) => {
+    const data = req.body;
+    try {
+        const notification = await notificationService.createNotification(data);
+        res.status(201).json(notification);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 const getMyNotifications = async (req, res) => {
     try {
         const userId = req.user_id || req.query.user_id || req.query.userId;
@@ -30,5 +40,6 @@ const markNotificationAsRead = async (req, res) => {
 
 module.exports = {
     getMyNotifications,
-    markNotificationAsRead
+    markNotificationAsRead,
+    createNotification
 };
