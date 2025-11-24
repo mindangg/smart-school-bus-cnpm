@@ -69,6 +69,41 @@ const busData = [
         model: 'Ford Transit',
         status: 'ACTIVE',
     },
+    {
+        bus_id: 11,
+        bus_number: 'SGU-011',
+        capacity: 30,
+        model: 'Ford Transit',
+        status: 'ACTIVE',
+    },
+    {
+        bus_id: 12,
+        bus_number: 'SGU-012',
+        capacity: 27,
+        model: 'Toyota Coaster',
+        status: 'ACTIVE',
+    },
+    {
+        bus_id: 13,
+        bus_number: 'SGU-013',
+        capacity: 36,
+        model: 'Hyundai County',
+        status: 'ACTIVE',
+    },
+    {
+        bus_id: 14,
+        bus_number: 'SGU-014',
+        capacity: 27,
+        model: 'Toyota Coaster',
+        status: 'ACTIVE',
+    },
+    {
+        bus_id: 15,
+        bus_number: 'SGU-015',
+        capacity: 28,
+        model: 'Ford Transit',
+        status: 'ACTIVE',
+    },
 ];
 
 module.exports = busData;
