@@ -68,7 +68,7 @@ const createPickupStudentEvent = async (data) => {
         'PICKED UP': 'Con bạn đã được đón lên xe',
         'DROPPED OFF': 'Con bạn đã đến trường an toàn',
         'ABSENT': 'Con bạn vắng mặt tại điểm đón',
-        'PICK UP': 'Con bạn đã được đón lên xe'  // Optional fix: thêm nếu bạn dùng "PICK UP" trong test
+        'PICK UP': 'Con bạn đã được đón lên xe'
     }
 
     const messages = {

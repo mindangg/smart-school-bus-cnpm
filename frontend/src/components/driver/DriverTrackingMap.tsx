@@ -23,6 +23,9 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
 
     const [segmentEndIndices, setSegmentEndIndices] = useState<number[]>([]);
 
+    const ALMOST_THERE_DISTANCE = 1000; // meters
+    const almostThereLoggedRef = useRef(false);
+
     const start = {
         lng: pathRoute?.route_stops[0]?.stop?.longitude,
         lat: pathRoute?.route_stops[0]?.stop?.latitude
@@ -36,7 +39,7 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                 let totalDuration = 0
                 const allSteps: any[] = []
 
-                // const segmentEndIndices: number[] = [];
+                const segmentEndIndices: number[] = [];
 
                 for (let i = 0; i < pathRoute.route_stops.length - 1; i++) {
                     const current = pathRoute.route_stops[i].stop;
@@ -54,7 +57,6 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
                     if (geometry?.coordinates?.length > 0) {
                         coordinates.push(...geometry.coordinates);
 
-                        // Store the index where this segment ends
                         segmentEndIndices.push(coordinates.length - 1);
                     }
 
@@ -96,7 +98,7 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
     const getBusStartProgress = (startTimeStr: string, durationSeconds: number) => {
         const [startHour, startMinute] = startTimeStr.split(':').map(Number);
         const now = new Date();
-        now.setHours(6, 15, 0, 0); // test
+        now.setHours(6, 0, 0, 0); // test
 
         const startTime = new Date();
         startTime.setHours(startHour, startMinute, 0, 0);
@@ -191,8 +193,6 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
         };
 
         let lastTimestamp = 0;
-        let lastLogTime = 0;
-
         const animateBus = (timestamp: number) => {
             if (!lastTimestamp) lastTimestamp = timestamp;
             const deltaTime = (timestamp - lastTimestamp) / 1000;
@@ -237,6 +237,32 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
             const lat = lat1 + (lat2 - lat1) * segmentFraction;
             setBusPos([lng, lat]);
 
+            // Calculate how much distance bus has traveled
+            let traveledDistance = 0;
+            for (let i = 1; i < coordinates.length; i++) {
+                const segDist = getDistance(
+                    coordinates[i - 1][0],
+                    coordinates[i - 1][1],
+                    coordinates[i][0],
+                    coordinates[i][1]
+                );
+
+                if ((traveledDistance + segDist) / distance >= progress) {
+                    traveledDistance += (progress * distance - traveledDistance);
+                    break;
+                }
+                traveledDistance += segDist;
+            }
+
+            // Calculate remaining distance
+            const remainingDistance = distance - traveledDistance;
+
+            // Trigger once when bus is almost there
+            if (!almostThereLoggedRef.current && remainingDistance <= ALMOST_THERE_DISTANCE) {
+                console.log("Almost there!");
+                almostThereLoggedRef.current = true;
+            }
+
             // check if reached a stop
             if (currentStopIndex < segmentEndIndices.length &&
                 segmentIndex >= segmentEndIndices[currentStopIndex]) {
@@ -251,14 +277,6 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
         };
 
         map.once("moveend", () => {
-            // if (coordinates.length > 0) {
-            //     setBusPos(coordinates[0]);
-            // }
-            //
-            // setTimeout(() => {
-            //     animationFrameId = requestAnimationFrame(animateBus);
-            // }, 2000);
-
             animationFrameId = requestAnimationFrame(animateBus);
         });
 
@@ -270,12 +288,14 @@ const DriverTrackingMap = ({pathRoute, bus}: any) => {
         };
     }, [route, isMapLoaded, distance, duration]);
 
-    useEffect(() => {
-        if (!busPos) return;
-        setInterval(() => {
-            console.log('Bus position:', busPos);
-        }, 1000);
-    }, [busPos]);
+    // useEffect(() => {
+    //     if (!busPos)
+    //         return;
+    //
+    //     setInterval(() => {
+    //         console.log('Vị trí xe buýt:', busPos);
+    //     }, 1000);
+    // }, [busPos]);
 
     if (!pathRoute || !pathRoute.route_stops || pathRoute.route_stops.length < 2) {
         return (

@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import { Bus, BusFront, MapPin, User } from 'lucide-react'
 import Map, { Layer, Marker, NavigationControl, Source } from 'react-map-gl'
 import api from "@/lib/axios";
 import mapboxgl from "mapbox-gl";
+import {useAuth} from "@/contexts/AuthContext";
 
 interface LiveTrackingMapProps {
     pathRoute: any;
@@ -14,7 +15,7 @@ interface LiveTrackingMapProps {
 const LiveTrackingMap = ({ pathRoute, assignedStop }: LiveTrackingMapProps) => {
     const mapRef = useRef<any>(null)
     const [isMapLoaded, setIsMapLoaded] = useState(false)
-    const [routeGeometry, setRouteGeometry] = useState<any>(null)
+    const [route, setRoute] = useState<any>(null)
 
     const [distance, setDistance] = useState<number>(0)
     const [duration, setDuration] = useState<number>(0)
@@ -22,7 +23,13 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: LiveTrackingMapProps) => {
 
     const routeStops = pathRoute?.route_stops || [];
     const startStop = routeStops.length > 0 ? routeStops[0].stop : null;
-    const schoolStop = routeStops.length > 0 ? routeStops[routeStops.length - 1].stop : null;
+
+    const [segmentEndIndices, setSegmentEndIndices] = useState<number[]>([]);
+
+    const ALMOST_THERE_DISTANCE = 1000; // meters
+    const almostThereLoggedRef = useRef(false);
+
+    const { user } = useAuth()
 
     useEffect(() => {
         const fetchFullRoute = async () => {
@@ -32,6 +39,8 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: LiveTrackingMapProps) => {
                 const coordinates: [number, number][] = []
                 let totalDistance = 0
                 let totalDuration = 0
+
+                const segmentEndIndices: number[] = [];
 
                 for (let i = 0; i < routeStops.length - 1; i++) {
                     const current = routeStops[i].stop
@@ -48,18 +57,22 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: LiveTrackingMapProps) => {
 
                     if (geometry?.coordinates?.length > 0) {
                         coordinates.push(...geometry.coordinates)
+
+                        segmentEndIndices.push(coordinates.length - 1);
                     }
 
                     totalDistance += distance || 0
                     totalDuration += duration || 0
                 }
 
+                setSegmentEndIndices(segmentEndIndices);
+
                 const fullGeometry = {
                     type: 'LineString',
                     coordinates,
                 }
 
-                setRouteGeometry(fullGeometry)
+                setRoute(fullGeometry)
                 setDistance(totalDistance)
                 setDuration(totalDuration)
 
@@ -76,55 +89,198 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: LiveTrackingMapProps) => {
         fetchFullRoute()
     }, [pathRoute])
 
-    useEffect(() => {
-        if (!routeGeometry || !mapRef.current || !isMapLoaded) return;
+    const getBusStartProgress = (startTimeStr: string, durationSeconds: number) => {
+        const [startHour, startMinute] = startTimeStr.split(':').map(Number);
+        const now = new Date();
+        now.setHours(6, 0, 0, 0); // test
 
-        const desiredSimTime = duration / 30;
+        const startTime = new Date();
+        startTime.setHours(startHour, startMinute, 0, 0);
+
+        const elapsed = (now.getTime() - startTime.getTime()) / 1000;
+        let progress = elapsed / durationSeconds;
+
+        if (progress < 0) progress = 0;   // bus hasn't started
+        if (progress > 1) progress = 1;   // bus already finished
+        return progress;
+    };
+
+    const getPositionFromProgress = (coordinates: [number, number][], progress: number) => {
+        if (!coordinates || coordinates.length < 2) return coordinates[0];
+
+        const totalDistance = coordinates.reduce((acc, curr, idx) => {
+            if (idx === 0) return 0;
+            const [lng1, lat1] = coordinates[idx - 1];
+            const [lng2, lat2] = curr;
+            const R = 6371000;
+            const toRad = (deg: number) => (deg * Math.PI) / 180;
+            const dLat = toRad(lat2 - lat1);
+            const dLng = toRad(lng2 - lng1);
+            const a =
+                Math.sin(dLat / 2) ** 2 +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return acc + R * c;
+        }, 0);
+
+        const targetDistance = totalDistance * progress;
+
+        let traveled = 0;
+        for (let i = 1; i < coordinates.length; i++) {
+            const [lng1, lat1] = coordinates[i - 1];
+            const [lng2, lat2] = coordinates[i];
+            const R = 6371000;
+            const toRad = (deg: number) => (deg * Math.PI) / 180;
+            const dLat = toRad(lat2 - lat1);
+            const dLng = toRad(lng2 - lng1);
+            const segmentDistance = 2 * R * Math.atan2(Math.sqrt(Math.sin(dLat / 2) ** 2 +
+                    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2),
+                Math.sqrt(1 - (Math.sin(dLat / 2) ** 2 +
+                    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2))
+            );
+
+            if (traveled + segmentDistance >= targetDistance) {
+                const remaining = targetDistance - traveled;
+                const fraction = remaining / segmentDistance;
+                const lng = lng1 + (lng2 - lng1) * fraction;
+                const lat = lat1 + (lat2 - lat1) * fraction;
+                return [lng, lat] as [number, number];
+            }
+
+            traveled += segmentDistance;
+        }
+
+        return coordinates[coordinates.length - 1];
+    };
+
+    const createAlmostNotification = async () => {
+        try {
+            await api.post('notifications', {
+                user_id: user?.user_id,
+                notification_type: 'STUDENT_EVENT',
+                title: 'Con bạn sắp đến nơi',
+                message: 'Con bạn sắp đến trường! Chúc bé một ngày học vui vẻ',
+            })
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    useEffect(() => {
+        if (!route || !mapRef.current || !isMapLoaded)
+            return;
+
+        let progress = getBusStartProgress(pathRoute.start_time, duration);
+        const initialPos = getPositionFromProgress(route.coordinates, progress);
+        setBusPos(initialPos);
+
+        const desiredSimTime = duration / 500;
         const map = mapRef.current.getMap();
         let animationFrameId: number;
-        let progress = 0;
 
-        const coordinates = routeGeometry.coordinates;
+        let isWaiting = false;
+        let waitTimeout: any = null;
+        let currentStopIndex = 0;
+
+        const coordinates = route.coordinates;
         if (!coordinates || coordinates.length < 2) return;
 
-        const simulatedSpeed = distance / desiredSimTime; 
+        const simulatedSpeed = distance / desiredSimTime;
 
         const getDistance = (lng1: number, lat1: number, lng2: number, lat2: number) => {
             const R = 6371000;
             const toRad = (deg: number) => (deg * Math.PI) / 180;
             const dLat = toRad(lat2 - lat1);
             const dLng = toRad(lng2 - lng1);
-            const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+            const a =
+                Math.sin(dLat / 2) ** 2 +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             return R * c;
         };
 
-        let segmentIndex = 0;
         let lastTimestamp = 0;
-
         const animateBus = (timestamp: number) => {
             if (!lastTimestamp) lastTimestamp = timestamp;
             const deltaTime = (timestamp - lastTimestamp) / 1000;
             lastTimestamp = timestamp;
 
-            const [lng1, lat1] = coordinates[segmentIndex];
-            const [lng2, lat2] = coordinates[segmentIndex + 1];
-
-            const segmentLength = getDistance(lng1, lat1, lng2, lat2);
-            const travelFraction = (simulatedSpeed * deltaTime) / segmentLength;
-            progress += travelFraction;
-
-            if (progress >= 1) {
-                progress = 0;
-                segmentIndex++;
-                if (segmentIndex >= coordinates.length - 1) {
-                     return;
-                }
+            if (isWaiting) {
+                animationFrameId = requestAnimationFrame(animateBus);
+                return;
             }
 
-            const lng = lng1 + (lng2 - lng1) * progress;
-            const lat = lat1 + (lat2 - lat1) * progress;
+            // update progress along the total route
+            progress += (simulatedSpeed * deltaTime) / distance; // progress: 0 → 1
+
+            if (progress >= 1) {
+                progress = 1; // bus reached the end
+                setBusPos(coordinates[coordinates.length - 1]);
+                return;
+            }
+
+            // find the current segment and local fraction
+            let traveled = 0;
+            let segmentIndex = 0;
+            let segmentFraction = 0;
+            for (let i = 1; i < coordinates.length; i++) {
+                const segDist = getDistance(
+                    coordinates[i - 1][0],
+                    coordinates[i - 1][1],
+                    coordinates[i][0],
+                    coordinates[i][1]
+                );
+                if ((traveled + segDist) / distance >= progress) {
+                    segmentIndex = i - 1;
+                    segmentFraction = (progress * distance - traveled) / segDist;
+                    break;
+                }
+                traveled += segDist;
+            }
+
+            const [lng1, lat1] = coordinates[segmentIndex];
+            const [lng2, lat2] = coordinates[segmentIndex + 1];
+            const lng = lng1 + (lng2 - lng1) * segmentFraction;
+            const lat = lat1 + (lat2 - lat1) * segmentFraction;
             setBusPos([lng, lat]);
+
+            // Calculate how much distance bus has traveled
+            let traveledDistance = 0;
+            for (let i = 1; i < coordinates.length; i++) {
+                const segDist = getDistance(
+                    coordinates[i - 1][0],
+                    coordinates[i - 1][1],
+                    coordinates[i][0],
+                    coordinates[i][1]
+                );
+
+                if ((traveledDistance + segDist) / distance >= progress) {
+                    traveledDistance += (progress * distance - traveledDistance);
+                    break;
+                }
+                traveledDistance += segDist;
+            }
+
+            // Calculate remaining distance
+            const remainingDistance = distance - traveledDistance;
+
+            // Trigger once when bus is almost there
+            if (!almostThereLoggedRef.current && remainingDistance <= ALMOST_THERE_DISTANCE) {
+                console.log("Almost there!");
+                createAlmostNotification().catch(error => console.error(error));
+                almostThereLoggedRef.current = true;
+            }
+
+            // check if reached a stop
+            if (currentStopIndex < segmentEndIndices.length &&
+                segmentIndex >= segmentEndIndices[currentStopIndex]) {
+                isWaiting = true;
+                waitTimeout = setTimeout(() => {
+                    isWaiting = false;
+                }, 1200);
+                currentStopIndex++;
+            }
 
             animationFrameId = requestAnimationFrame(animateBus);
         };
@@ -134,10 +290,21 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: LiveTrackingMapProps) => {
         });
 
         return () => {
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            if (animationFrameId)
+                cancelAnimationFrame(animationFrameId);
+
             map.off("moveend", animateBus);
         };
-    }, [routeGeometry, isMapLoaded, distance, duration]);
+    }, [route, isMapLoaded, distance, duration]);
+
+    // useEffect(() => {
+    //     if (!busPos)
+    //         return;
+    //
+    //     setInterval(() => {
+    //         console.log('Vị trí xe buýt:', busPos);
+    //     }, 1000);
+    // }, [busPos]);
 
     if (!pathRoute || routeStops.length < 2) {
         return (
@@ -163,19 +330,28 @@ const LiveTrackingMap = ({ pathRoute, assignedStop }: LiveTrackingMapProps) => {
                         latitude: initialLat,
                         zoom: 12
                     }}
-                    style={{ width: '100%', height: '100%' }}   
+                    style={{ width: '100%', height: '100%' }}
                     mapStyle='mapbox://styles/mapbox/streets-v11'
                     onLoad={() => setIsMapLoaded(true)}
                 >
                     <NavigationControl position='top-right' />
 
-                    {routeGeometry && (
-                        <Source id='route' type='geojson' data={{ type: 'Feature', properties: {}, geometry: routeGeometry }}>
-                            <Layer 
-                                id='route-line' 
-                                type='line' 
-                                layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-                                paint={{ 'line-color': '#3b82f6', 'line-width': 5, 'line-opacity': 0.8 }} 
+                    {route && (
+                        <Source
+                            id='route'
+                            type='geojson'
+                            data={{
+                                type: 'Feature',
+                                properties: {},
+                                geometry: route,
+                            }}>
+                            <Layer
+                                id='route-line'
+                                type='line'
+                                paint={{
+                                    'line-color': '#007AFF',
+                                    'line-width': 5,
+                                }}
                             />
                         </Source>
                     )}

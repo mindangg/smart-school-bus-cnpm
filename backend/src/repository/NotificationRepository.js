@@ -6,7 +6,7 @@ const createNotification = async (data) => {
         data,
         include: {
             student_events: true,
-            users: {  // Fix: đổi từ 'user' thành 'users'
+            users: {
                 select: { full_name: true, email: true }
             }
         }
