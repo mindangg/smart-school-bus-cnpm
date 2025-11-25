@@ -23,6 +23,10 @@ const StudentInfoCard = ({ student, assignment }: any) => {
                 routeId: newRouteId
             });
 
+            await api.put(`student_events/stop_student`, {
+                student_id: student.student_id,
+                event_type: 'PICK UP'
+            })
 
             setIsModalOpen(false);
             router.refresh();
@@ -41,7 +45,6 @@ const StudentInfoCard = ({ student, assignment }: any) => {
 
                 {assignment ? (
                     <>
-                        <p>Xe buýt số: <span className='font-semibold'>{bus?.bus_number || 'N/A'}</span></p>
                         <p>Địa điểm đón: <span className='font-semibold'>{studentStop?.address || 'N/A'}</span></p>
                         <p>Địa điểm đi: <span className='font-semibold'>{destinationStop?.address || 'N/A'}</span></p>
                     </>

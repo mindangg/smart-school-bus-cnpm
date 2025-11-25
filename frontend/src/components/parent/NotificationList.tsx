@@ -24,7 +24,6 @@ export default function NotificationList({ studentId }: NotificationListProps) {
     const [prevCount, setPrevCount] = useState(0)
     const [isOpenModal, setIsOpenModal] = useState(false)
 
-    // Hàm format ngày đẹp cho người Việt
     const formatDateTime = (dateString: string) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -66,7 +65,6 @@ export default function NotificationList({ studentId }: NotificationListProps) {
             setPrevCount(newNotis.length)
         } catch (err: any) {
             if (err.response?.status === 401) {
-                console.log("Chưa login → dùng fallback test mode")
                 try {
                     const res = await api.get('notifications', {
                         params: { user_id: studentId }

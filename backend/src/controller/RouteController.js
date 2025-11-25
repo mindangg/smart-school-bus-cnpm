@@ -163,7 +163,7 @@ const getRouteDirectionFull = async (req, res) => {
         })
 
 
-        res.json(response.data)
+        // res.json(response.data)
     }
     catch (error) {
         console.error("Mapbox Directions API error:", error.response?.data || error.message)

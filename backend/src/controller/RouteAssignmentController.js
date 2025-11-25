@@ -1,15 +1,4 @@
 const routeAssignmentService = require('../service/RouteAssignmentService')
-const axios = require('axios')
-
-const getRouteAssignments = async (req, res) => {
-    try {
-        const routeAssignments = await routeAssignmentService.getRouteAssignments()
-        res.status(200).json(routeAssignments)
-    }
-    catch (error) {
-        res.status(500).json({message: error.message})
-    }
-}
 
 const getRouteAssignmentById = async (req, res) => {
     try {
@@ -93,7 +82,6 @@ const deleteRouteAssignment = async (req, res) => {
 }
 
 module.exports = {
-    getRouteAssignments,
     getRouteAssignmentById,
     getRouteAssignmentByDriver,
     getAllSchedules,

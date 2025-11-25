@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useState} from 'react';
+import React from 'react';
 import Image from "next/image";
 import {
     DropdownMenu,
@@ -12,20 +12,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Ellipsis} from "lucide-react";
 import api from "@/lib/axios";
-import {useRouter} from "next/navigation";
+import {toast} from "sonner";
 
-const StudentCard = ({ student, studentPickup }: any) => {
-    const [open, setOpen] = useState(false)
-    const [openAlert, setOpenAlert] = useState(false)
-    const router = useRouter();
-
+const StudentCard = ({ student, studentPickup, setOpen }: any) => {
     const handleUpdateEvent = async (event: string) => {
-
         await api.put(`student_events/stop_student`, {
             student_id: student.student_id,
             event_type: event
         })
-        router.refresh()
+        setOpen(false)
+        toast.success("Cập nhật thành công")
     }
 
     return (
@@ -41,7 +37,11 @@ const StudentCard = ({ student, studentPickup }: any) => {
             <span>{student.full_name}</span>
             <span>{studentPickup}</span>
             <span>6:30</span>
-            <span>{student.student_events[0]?.event_type}</span>
+            <span>{
+                student.student_events[0]?.event_type == 'PICKED UP' ? 'Đã đón' :
+                student.student_events[0]?.event_type == 'DROPPED OFF' ? 'Đã tới nơi' :
+                student.student_events[0]?.event_type == 'ABSENT' ? 'Không xuất hiện' : 'Đang đợi'
+            }</span>
             <span>
                 <DropdownMenu>
                 <DropdownMenuTrigger><Ellipsis /></DropdownMenuTrigger>
