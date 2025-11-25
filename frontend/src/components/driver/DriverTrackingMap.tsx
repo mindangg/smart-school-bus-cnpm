@@ -7,6 +7,7 @@ import Map, {Layer, Marker, NavigationControl, Source} from 'react-map-gl'
 import {ArrowRight, Bus, BusFront, Cpu, MapPin, Navigation, Wifi, WifiOff} from 'lucide-react'
 import StudentPopup from "@/components/driver/StudentPopup"
 import {useBusLocationDriver} from '@/hooks/useBusLocation'
+import {toast} from "sonner";
 
 interface DriverTrackingMapProps {
     pathRoute: any;
@@ -357,6 +358,22 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
             maximumAge: 0
         }
 
+        const checkPermission = async () => {
+            try {
+                const permission = await navigator.permissions.query({ name: 'geolocation' });
+                if (permission.state === 'denied') {
+                    alert('Vui lòng cho phép truy cập vị trí trong cài đặt trình duyệt');
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Error checking permission:', error);
+                return true;
+            }
+        }
+
+        checkPermission()
+
         gpsWatchIdRef.current = navigator.geolocation.watchPosition(
             (position) => {
                 const { latitude, longitude } = position.coords
@@ -369,6 +386,23 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
             },
             (error) => {
                 console.error('Error getting GPS location:', error)
+                toast.error('Lỗi khi lấy vị trí GPS. Vui lòng kiểm tra cài đặt vị trí của bạn.')
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        console.error('User denied the request for Geolocation.');
+                        alert('Vui lòng cho phép truy cập vị trí để sử dụng GPS thật');
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        console.error('Location information is unavailable.');
+                        break;
+                    case error.TIMEOUT:
+                        console.error('The request to get user location timed out.');
+                        break;
+                    default:
+                        console.error('An unknown error occurred.');
+                        break;
+                }
+                updateTrackingMode('simulation');
             },
             options
         )
