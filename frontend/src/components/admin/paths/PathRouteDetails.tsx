@@ -1,7 +1,7 @@
 // components/admin/paths/PathRouteDetails.tsx
 'use client'
 
-import { useEffect, useRef, useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -38,7 +38,7 @@ interface PathRouteDetailsProps {
     pathRoute: Route;
 }
 
-const PathRouteDetails = ({ pathRoute }: PathRouteDetailsProps) => {
+const PathRouteDetails = ({pathRoute}: PathRouteDetailsProps) => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<mapboxgl.Map | null>(null);
     const [mapLoaded, setMapLoaded] = useState(false);
@@ -73,7 +73,6 @@ const PathRouteDetails = ({ pathRoute }: PathRouteDetailsProps) => {
         };
     }, [pathRoute]);
 
-    // Update map when route data or map loaded state changes
     useEffect(() => {
         if (mapLoaded && pathRoute?.route_stops) {
             calculateAndDisplayRoute();
@@ -159,7 +158,7 @@ const PathRouteDetails = ({ pathRoute }: PathRouteDetailsProps) => {
 
             // Add markers for each stop
             stops.forEach((routeStop, index) => {
-                const { latitude, longitude, address } = routeStop.stop;
+                const {latitude, longitude, address} = routeStop.stop;
                 const coord: [number, number] = [parseFloat(longitude), parseFloat(latitude)];
 
                 const el = document.createElement('div');
@@ -178,7 +177,7 @@ const PathRouteDetails = ({ pathRoute }: PathRouteDetailsProps) => {
                 el.style.fontSize = '14px';
                 el.innerHTML = `${index + 1}`;
 
-                const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
+                const popup = new mapboxgl.Popup({offset: 25}).setHTML(
                     `<div style="padding: 8px; min-width: 200px;">
             <strong>Điểm ${index + 1}: ${address}</strong><br/>
             <span style="color: #666; font-size: 12px;">Thứ tự: ${routeStop.stop_order}</span>
@@ -224,7 +223,7 @@ const PathRouteDetails = ({ pathRoute }: PathRouteDetailsProps) => {
                     parseFloat(routeStop.stop.latitude)
                 ]);
             });
-            map.current.fitBounds(bounds, { padding: 50, duration: 1000 });
+            map.current.fitBounds(bounds, {padding: 50, duration: 1000});
 
         } catch (error) {
             console.error('Error updating map:', error);
@@ -240,7 +239,7 @@ const PathRouteDetails = ({ pathRoute }: PathRouteDetailsProps) => {
             let totalDistance = 0;
 
             for (let i = 1; i < coordinates.length; i++) {
-                const [lon1, lat1] = coordinates[i-1];
+                const [lon1, lat1] = coordinates[i - 1];
                 const [lon2, lat2] = coordinates[i];
 
                 // Haversine distance calculation
@@ -248,10 +247,10 @@ const PathRouteDetails = ({ pathRoute }: PathRouteDetailsProps) => {
                 const dLat = (lat2 - lat1) * Math.PI / 180;
                 const dLon = (lon2 - lon1) * Math.PI / 180;
                 const a =
-                    Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                    Math.sin(dLon/2) * Math.sin(dLon/2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
                 totalDistance += R * c;
             }
 
@@ -326,8 +325,8 @@ const PathRouteDetails = ({ pathRoute }: PathRouteDetailsProps) => {
                                             ? 'bg-orange-100 text-orange-700'
                                             : 'bg-purple-100 text-purple-700'
                                     }`}>
-                    {pathRoute.route_type === 'MORNING' ? 'Buổi sáng' : 'Buổi chiều'}
-                  </span>
+                                        {pathRoute.route_type === 'MORNING' ? 'Buổi sáng' : 'Buổi chiều'}
+                                    </span>
                                 </div>
                                 {routeInfo && (
                                     <>
@@ -361,8 +360,8 @@ const PathRouteDetails = ({ pathRoute }: PathRouteDetailsProps) => {
                                 <span className="text-green-600">📍</span>
                                 Danh sách điểm dừng
                                 <span className="bg-blue-100 text-blue-700 text-sm px-2 py-1 rounded-full">
-                  {sortedStops.length} điểm
-                </span>
+                                  {sortedStops.length} điểm
+                                </span>
                             </h2>
 
                             <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">

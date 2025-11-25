@@ -1,7 +1,7 @@
 'use client'
 
 import React, {useEffect, useRef, useState} from 'react'
-import {Bus, Cpu, MapPin, Navigation, User, Wifi, WifiOff} from 'lucide-react'
+import {Bus, BusFront, Cpu, MapPin, Navigation, User, Wifi, WifiOff} from 'lucide-react'
 import Map, {Layer, Marker, NavigationControl, Source} from 'react-map-gl'
 import {useBusLocationParent} from '@/hooks/useBusLocation'
 import api from "@/lib/axios";
@@ -298,8 +298,11 @@ const LiveTrackingMap = ({ pathRoute, assignedStop, assignmentId, parentId }: Li
                                             <MapPin size={24} />
                                         </div>
                                     ) : (
-                                        <div className="bg-white text-gray-500 p-1 rounded-full border border-gray-300 shadow-sm hover:bg-gray-50">
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                                        <div className="relative bg-white p-1.5 rounded-full border-2 border-blue-500 shadow-lg group-hover:scale-110 transition-transform">
+                                            <BusFront size={20} className='text-blue-500' />
+                                            <div className='absolute -top-1 -right-1 bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs'>
+                                                {index}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -321,12 +324,6 @@ const LiveTrackingMap = ({ pathRoute, assignedStop, assignmentId, parentId }: Li
                             <p className='text-gray-600'>Thời gian dự kiến:</p>
                             <p className='font-semibold text-gray-900'>
                                 {Math.round(duration / 60)} phút
-                            </p>
-                        </div>
-                        <div>
-                            <p className='text-gray-600'>Chế độ theo dõi:</p>
-                            <p className='font-semibold text-gray-900'>
-                                {trackingMode === 'gps' ? 'GPS Thật' : 'Giả lập'}
                             </p>
                         </div>
                         <div>

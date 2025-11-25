@@ -33,6 +33,10 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
     const [segmentEndIndices, setSegmentEndIndices] = useState<number[]>([])
     const [simulationProgress, setSimulationProgress] = useState<number>(0)
 
+    // THÊM: State để theo dõi trạng thái GPS
+    const [isGpsActive, setIsGpsActive] = useState<boolean>(false)
+    const [lastGpsPosition, setLastGpsPosition] = useState<[number, number] | null>(null)
+
     const { isConnected, sendLocation, trackingMode, updateTrackingMode } = useBusLocationDriver({
         assignment_id: assignmentId,
         driver_id: driverId,
@@ -44,7 +48,7 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
     const gpsWatchIdRef = useRef<number>()
     const animationFrameRef = useRef<number>()
 
-    const ALMOST_THERE_DISTANCE = 1000; // meters
+    const ALMOST_THERE_DISTANCE = 1000;
     const almostThereLoggedRef = useRef(false);
 
     const start = {
@@ -79,7 +83,6 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
                     if (geometry?.coordinates?.length > 0) {
                         coordinates.push(...geometry.coordinates)
                         tempSegmentEndIndices.push(coordinates.length - 1)
-
                         segmentEndIndices.push(coordinates.length - 1);
                     }
 
@@ -101,7 +104,7 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
                 setRoute(fullGeometry)
                 setSteps(allSteps)
                 setDistance(totalDistance)
-                setDuration(totalDuration)
+                setDuration(totalDuration / 5)
 
                 if (mapRef.current && coordinates.length > 0) {
                     const bounds = new mapboxgl.LngLatBounds()
@@ -118,8 +121,31 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
         }
     }, [pathRoute])
 
-    const getBusStartProgress = (startTimeStr: string, durationSeconds: number) => {
+    // Cleanup tất cả animations và intervals
+    const cleanupAllTracking = () => {
+        console.log('🧹 Cleaning up all tracking...');
 
+        // Dừng simulation interval
+        if (simulationIntervalRef.current) {
+            clearInterval(simulationIntervalRef.current);
+            simulationIntervalRef.current = undefined;
+        }
+
+        // Dừng animation frame
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = undefined;
+        }
+
+        // Dừng GPS tracking
+        if (gpsWatchIdRef.current) {
+            navigator.geolocation.clearWatch(gpsWatchIdRef.current);
+            gpsWatchIdRef.current = undefined;
+            setIsGpsActive(false);
+        }
+    }
+
+    const getBusStartProgress = (startTimeStr: string, durationSeconds: number) => {
         const [startHour, startMinute] = startTimeStr.split(':').map(Number)
         const now = new Date()
 
@@ -211,6 +237,8 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
     const startAnimatedSimulation = () => {
         if (!route || !pathRoute?.start_time || !mapRef.current || !isMapLoaded) return
 
+        console.log('🚀 Starting animated simulation...');
+
         let progress = getBusStartProgress(pathRoute.start_time, duration)
         const initialPos = getPositionFromProgress(route.coordinates, progress)
         setBusPos(initialPos)
@@ -245,6 +273,12 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
         }
 
         const animateBus = (timestamp: number) => {
+            // QUAN TRỌNG: Kiểm tra nếu đang ở chế độ GPS thì dừng animation ngay
+            if (trackingMode === 'gps' || isGpsActive) {
+                console.log('⏹️ Stopping simulation animation - GPS mode active');
+                return;
+            }
+
             if (!lastTimestamp) lastTimestamp = timestamp
             const deltaTime = (timestamp - lastTimestamp) / 1000
             lastTimestamp = timestamp
@@ -296,13 +330,12 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
             setSimulationProgress(progress)
 
             const currentTime = Date.now()
-            if (currentTime % 5000 < 16) { // ~5 giây
+            if (currentTime % 5000 < 16) {
                 if (isConnected) {
                     sendLocation(lat, lng)
                 }
             }
 
-            // Calculate how much distance bus has traveled
             let traveledDistance = 0;
             for (let i = 1; i < coordinates.length; i++) {
                 const segDist = getDistance(
@@ -319,22 +352,19 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
                 traveledDistance += segDist;
             }
 
-            // Calculate remaining distance
             const remainingDistance = distance - traveledDistance;
 
-            // Trigger once when bus is almost there
             if (!almostThereLoggedRef.current && remainingDistance <= ALMOST_THERE_DISTANCE) {
                 console.log("Almost there!");
                 almostThereLoggedRef.current = true;
             }
 
-            // check if reached a stop
             if (currentStopIndex < segmentEndIndices.length &&
                 segmentIndex >= segmentEndIndices[currentStopIndex]) {
                 isWaiting = true
                 waitTimeout = setTimeout(() => {
                     isWaiting = false
-                }, 1200)
+                }, 5000)
                 currentStopIndex++
             }
 
@@ -342,27 +372,36 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
         }
 
         map.once("moveend", () => {
-            animationFrameRef.current = requestAnimationFrame(animateBus)
+            // KIỂM TRA LẠI trước khi bắt đầu animation
+            if (trackingMode === 'simulation' && !isGpsActive) {
+                animationFrameRef.current = requestAnimationFrame(animateBus)
+            }
         })
     }
 
     const startGPSTracking = () => {
         if (!navigator.geolocation) {
             console.error('Geolocation is not supported by this browser.')
+            toast.error('Trình duyệt không hỗ trợ định vị GPS')
             return
         }
 
+        console.log('📍 Starting GPS tracking...');
+        setIsGpsActive(true);
+
         const options = {
             enableHighAccuracy: true,
-            timeout: 5000,
+            timeout: 100000, // Tăng timeout lên 10 giây
             maximumAge: 0
         }
 
         const checkPermission = async () => {
             try {
                 const permission = await navigator.permissions.query({ name: 'geolocation' });
+                console.log('GPS Permission state:', permission.state);
+
                 if (permission.state === 'denied') {
-                    alert('Vui lòng cho phép truy cập vị trí trong cài đặt trình duyệt');
+                    toast.error('Quyền truy cập vị trí bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.');
                     return false;
                 }
                 return true;
@@ -372,71 +411,94 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
             }
         }
 
-        checkPermission()
-
-        gpsWatchIdRef.current = navigator.geolocation.watchPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords
-                const newPos: [number, number] = [longitude, latitude]
-                setBusPos(newPos)
-
-                if (isConnected) {
-                    sendLocation(latitude, longitude)
-                }
-            },
-            (error) => {
-                console.error('Error getting GPS location:', error)
-                toast.error('Lỗi khi lấy vị trí GPS. Vui lòng kiểm tra cài đặt vị trí của bạn.')
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        console.error('User denied the request for Geolocation.');
-                        alert('Vui lòng cho phép truy cập vị trí để sử dụng GPS thật');
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        console.error('Location information is unavailable.');
-                        break;
-                    case error.TIMEOUT:
-                        console.error('The request to get user location timed out.');
-                        break;
-                    default:
-                        console.error('An unknown error occurred.');
-                        break;
-                }
+        checkPermission().then((hasPermission) => {
+            if (!hasPermission) {
                 updateTrackingMode('simulation');
-            },
-            options
-        )
+                return;
+            }
+
+            gpsWatchIdRef.current = navigator.geolocation.watchPosition(
+                (position) => {
+                    const { latitude, longitude, accuracy } = position.coords
+                    console.log('📍 GPS Position received:', { latitude, longitude, accuracy });
+
+                    const newPos: [number, number] = [longitude, latitude]
+                    setBusPos(newPos)
+                    setLastGpsPosition(newPos)
+
+                    if (isConnected) {
+                        sendLocation(latitude, longitude)
+                    }
+
+                    if (mapRef.current) {
+                        mapRef.current.flyTo({
+                            center: newPos,
+                            zoom: 15,
+                            essential: true
+                        });
+                    }
+
+                    toast.success(`Đã cập nhật vị trí GPS`, {
+                        duration: 2000,
+                    });
+                },
+                (error) => {
+                    console.error('Error getting GPS location:', error)
+                    let errorMessage = 'Lỗi khi lấy vị trí GPS';
+
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Truy cập vị trí bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Thông tin vị trí không khả dụng. Kiểm tra kết nối mạng và GPS.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Hết thời gian chờ lấy vị trí. Vui lòng thử lại.';
+                            break;
+                        default:
+                            errorMessage = `Lỗi GPS: ${error.message}`;
+                            break;
+                    }
+
+                    toast.error(errorMessage);
+                    updateTrackingMode('simulation');
+                },
+                options
+            );
+
+            console.log('GPS Watch started with ID:', gpsWatchIdRef.current);
+        });
     }
 
+    // SỬA QUAN TRỌNG: useEffect với cleanup đúng cách
     useEffect(() => {
-        if (simulationIntervalRef.current) {
-            clearInterval(simulationIntervalRef.current)
-        }
-        if (animationFrameRef.current) {
-            cancelAnimationFrame(animationFrameRef.current)
-        }
-        if (gpsWatchIdRef.current) {
-            navigator.geolocation.clearWatch(gpsWatchIdRef.current)
-        }
+        console.log('🔄 Tracking mode changed to:', trackingMode);
 
-        if (trackingMode === 'simulation' && route) {
-            startAnimatedSimulation()
+        // Cleanup mọi thứ trước khi chuyển mode
+        cleanupAllTracking();
+
+        if (trackingMode === 'simulation' && route && isMapLoaded) {
+            console.log('🚀 Starting simulation mode');
+            setIsGpsActive(false);
+            startAnimatedSimulation();
         } else if (trackingMode === 'gps') {
-            startGPSTracking()
+            console.log('📍 Starting GPS mode');
+            setIsGpsActive(true);
+            startGPSTracking();
         }
 
         return () => {
-            if (simulationIntervalRef.current) {
-                clearInterval(simulationIntervalRef.current)
-            }
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current)
-            }
-            if (gpsWatchIdRef.current) {
-                navigator.geolocation.clearWatch(gpsWatchIdRef.current)
-            }
-        }
+            cleanupAllTracking();
+        };
     }, [trackingMode, route, isConnected, isMapLoaded])
+
+    // THÊM: Effect để đảm bảo vị trí GPS được giữ nguyên
+    useEffect(() => {
+        if (trackingMode === 'gps' && lastGpsPosition) {
+            setBusPos(lastGpsPosition);
+        }
+    }, [trackingMode, lastGpsPosition])
 
     const getStudentsAtRouteStop = async (routeStopId: number, pickup: any) => {
         const res = await api.get(`route_stop_student/${routeStopId}`)
@@ -472,11 +534,8 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
     if (!pathRoute || !pathRoute.route_stops || pathRoute.route_stops.length < 2) {
         return (
             <div className='bg-white rounded-lg shadow-lg p-6'>
-                <div className='relative w-full h-[450px] bg-gray-200 rounded-md overflow-hidden
-                                flex items-center justify-center'>
-                    <p className='text-gray-700 font-semibold'>
-                        Không có dữ liệu theo dõi tuyến đường.
-                    </p>
+                <div className='relative w-full h-[450px] bg-gray-200 rounded-md overflow-hidden flex items-center justify-center'>
+                    <p className='text-gray-700 font-semibold'>Không có dữ liệu theo dõi tuyến đường.</p>
                 </div>
             </div>
         )
@@ -524,10 +583,11 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
                         }`}
                     >
                         <Navigation size={16} />
-                        <span>GPS Thật</span>
+                        <span>GPS </span>
                     </button>
                 </div>
             </div>
+
 
             <div className='mb-4 grid grid-cols-3 gap-4 text-sm'>
                 <div className='bg-blue-50 p-3 rounded-lg'>
@@ -602,12 +662,12 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
                                         {bus}
                                     </p>
                                     <p className='text-xs text-gray-500'>
-                                        {trackingMode === 'gps' ? 'GPS Thật' : 'Giả lập'}
+                                        {trackingMode === 'gps' ? '📍 GPS ' : 'Giả lập'}
                                     </p>
                                 </div>
                                 <div className={`relative bg-white rounded-full p-1 shadow-md border z-20 ${
                                     trackingMode === 'gps' ? 'border-green-500' : 'border-yellow-500'
-                                }`}>
+                                } ${trackingMode === 'gps' && isGpsActive ? 'animate-pulse' : ''}`}>
                                     <Bus
                                         size={24}
                                         className={trackingMode === 'gps' ? 'text-green-600' : 'text-yellow-600'}
@@ -647,7 +707,12 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
                                             </div>
                                         </div>
                                     ) : (
-                                        <BusFront size={24} className='text-blue-500 fill-blue-400' />
+                                        <div className="relative bg-white p-1.5 rounded-full border-2 border-blue-500 shadow-lg group-hover:scale-110 transition-transform">
+                                            <BusFront size={20} className='text-blue-500' />
+                                            <div className='absolute -top-1 -right-1 bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs'>
+                                                {index + 1}
+                                            </div>
+                                        </div>
                                     )
                                 }
                             </div>
@@ -667,9 +732,7 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
             {steps?.length > 0 && (
                 <div className='mt-6 border-t pt-4 flex flex-col gap-2'>
                     <h3 className='text-lg font-semibold'>Hướng dẫn lộ trình</h3>
-                    <p className=''>
-                        Khoảng cách: {(distance / 1000).toFixed(2)} km
-                    </p>
+                    <p className=''>Khoảng cách: {(distance / 1000).toFixed(2)} km</p>
                     {(() => {
                         const totalMinutes = Math.round(duration / 60);
                         const hours = Math.floor(totalMinutes / 60);
@@ -677,18 +740,13 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
                         return (
                             <p>
                                 Thời gian ước tính{" "}
-                                {hours > 0
-                                    ? `${hours} giờ ${minutes > 0 ? `${minutes} phút` : ""}`
-                                    : `${minutes} phút`}
+                                {hours > 0 ? `${hours} giờ ${minutes > 0 ? `${minutes} phút` : ""}` : `${minutes} phút`}
                             </p>
                         );
                     })()}
                     <div className='max-h-[200px] overflow-y-auto space-y-2'>
                         {steps.map((step, i) => (
-                            <div
-                                key={i}
-                                className='flex items-start space-x-2 border-l-4 border-blue-500 pl-3'
-                            >
+                            <div key={i} className='flex items-start space-x-2 border-l-4 border-blue-500 pl-3'>
                                 <ArrowRight className='w-4 h-4 mt-1 text-blue-500' />
                                 <p className='text-sm text-gray-700'>{step.maneuver.instruction}</p>
                             </div>
@@ -697,7 +755,6 @@ const DriverTrackingMap = ({pathRoute, bus, assignmentId, driverId}: DriverTrack
                 </div>
             )}
             {open && <StudentPopup students={students} studentPickup={studentPickup} setOpen={setOpen} />}
-
         </div>
     )
 }
