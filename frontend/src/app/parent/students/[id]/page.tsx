@@ -28,7 +28,7 @@ const page = async ({ params }: any) => {
                     <LiveTrackingMap 
                         pathRoute={assignmentData?.route_stop?.route} 
                         assignedStop={assignmentData?.route_stop?.stop}
-                        assignmentId={assignmentData?.route_stop.route?.route_assignments[0].assignment_id}
+                        assignmentId={assignmentData?.route_stop.route?.route_assignments[0]?.assignment_id}
                         parentId={student.parent_id}
                     />
                 </div>

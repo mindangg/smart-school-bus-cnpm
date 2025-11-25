@@ -90,17 +90,17 @@ const deleteStudentEvent = async (req, res) => {
     }
 }
 
+
 const createPickupStudentEvent = async (req, res) => {
     try {
-        const data = req.body
-
-        const studentEvent = await studentEventService.createPickupStudentEvent(data)
-        res.status(200).json(studentEvent)
+        const callerRole = req.user?.role || null;
+        const studentEvent = await studentEventService.createPickupStudentEvent(req.body, callerRole);
+        res.status(200).json(studentEvent);
+    } catch (error) {
+        console.error("Lỗi tạo sự kiện đón:", error);
+        res.status(500).json({ message: error.message || "Lỗi server" });
     }
-    catch (error) {
-        res.status(500).json({ message: error.message })
-    }
-}
+};
 
 
 module.exports = {

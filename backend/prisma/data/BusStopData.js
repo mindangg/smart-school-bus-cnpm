@@ -40,6 +40,21 @@ const busStopsData = [
     { stop_id: 28, address: "Ngã tư Nguyễn Văn Linh - Quốc Lộ 50", longitude: 106.649221, latitude: 10.715221 },
     { stop_id: 29, address: "Bến xe Miền Tây", longitude: 106.627921, latitude: 10.754111 },
     { stop_id: 30, address: "Khu dân cư Him Lam", longitude: 106.682891, latitude: 10.740811 },
+
+    // === HÓC MÔN ===
+    { stop_id: 31, address: "Chợ Hóc Môn", longitude: 106.59668078556888, latitude: 10.888964472378573 },
+    { stop_id: 32, address: "Ngã tư Hóc Môn (Quốc Lộ 22)", longitude: 106.5872037703503, latitude: 10.884161233366711 },
+    { stop_id: 33, address: "UBND Huyện Hóc Môn", longitude: 106.59431999339967, latitude: 10.888291040130923 },
+    { stop_id: 34, address: "Bến xe An Sương", longitude: 106.61382914289771, latitude: 10.844060208764546 },
+    { stop_id: 35, address: "Cống Đôi", longitude: 106.60830572570265, latitude: 10.881593764603997 },
+
+    // === CỦ CHI ===
+    { stop_id: 36, address: "Bến xe Củ Chi", longitude: 106.48213688209371, latitude: 10.971829974629022 },
+    { stop_id: 37, address: "Địa đạo Củ Chi - Cổng chính", longitude: 106.52963963976752, latitude: 11.06249501462917 },
+    { stop_id: 38, address: "Ngã tư Tân Quy (Củ Chi)", longitude: 106.57722195325763, latitude: 10.982395965577403 },
+    { stop_id: 39, address: "Chợ Củ Chi", longitude: 106.48256665696489, latitude: 10.970530946308196 },
+    { stop_id: 40, address: "Co.opMart Củ Chi", longitude: 106.50443488549264, latitude: 10.959465891997516 },
+
 ];
 
 module.exports = busStopsData;

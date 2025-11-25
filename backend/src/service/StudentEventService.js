@@ -41,54 +41,57 @@ const deleteStudentEvent = async (id) => {
 }
 
 // Logic driver thao tác thì cũng phải liên kết tới notification service
-const createPickupStudentEvent = async (data) => {
-    const { student_id, event_type } = data
+const createPickupStudentEvent = async (data, callerRole = null) => {
+    const { student_id, event_type, route_assignment_id } = data;
 
-    let studentEvent = await studentEventRepository.createPickupStudentEvent(data)
+    const studentEvent = await studentEventRepository.createPickupStudentEvent(data);
+
+    const isDriverAction = callerRole === 'DRIVER' || route_assignment_id != null;
+
+    if (event_type === 'PICK UP' && !isDriverAction) {
+        return studentEvent;
+    }
 
     const student = await prisma.students.findUnique({
         where: { student_id },
         include: {
             users: {
-                select: {
-                    user_id: true,
-                    full_name: true
-                }
+                select: { user_id: true, full_name: true }
             }
         }
-    })
+    });
 
-    if (!student?.users) {
-        return studentEvent
-    }
+    if (!student?.users) return studentEvent;
 
-    const parentId = student.users.user_id
+    const parentId = student.users.user_id;
 
     const titles = {
         'PICKED UP': 'Con bạn đã được đón lên xe',
         'DROPPED OFF': 'Con bạn đã đến trường an toàn',
         'ABSENT': 'Con bạn vắng mặt tại điểm đón',
         'PICK UP': 'Con bạn đã được đón lên xe'
-    }
+    };
 
     const messages = {
         'PICKED UP': `${student.full_name} đã lên xe buýt lúc ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`,
         'DROPPED OFF': `${student.full_name} đã đến trường an toàn! Chúc bé một ngày học vui vẻ`,
         'ABSENT': `${student.full_name} không có mặt tại điểm đón hôm nay. Tài xế đã chờ 2 phút và tiếp tục hành trình.`,
-        'PICK UP': `${student.full_name} đã lên xe buýt lúc ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`  // Optional fix: thêm nếu cần
+        'PICK UP': `${student.full_name} đã lên xe buýt lúc ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`,
+    };
+
+    if (titles[event_type]) {
+        await notificationService.createNotification({
+            user_id: parentId,
+            notification_type: 'STUDENT_EVENT',
+            title: titles[event_type],
+            message: messages[event_type],
+            event_id: studentEvent.event_id,
+            is_read: false
+        });
     }
 
-    await notificationService.createNotification({
-        user_id: parentId,
-        notification_type: 'STUDENT_EVENT',
-        title: titles[event_type] || 'Cập nhật từ tài xế',
-        message: messages[event_type] || 'Có cập nhật trạng thái học sinh',
-        event_id: studentEvent.event_id,
-        is_read: false
-    })
-
-    return studentEvent
-}
+    return studentEvent;
+};
 
 module.exports = {
     getStudentEvents,

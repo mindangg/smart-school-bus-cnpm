@@ -123,9 +123,167 @@ const users = [
         is_active: true,
     },
 
-    // ADMINS
+
+    // ====================== THÊM 8 TÀI XẾ MỚI  ======================
     {
         user_id: 13,
+        email: 'driver3@gmail.com',
+        password: 'driver3',
+        full_name: 'Nguyễn Văn Hùng',
+        phone_number: '0903188881',
+        address: '123 Lê Văn Việt, TP. Thủ Đức',
+        role: 'DRIVER',
+        is_active: true,
+    },
+    {
+        user_id: 14,
+        email: 'driver4@gmail.com',
+        password: 'driver4',
+        full_name: 'Trần Thị Mai',
+        phone_number: '0904188882',
+        address: '456 Nguyễn Văn Linh, Quận 7',
+        role: 'DRIVER',
+        is_active: true,
+    },
+    {
+        user_id: 15,
+        email: 'driver5@gmail.com',
+        password: 'driver5',
+        full_name: 'Lê Quang Minh',
+        phone_number: '0905188883',
+        address: '789 Phạm Văn Đồng, Gò Vấp',
+        role: 'DRIVER',
+        is_active: true,
+    },
+    {
+        user_id: 16,
+        email: 'driver6@gmail.com',
+        password: 'driver6',
+        full_name: 'Phạm Quốc Anh',
+        phone_number: '0906188884',
+        address: '321 Kinh Dương Vương, Bình Tân',
+        role: 'DRIVER',
+        is_active: true,
+    },
+    {
+        user_id: 17,
+        email: 'driver7@gmail.com',
+        password: 'driver7',
+        full_name: 'Hoàng Thị Ngọc',
+        phone_number: '0907188885',
+        address: '555 An Dương Vương, Quận 5',
+        role: 'DRIVER',
+        is_active: true,
+    },
+    {
+        user_id: 18,
+        email: 'driver8@gmail.com',
+        password: 'driver8',
+        full_name: 'Vũ Văn Đức',
+        phone_number: '0908188886',
+        address: '246 Quốc lộ 22, Hóc Môn',
+        role: 'DRIVER',
+        is_active: true,
+    },
+    {
+        user_id: 19,
+        email: 'driver9@gmail.com',
+        password: 'driver9',
+        full_name: 'Đinh Thị Thu Hà',
+        phone_number: '0909188887',
+        address: '135 Nguyễn Thị Thập, Quận 7',
+        role: 'DRIVER',
+        is_active: true,
+    },
+    {
+        user_id: 20,
+        email: 'driver10@gmail.com',
+        password: 'driver10',
+        full_name: 'Bùi Xuân Trường',
+        phone_number: '0910188888',
+        address: '88 Xa lộ Hà Nội, TP. Thủ Đức',
+        role: 'DRIVER',
+        is_active: true,
+    },
+
+    // ================================
+    // 21–55: THÊM 35 TÀI XẾ → ĐỦ 50 DRIVER
+    // ================================
+    ...(function() {
+        const drivers = [];
+        const firstNames = ["Văn","Minh","Quang","Hùng","Tuấn","Đức","Khoa","Bảo","Long","Phúc","Khang","Nam","Hiếu","Phong","Đạt","Kiệt","Thịnh","Khôi","Tài","Lộc","Thắng","Tín","Phát","Cường","Dũng","Hải","Sơn","Tâm","Lâm","Khánh"];
+        const lastNames  = ["Nguyễn","Trần","Lê","Phạm","Hoàng","Vũ","Đỗ","Bùi","Đặng","Hà","Huỳnh","Võ","Ngô","Dương","Lý","Trương","Tô","Hồ","Quách","Đinh","Lâm","Mai","Tăng","Sơn","Uông"];
+        const districts = ["Gò Vấp","Quận 7","Thủ Đức","Bình Thạnh","Tân Bình","Quận 12","Hóc Môn","Bình Tân","Quận 8","Nhà Bè"];
+
+        for (let i = 21; i <= 55; i++) {
+            const first = firstNames[(i - 21) % firstNames.length];
+            const last = lastNames[(i - 21) % lastNames.length];
+            const district = districts[(i - 21) % districts.length];
+            drivers.push({
+                user_id: i,
+                email: `driver${(i - 5).toString().padStart(2, '0')}@gmail.com`, // driver11 → driver45
+                password: "123456",
+                full_name: `${last} ${first}`,
+                phone_number: `0908${String(i).padStart(6, '0')}`,
+                address: `${i * 15 + 100} ${district}, TP. Hồ Chí Minh`,
+                role: "DRIVER",
+                is_active: true
+            });
+        }
+        return drivers;
+    })(),
+
+    // ================================
+    // 56–105: 50 PHỤ HUYNH (giữ nguyên như cũ, user_id 56 → 105)
+    // ================================
+    { user_id: 56,  email: 'parent26@gmail.com', password: '123456', full_name: 'Lê Thị Kim Oanh',      phone_number: '0901234526', address: 'Phú Mỹ Hưng, Q7, Ho Chi Minh City',               role: 'PARENT', is_active: true },
+    { user_id: 57,  email: 'parent27@gmail.com', password: '123456', full_name: 'Nguyễn Văn Tuấn',      phone_number: '0901234527', address: 'Him Lam, Q7, Ho Chi Minh City',                   role: 'PARENT', is_active: true },
+    { user_id: 58,  email: 'parent28@gmail.com', password: '123456', full_name: 'Trần Thị Hồng Nhung',  phone_number: '0901234528', address: 'TP. Thủ Đức, Ho Chi Minh City',                   role: 'PARENT', is_active: true },
+    { user_id: 59,  email: 'parent29@gmail.com', password: '123456', full_name: 'Phạm Minh Quân',       phone_number: '0901234529', address: 'Gò Vấp, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 60,  email: 'parent30@gmail.com', password: '123456', full_name: 'Hoàng Anh Tuấn',       phone_number: '0901234530', address: 'Bình Thạnh, Ho Chi Minh City',                    role: 'PARENT', is_active: true },
+    { user_id: 61,  email: 'parent31@gmail.com', password: '123456', full_name: 'Đặng Thị Thu Hà',      phone_number: '0901234531', address: 'Quận 12, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 62,  email: 'parent32@gmail.com', password: '123456', full_name: 'Vũ Văn Hùng',          phone_number: '0901234532', address: 'Hóc Môn, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 63,  email: 'parent33@gmail.com', password: '123456', full_name: 'Nguyễn Thị Lan Anh',   phone_number: '0901234533', address: 'Nhà Bè, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 64,  email: 'parent34@gmail.com', password: '123456', full_name: 'Trần Văn Long',        phone_number: '0901234534', address: 'Bình Tân, Ho Chi Minh City',                      role: 'PARENT', is_active: true },
+    { user_id: 65,  email: 'parent35@gmail.com', password: '123456', full_name: 'Lê Thị Ngọc',          phone_number: '0901234535', address: 'Tân Bình, Ho Chi Minh City',                      role: 'PARENT', is_active: true },
+    { user_id: 66,  email: 'parent36@gmail.com', password: '123456', full_name: 'Phan Thị Minh Thư',    phone_number: '0901234536', address: 'Quận 7, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 67,  email: 'parent37@gmail.com', password: '123456', full_name: 'Đinh Văn Khánh',       phone_number: '0901234537', address: 'Thủ Đức, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 68,  email: 'parent38@gmail.com', password: '123456', full_name: 'Bùi Thị Thanh Hương',  phone_number: '0901234538', address: 'Bình Thạnh, Ho Chi Minh City',                    role: 'PARENT', is_active: true },
+    { user_id: 69,  email: 'parent39@gmail.com', password: '123456', full_name: 'Huỳnh Văn Nam',        phone_number: '0901234539', address: 'Quận 8, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 70,  email: 'parent40@gmail.com', password: '123456', full_name: 'Mai Thị Hồng',         phone_number: '0901234540', address: 'Quận 10, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 71,  email: 'parent41@gmail.com', password: '123456', full_name: 'Trương Văn Hải',       phone_number: '0901234541', address: 'Tân Phú, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 72,  email: 'parent42@gmail.com', password: '123456', full_name: 'Lý Thị Bé',            phone_number: '0901234542', address: 'Bình Chánh, Ho Chi Minh City',                    role: 'PARENT', is_active: true },
+    { user_id: 73,  email: 'parent43@gmail.com', password: '123456', full_name: 'Đỗ Văn Toàn',          phone_number: '0901234543', address: 'Quận 12, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 74,  email: 'parent44@gmail.com', password: '123456', full_name: 'Võ Thị Kim Liên',      phone_number: '0901234544', address: 'Gò Vấp, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 75,  email: 'parent45@gmail.com', password: '123456', full_name: 'Hà Văn Dũng',          phone_number: '0901234545', address: 'Hóc Môn, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 76,  email: 'parent46@gmail.com', password: '123456', full_name: 'Nguyễn Thị Thu Trang', phone_number: '0901234546', address: 'Quận 7, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 77,  email: 'parent47@gmail.com', password: '123456', full_name: 'Phạm Văn Hậu',         phone_number: '0901234547', address: 'Nhà Bè, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 78,  email: 'parent48@gmail.com', password: '123456', full_name: 'Lâm Thị Diễm My',      phone_number: '0901234548', address: 'Thủ Đức, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 79,  email: 'parent49@gmail.com', password: '123456', full_name: 'Trần Quốc Cường',      phone_number: '0901234549', address: 'Bình Tân, Ho Chi Minh City',                      role: 'PARENT', is_active: true },
+    { user_id: 80,  email: 'parent50@gmail.com', password: '123456', full_name: 'Nguyễn Thị Ngọc Ánh',  phone_number: '0901234550', address: 'Quận 3, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 81,  email: 'parent51@gmail.com', password: '123456', full_name: 'Hoàng Văn Tùng',       phone_number: '0901234551', address: 'Quận 1, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 82,  email: 'parent52@gmail.com', password: '123456', full_name: 'Đào Thị Bích',         phone_number: '0901234552', address: 'Tân Bình, Ho Chi Minh City',                      role: 'PARENT', is_active: true },
+    { user_id: 83,  email: 'parent53@gmail.com', password: '123456', full_name: 'Lê Văn Hiếu',          phone_number: '0901234553', address: 'Gò Vấp, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 84,  email: 'parent54@gmail.com', password: '123456', full_name: 'Trịnh Thị Mai',        phone_number: '0901234554', address: 'Quận 12, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 85,  email: 'parent55@gmail.com', password: '123456', full_name: 'Vương Văn Khang',      phone_number: '0901234555', address: 'Hóc Môn, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 86,  email: 'parent56@gmail.com', password: '123456', full_name: 'Phan Thị Thúy',        phone_number: '0901234556', address: 'Nhà Bè, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 87,  email: 'parent57@gmail.com', password: '123456', full_name: 'Tô Văn Minh',          phone_number: '0901234557', address: 'Bình Chánh, Ho Chi Minh City',                    role: 'PARENT', is_active: true },
+    { user_id: 88,  email: 'parent58@gmail.com', password: '123456', full_name: 'Cao Thị Hương',        phone_number: '0901234558', address: 'Quận 7, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 89,  email: 'parent59@gmail.com', password: '123456', full_name: 'Dương Văn Bình',       phone_number: '0901234559', address: 'Thủ Đức, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 90,  email: 'parent60@gmail.com', password: '123456', full_name: 'Hứa Thị Kim Chi',      phone_number: '0901234560', address: 'Bình Thạnh, Ho Chi Minh City',                    role: 'PARENT', is_active: true },
+    { user_id: 91,  email: 'parent61@gmail.com', password: '123456', full_name: 'Từ Văn Lộc',           phone_number: '0901234561', address: 'Quận 10, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 92,  email: 'parent62@gmail.com', password: '123456', full_name: 'Kiều Thị Duyên',       phone_number: '0901234562', address: 'Tân Phú, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 93,  email: 'parent63@gmail.com', password: '123456', full_name: 'Mạc Văn Huy',          phone_number: '0901234563', address: 'Quận 8, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 94,  email: 'parent64@gmail.com', password: '123456', full_name: 'Nông Thị Lan',         phone_number: '0901234564', address: 'Bình Tân, Ho Chi Minh City',                      role: 'PARENT', is_active: true },
+    { user_id: 95,  email: 'parent65@gmail.com', password: '123456', full_name: 'Quách Văn Thành',      phone_number: '0901234565', address: 'Gò Vấp, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 96,  email: 'parent66@gmail.com', password: '123456', full_name: 'Rơ Chăm Thi',          phone_number: '0901234566', address: 'Quận 12, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 97,  email: 'parent67@gmail.com', password: '123456', full_name: 'Sơn Thị Hạnh',         phone_number: '0901234567', address: 'Hóc Môn, Ho Chi Minh City',                       role: 'PARENT', is_active: true },
+    { user_id: 98,  email: 'parent68@gmail.com', password: '123456', full_name: 'Tăng Văn Đạt',         phone_number: '0901234568', address: 'Nhà Bè, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    { user_id: 99,  email: 'parent69@gmail.com', password: '123456', full_name: 'Uông Thị Phương',      phone_number: '0901234569', address: 'Bình Chánh, Ho Chi Minh City',                    role: 'PARENT', is_active: true },
+    { user_id: 100, email: 'parent70@gmail.com', password: '123456', full_name: 'Yên Văn Hùng',         phone_number: '0901234570', address: 'Quận 7, Ho Chi Minh City',                        role: 'PARENT', is_active: true },
+    // ADMINS
+    {
+        user_id: 101,
         email: 'qbael3@gmail.com',
         password: 'qbael3',
         full_name: 'Hồ Quốc Bảo',
@@ -135,7 +293,7 @@ const users = [
         is_active: true,
     },
     {
-        user_id: 14,
+        user_id: 102,
         email: 'mindang3@gmail.com',
         password: 'mindang3',
         full_name: 'Trần Minh Đăng',
@@ -145,7 +303,7 @@ const users = [
         is_active: true,
     },
     {
-        user_id: 15,
+        user_id: 103,
         email: 'hongduy3@gmail.com',
         password: 'hongduy3',
         full_name: 'Nguyễn Hồng Duy',
@@ -155,7 +313,7 @@ const users = [
         is_active: true,
     },
     {
-        user_id: 16,
+        user_id: 104,
         email: 'hbao3@gmail.com',
         password: 'hbao3',
         full_name: 'Đỗ Trần Huy Bảo',
@@ -165,7 +323,7 @@ const users = [
         is_active: true,
     },
     {
-        user_id: 17,
+        user_id: 105,
         email: 'nhuy3@gmail.com',
         password: 'nhuy3',
         full_name: 'Võ Thị Như Ý',
