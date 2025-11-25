@@ -66,6 +66,7 @@ class BusLocationServer {
         });
     }
 
+
     handleMessage(ws, data) {
         const { type, payload } = data;
 
@@ -90,6 +91,31 @@ class BusLocationServer {
                 this.unsubscribeParent(ws, payload);
                 break;
 
+            // Thêm handler cho admin
+            case 'admin:register':
+                this.registerAdmin(ws, payload);
+                break;
+
+            case 'admin:get_system_status':
+                this.sendSystemStatus(ws, payload);
+                break;
+
+            case 'admin:notify_driver':
+                this.sendDriverNotification(ws, payload);
+                break;
+
+            case 'admin:notify_parents':
+                this.sendParentNotification(ws, payload);
+                break;
+
+            case 'admin:change_tracking_mode':
+                this.changeDriverTrackingMode(ws, payload);
+                break;
+
+            case 'admin:unregister':
+                this.unregisterAdmin(ws, payload);
+                break;
+
             default:
                 ws.send(JSON.stringify({
                     type: 'error',
@@ -97,6 +123,151 @@ class BusLocationServer {
                 }));
         }
     }
+
+    // Đăng ký admin
+    registerAdmin(ws, payload) {
+        const { admin_id, assignment_id } = payload;
+
+        if (!admin_id) {
+            ws.send(JSON.stringify({
+                type: 'error',
+                message: 'Missing admin_id'
+            }));
+            return;
+        }
+
+        ws.role = 'admin';
+        ws.admin_id = admin_id;
+        ws.assignment_id = assignment_id;
+
+        console.log(`Admin ${admin_id} registered`);
+
+        ws.send(JSON.stringify({
+            type: 'admin:registered',
+            payload: { admin_id, assignment_id }
+        }));
+
+        // Gửi ngay trạng thái hệ thống hiện tại
+        this.sendSystemStatus(ws, payload);
+    }
+
+    // Gửi trạng thái hệ thống cho admin
+    sendSystemStatus(ws, payload) {
+        const systemStatus = {
+            bus_locations: Object.fromEntries(this.busLocations),
+            driver_connections: Array.from(this.driverConnections.keys()),
+            parent_subscriptions: Object.fromEntries(
+                Array.from(this.parentConnections.entries()).map(([key, value]) => [
+                    key,
+                    Array.from(value).map(ws => ws.parent_id).filter(Boolean)
+                ])
+            ),
+            tracking_modes: Object.fromEntries(this.driverTrackingModes)
+        };
+
+        ws.send(JSON.stringify({
+            type: 'admin:system_status',
+            payload: systemStatus
+        }));
+    }
+
+    // Gửi thông báo đến driver
+    sendDriverNotification(ws, payload) {
+        const { target_assignment_id, message } = payload;
+        const driverWs = this.driverConnections.get(target_assignment_id);
+
+        if (driverWs && driverWs.readyState === WebSocket.OPEN) {
+            driverWs.send(JSON.stringify({
+                type: 'admin:notification',
+                payload: {
+                    message,
+                    timestamp: Date.now(),
+                    from_admin: ws.admin_id
+                }
+            }));
+        }
+    }
+
+    // Gửi thông báo đến tất cả parents của một assignment
+    sendParentNotification(ws, payload) {
+        const { assignment_id, message } = payload;
+        const subscribers = this.parentConnections.get(assignment_id) || new Set();
+
+        subscribers.forEach(parentWs => {
+            if (parentWs.readyState === WebSocket.OPEN) {
+                parentWs.send(JSON.stringify({
+                    type: 'admin:notification',
+                    payload: {
+                        message,
+                        timestamp: Date.now(),
+                        from_admin: ws.admin_id
+                    }
+                }));
+            }
+        });
+    }
+
+    // Thay đổi chế độ theo dõi của driver
+    changeDriverTrackingMode(ws, payload) {
+        const { assignment_id, tracking_mode } = payload;
+        const driverWs = this.driverConnections.get(assignment_id);
+
+        if (driverWs && driverWs.readyState === WebSocket.OPEN) {
+            driverWs.send(JSON.stringify({
+                type: 'admin:change_tracking_mode',
+                payload: {
+                    tracking_mode,
+                    timestamp: Date.now()
+                }
+            }));
+        }
+    }
+
+    // Hủy đăng ký admin
+    unregisterAdmin(ws, payload) {
+        console.log(`Admin ${ws.admin_id} unregistered`);
+        // Cleanup sẽ được xử lý trong handleDisconnect
+    }
+
+    // Cập nhật handleDisconnect để xử lý admin
+    handleDisconnect(ws) {
+        if (ws.role === 'driver' && ws.assignment_id) {
+            this.driverConnections.delete(ws.assignment_id);
+            this.driverTrackingModes.delete(ws.assignment_id);
+            console.log(`Driver disconnected from assignment ${ws.assignment_id}`);
+
+            // Thông báo cho admin về driver disconnect
+            this.broadcastToAdmins('driver:disconnected', {
+                assignment_id: ws.assignment_id,
+                timestamp: Date.now()
+            });
+
+        } else if (ws.role === 'parent') {
+            this.parentConnections.forEach((subscribers, assignment_id) => {
+                subscribers.delete(ws);
+                if (subscribers.size === 0) {
+                    this.parentConnections.delete(assignment_id);
+                }
+            });
+            console.log('Parent disconnected');
+
+        } else if (ws.role === 'admin') {
+            console.log(`Admin ${ws.admin_id} disconnected`);
+        }
+    }
+
+    // Broadcast đến tất cả admin
+    broadcastToAdmins(type, payload) {
+        this.wss.clients.forEach((client) => {
+            if (client.role === 'admin' && client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({
+                    type,
+                    payload
+                }));
+            }
+        });
+    }
+
 
     registerDriver(ws, payload) {
         const { assignment_id, driver_id, tracking_mode = 'simulation' } = payload;
@@ -125,6 +296,13 @@ class BusLocationServer {
         }));
 
         this.broadcastTrackingMode(assignment_id, tracking_mode);
+
+        this.broadcastToAdmins('driver:connected', {
+            assignment_id,
+            driver_id,
+            tracking_mode,
+            timestamp: Date.now()
+        });
     }
 
     updateDriverTrackingMode(ws, payload) {
@@ -186,8 +364,8 @@ class BusLocationServer {
 
         this.busLocations.set(assignment_id, locationData);
 
+        // 1. Broadcast đến parents đã subscribe
         const subscribedParents = this.parentConnections.get(assignment_id) || new Set();
-
         subscribedParents.forEach((parentWs) => {
             if (parentWs.readyState === WebSocket.OPEN) {
                 parentWs.send(JSON.stringify({
@@ -196,6 +374,9 @@ class BusLocationServer {
                 }));
             }
         });
+
+        // 2. Broadcast đến TẤT CẢ admin (quan trọng!)
+        this.broadcastToAdmins('bus:location', locationData);
 
         console.log(`Location updated for assignment ${assignment_id}: [${latitude}, ${longitude}] mode: ${locationData.tracking_mode}`);
     }
@@ -243,6 +424,12 @@ class BusLocationServer {
             }));
         }
 
+        this.broadcastToAdmins('parent:subscribed', {
+            assignment_id,
+            parent_id,
+            timestamp: Date.now()
+        });
+
         ws.send(JSON.stringify({
             type: 'parent:subscribed',
             payload: { assignment_id }
@@ -264,6 +451,12 @@ class BusLocationServer {
                 this.parentConnections.delete(assignment_id);
             }
         }
+
+        this.broadcastToAdmins('parent:unsubscribed', {
+            assignment_id,
+            parent_id: ws.parent_id,
+            timestamp: Date.now()
+        });
 
         console.log(`Parent unsubscribed from assignment ${assignment_id}`);
     }

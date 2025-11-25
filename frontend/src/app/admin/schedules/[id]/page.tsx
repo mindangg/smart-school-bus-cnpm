@@ -10,6 +10,8 @@ import RouteMap from "@/components/admin/RouteMap";
 import api from "@/lib/axios";
 import DriverTrackingMap from "@/components/driver/DriverTrackingMap";
 import LiveTrackingMap from "@/components/parent/LiveTrackingMap";
+import AdminTrackingMap from "@/components/admin/paths/AdminTrackingMap";
+import {useAuth} from "@/contexts/AuthContext";
 
 interface Stop {
     stop_id: number;
@@ -59,6 +61,7 @@ const ScheduleDetailPage = () => {
     const [schedule, setSchedule] = useState<Schedule | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const {user} = useAuth()
 
     const assignmentId = params.id as string;
 
@@ -68,6 +71,7 @@ const ScheduleDetailPage = () => {
                 setIsLoading(true);
                 const res = await api.get(`route_assignment/${assignmentId}`);
                 setSchedule(res.data);
+                console.log(res.data);
             } catch (error) {
                 console.error("Failed to fetch schedule details", error);
                 setError("Không thể tải thông tin phân công");
@@ -286,6 +290,7 @@ const ScheduleDetailPage = () => {
                                 {/*    routeStops={schedule.routes.route_stops}*/}
                                 {/*    routeType={schedule.routes.route_type}*/}
                                 {/*/>*/}
+                                <AdminTrackingMap pathRoute={schedule.routes} assignmentId={schedule.assignment_id} adminId={user.user_id} bus={String(schedule.bus_id)}/>
                             </CardContent>
                         </Card>
 
